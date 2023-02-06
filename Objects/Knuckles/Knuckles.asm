@@ -307,6 +307,9 @@ Knux_Stand_Path:
 Knux_Stand_Freespace:
 		tst.b	double_jump_flag(a0)
 		bne.s	Knux_Glide_Freespace
+	if RollInAir
+		bsr.w	Sonic_ChgFallAnim
+	endif
 		bsr.w	Knux_JumpHeight
 		bsr.w	Knux_ChgJumpDir
 		bsr.w	Player_LevelBound

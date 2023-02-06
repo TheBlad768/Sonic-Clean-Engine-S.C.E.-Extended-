@@ -1360,6 +1360,9 @@ loc_14760:
 Tails_Stand_Freespace:
 		tst.b	double_jump_flag(a0)
 		bne.s	Tails_FlyingSwimming
+	if RollInAir
+		bsr.w	Sonic_ChgFallAnim
+	endif
 		bsr.w	Tails_JumpHeight
 		bsr.w	Tails_InputAcceleration_Freespace
 		bsr.w	Tails_Check_Screen_Boundaries
