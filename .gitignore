@@ -1,0 +1,7 @@
+desktop.ini
+*.gen
+*.lst
+*.log
+*.[ph]
+SonLVL INI Files/dllcache/*
+SonLVL INI Files/SonLVL.log
