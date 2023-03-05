@@ -198,7 +198,7 @@ Go_CheckPlayerRelease:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Song_Fade_Transition:
-		sfx	mus_Fade	; fade out music
+		music	mus_Fade	; fade out music
 		move.l	#Song_Fade_Transition_Wait,address(a0)
 
 Song_Fade_Transition_Return:
@@ -216,7 +216,7 @@ Song_Fade_Transition_Wait:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Song_Fade_ToLevelMusic:
-		sfx	mus_Fade	; fade out music
+		music	mus_Fade	; fade out music
 		move.l	#Song_Fade_ToLevelMusic_Wait,address(a0)
 
 Song_Fade_ToLevelMusic_Return:
