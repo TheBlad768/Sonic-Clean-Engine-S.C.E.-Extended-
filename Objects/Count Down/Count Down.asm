@@ -272,7 +272,11 @@ AirCountdown_ReduceAir:
 		clr.w	ground_vel(a0)
 		move.b	#id_SonicDrown,routine(a0)
 		movea.w	(sp)+,a0
+		cmpa.w	#Player_1,a2
+		bne.s	locret_1857A
 		st	(Deform_lock).w
+
+locret_1857A:
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -316,6 +320,7 @@ loc_185A4:
 		move.b	#$40,angle(a1)
 +		add.w	d0,x_pos(a1)
 		move.w	y_pos(a2),y_pos(a1)
+		move.w	parent(a0),parent(a1)
 		move.b	#6,subtype(a1)
 		tst.w	objoff_30(a0)
 		beq.s	loc_1862A
@@ -361,6 +366,7 @@ loc_18676:
 		bpl.s	+
 		clr.w	objoff_3A(a0)
 +		rts
+
 ; ----------------------------------------------------------------------------
 ; Reset player air timer
 ; ----------------------------------------------------------------------------
