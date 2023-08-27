@@ -10,7 +10,7 @@ Obj_Tails_Tail:
 		move.b	#$18,width_pixels(a0)
 		move.b	#$18,height_pixels(a0)
 		move.b	#4,render_flags(a0)
-		move.l	#Obj_Tails_Tail_Main,(a0)
+		move.l	#Obj_Tails_Tail_Main,address(a0)
 
 Obj_Tails_Tail_Main:
 		; Here, several SSTs are inheritied from the parent, normally Tails

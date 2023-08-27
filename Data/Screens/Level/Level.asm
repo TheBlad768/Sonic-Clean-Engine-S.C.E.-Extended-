@@ -90,7 +90,7 @@ Level_Screen:
 
 .notwaterknux
 		move.w	d0,d1
-		jsr	(LoadPalette2).w											; load Player's water palette
+		jsr	(LoadPalette2).w													; load Player's water palette
 		move.w	d1,d0
 		jsr	(LoadPalette2_Immediate).w
 
@@ -98,11 +98,11 @@ Level_Screen:
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#6,d0
-		lea	(LevelMusic_Playlist).l,a1									; load music playlist
+		lea	(LevelMusic_Playlist).l,a1											; load music playlist
 		move.b	(a1,d0.w),d0
 		move.w	d0,(Current_music).w
-		jsr	(SMPS_QueueSound1).w									; play music
-		move.l	#Obj_TitleCard,(Dynamic_object_RAM+(object_size*5)).w	; load title card object
+		jsr	(SMPS_QueueSound1).w											; play music
+		move.l	#Obj_TitleCard,(Dynamic_object_RAM+(object_size*5)+address).w	; load title card object
 
 .wait
 		move.b	#VintID_Fade,(V_int_routine).w
@@ -156,7 +156,7 @@ Level_Screen:
 		move.l	#Load_Rings_Init,(Rings_manager_addr_RAM).w
 		tst.b	(Water_flag).w
 		beq.s	.notwater2
-		move.l	#Obj_WaterWave,(v_WaterWave).w
+		move.l	#Obj_WaterWave,(v_WaterWave+address).w
 
 .notwater2
 		bsr.w	SpawnLevelMainSprites
@@ -211,23 +211,23 @@ PLC_PlayerIndex:
 ; =============== S U B R O U T I N E =======================================
 
 SpawnLevelMainSprites:
-		move.l	#Obj_ResetCollisionResponseList,(Reserved_object_3).w
+		move.l	#Obj_ResetCollisionResponseList,(Reserved_object_3+address).w
 
 		move.w	(Player_mode).w,d0
 		bne.s	.sonicalone
 
 		; Sonic and Tails
-		move.l	#Obj_Sonic,(Player_1).w
-		move.l	#Obj_DashDust,(v_Dust).w
-		move.l	#Obj_InstaShield,(v_Shield).w
+		move.l	#Obj_Sonic,(Player_1+address).w
+		move.l	#Obj_DashDust,(v_Dust+address).w
+		move.l	#Obj_InstaShield,(v_Shield+address).w
 		move.w	#Player_1,(v_Shield+parent).w
-		move.l	#Obj_Tails,(Player_2).w
+		move.l	#Obj_Tails,(Player_2+address).w
 		move.w	(Player_1+x_pos).w,(Player_2+x_pos).w
 		move.w	(Player_1+y_pos).w,(Player_2+y_pos).w
 		subi.w	#$20,(Player_2+x_pos).w
-		addi.w	#4,(Player_2+y_pos).w
-		move.l	#Obj_DashDust,(v_Dust_P2).w
-		move.w	#0,(Tails_CPU_routine).w
+		addq.w	#4,(Player_2+y_pos).w
+		move.l	#Obj_DashDust,(v_Dust_P2+address).w
+		clr.w	(Tails_CPU_routine).w
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -236,9 +236,9 @@ SpawnLevelMainSprites:
 		bne.s	.tailsalone
 
 		; Sonic alone
-		move.l	#Obj_Sonic,(Player_1).w
-		move.l	#Obj_DashDust,(v_Dust).w
-		move.l	#Obj_InstaShield,(v_Shield).w
+		move.l	#Obj_Sonic,(Player_1+address).w
+		move.l	#Obj_DashDust,(v_Dust+address).w
+		move.l	#Obj_InstaShield,(v_Shield+address).w
 		move.w	#Player_1,(v_Shield+parent).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -248,18 +248,18 @@ SpawnLevelMainSprites:
 		bne.s	.knuxalone
 
 		; Tails alone
-		move.l	#Obj_Tails,(Player_1).w
-		move.l	#Obj_DashDust,(v_Dust_P2).w
-		addi.w	#4,(Player_1+y_pos).w
-		move.w	#0,(Tails_CPU_routine).w
+		move.l	#Obj_Tails,(Player_1+address).w
+		move.l	#Obj_DashDust,(v_Dust_P2+address).w
+		addq.w	#4,(Player_1+y_pos).w
+		clr.w	(Tails_CPU_routine).w
 		rts
 ; ---------------------------------------------------------------------------
 
 .knuxalone
 
 		; Knuckles alone
-		move.l	#Obj_Knuckles,(Player_1).w
-		move.l	#Obj_DashDust,(v_Dust).w
+		move.l	#Obj_Knuckles,(Player_1+address).w
+		move.l	#Obj_DashDust,(v_Dust+address).w
 		rts
 
 ; =============== S U B R O U T I N E =======================================

@@ -95,13 +95,13 @@ Continue_Screen:
 
 		bra.s	loc_5C3EE
 
-		move.l	#Obj_Continue_SonicAlone,(Player_1).w
+		move.l	#Obj_Continue_SonicAlone,(Player_1+address).w
 		bra.w	loc_5C3FE
 ; ---------------------------------------------------------------------------
 
 loc_5C3EE:
-		move.l	#Obj_Continue_SonicWTails,(Player_1).w
-		move.l	#Obj_Continue_TailsWSonic,(Player_2).w
+		move.l	#Obj_Continue_SonicWTails,(Player_1+address).w
+		move.l	#Obj_Continue_TailsWSonic,(Player_2+address).w
 
 loc_5C3FE:
 		move.l	#loc_5C838,(Reserved_object_3).w
@@ -393,7 +393,7 @@ loc_5C770:
 		lea	(v_Tails_tails).w,a1
 		move.l	#Obj_Tails_Tail,address(a1)
 		move.w	a0,$30(a1)
-		move.l	#loc_5C82C,(v_Dust).w
+		move.l	#loc_5C82C,(v_Dust+address).w
 
 loc_5C790:
 		moveq	#0,d0

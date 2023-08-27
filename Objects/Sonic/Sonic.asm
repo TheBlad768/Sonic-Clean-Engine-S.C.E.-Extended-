@@ -290,7 +290,7 @@ Sonic_InWater:
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		jsr	(Player_ResetAirTimer).l
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles).w	; load Sonic's breathing bubbles
+		move.l	#Obj_AirCountdown,(v_Breathing_bubbles+address).w		; load Sonic's breathing bubbles
 		move.b	#$81,(v_Breathing_bubbles+subtype).w
 		move.w	a0,(v_Breathing_bubbles+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)
@@ -2213,8 +2213,8 @@ loc_12432:
 		subq.b	#1,(Life_count).w
 		bne.s	loc_12498
 		clr.w	spin_dash_counter(a0)
-		move.l	#Obj_GameOver,(Reserved_object_3).w
-		move.l	#Obj_GameOver,(Dynamic_object_RAM).w
+		move.l	#Obj_GameOver,(Reserved_object_3+address).w
+		move.l	#Obj_GameOver,(Dynamic_object_RAM+address).w
 		clr.b	(Reserved_object_3+mapping_frame).w
 		move.b	#1,(Dynamic_object_RAM+mapping_frame).w
 		move.w	a0,(Reserved_object_3+objoff_3E).w
@@ -2233,8 +2233,8 @@ loc_12498:
 		tst.b	(Time_over_flag).w
 		beq.s	locret_1258E
 		clr.w	spin_dash_counter(a0)
-		move.l	#Obj_GameOver,(Reserved_object_3).w
-		move.l	#Obj_GameOver,(Dynamic_object_RAM).w
+		move.l	#Obj_GameOver,(Reserved_object_3+address).w
+		move.l	#Obj_GameOver,(Dynamic_object_RAM+address).w
 		move.b	#2,(Reserved_object_3+mapping_frame).w
 		move.b	#3,(Dynamic_object_RAM+mapping_frame).w
 		move.w	a0,(Reserved_object_3+objoff_3E).w

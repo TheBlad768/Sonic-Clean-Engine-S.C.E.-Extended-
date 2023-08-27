@@ -384,13 +384,13 @@ Monitor_Give_Fire_Shield:
 		sfx	sfx_FireShield
 		tst.b	parent+1(a0)
 		bne.s	loc_1D984
-		move.l	#Obj_FireShield,(v_Shield).w
+		move.l	#Obj_FireShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_1D984:
-		move.l	#Obj_FireShield,(v_Shield_P2).w
+		move.l	#Obj_FireShield,(v_Shield_P2+address).w
 		move.w	a1,(v_Shield_P2+parent).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -402,13 +402,13 @@ Monitor_Give_Lightning_Shield:
 		sfx	sfx_LightningShield
 		tst.b	parent+1(a0)
 		bne.s	loc_1D9C2
-		move.l	#Obj_LightningShield,(v_Shield).w
+		move.l	#Obj_LightningShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_1D9C2:
-		move.l	#Obj_LightningShield,(v_Shield_P2).w
+		move.l	#Obj_LightningShield,(v_Shield_P2+address).w
 		move.w	a1,(v_Shield_P2+parent).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -420,13 +420,13 @@ Monitor_Give_Bubble_Shield:
 		sfx	sfx_BubbleShield
 		tst.b	parent+1(a0)
 		bne.s	loc_1DA00
-		move.l	#Obj_BubbleShield,(v_Shield).w
+		move.l	#Obj_BubbleShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_1DA00:
-		move.l	#Obj_BubbleShield,(v_Shield_P2).w
+		move.l	#Obj_BubbleShield,(v_Shield_P2+address).w
 		move.w	a1,(v_Shield_P2+parent).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -445,13 +445,13 @@ Monitor_Give_Invincibility:
 .skipmusic
 		tst.b	parent+1(a0)
 		bne.s	loc_1DA52
-		move.l	#Obj_Invincibility,(v_Invincibility_stars).w
+		move.l	#Obj_Invincibility,(v_Invincibility_stars+address).w
 		move.w	a1,(v_Invincibility_stars+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_1DA52:
-		move.l	#Obj_Invincibility,(v_Invincibility_stars_P2).w
+		move.l	#Obj_Invincibility,(v_Invincibility_stars_P2+address).w
 		move.w	a1,(v_Invincibility_stars_P2+parent).w
 		rts
 ; ---------------------------------------------------------------------------

@@ -98,9 +98,9 @@ Tails_Init_Continued:
 		move.w	#0,(Tails_CPU_routine).w
 
 loc_137A4:
-		move.w	#0,(Tails_CPU_idle_timer).w
-		move.w	#0,(Tails_CPU_flight_timer).w
-		move.l	#Obj_Tails_Tail,(v_Tails_tails).w
+		clr.w	(Tails_CPU_idle_timer).w
+		clr.w	(Tails_CPU_flight_timer).w
+		move.l	#Obj_Tails_Tail,(v_Tails_tails+address).w
 		move.w	a0,(v_Tails_tails+$30).w
 		move.b	(Last_star_post_hit).w,(Tails_CPU_star_post_flag).w
 		rts
@@ -817,7 +817,7 @@ loc_140AC:
 		tst.b	4(a0)
 		bmi.s	locret_140C4
 		moveq	#0,d0
-		move.l	d0,(a0)
+		move.l	d0,address(a0)
 		move.w	d0,$10(a0)
 		move.w	d0,$14(a0)
 		move.w	#$A,(Tails_CPU_routine).w
@@ -1281,7 +1281,7 @@ loc_1463A:
 		addq.b	#1,(Water_entered_counter).w
 		movea.l	a0,a1
 		bsr.w	Player_ResetAirTimer
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles_P2).w
+		move.l	#Obj_AirCountdown,(v_Breathing_bubbles_P2+address).w
 		move.b	#$81,(v_Breathing_bubbles_P2+subtype).w
 		move.w	a0,(v_Breathing_bubbles_P2+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)

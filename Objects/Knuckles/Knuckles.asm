@@ -243,7 +243,7 @@ loc_166F6:
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles).w
+		move.l	#Obj_AirCountdown,(v_Breathing_bubbles+address).w
 		move.b	#$81,(v_Breathing_bubbles+subtype).w
 		move.w	a0,(v_Breathing_bubbles+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)
