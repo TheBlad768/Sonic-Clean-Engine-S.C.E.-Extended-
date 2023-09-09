@@ -461,9 +461,8 @@ loc_E16C:
 loc_E178:
 		tst.w	d6
 		beq.s	loc_E156
-		moveq	#8-1,d5
-
-loc_E17E:
-		move.l	#0,(a6)
-		dbf	d5,loc_E17E
+		moveq	#0,d5
+	rept 8
+		move.l	d5,VDP_data_port-VDP_data_port(a6)
+	endr
 		bra.s	loc_E16C
