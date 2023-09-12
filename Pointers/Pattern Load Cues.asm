@@ -71,7 +71,7 @@ PLC1_DEZ1_Misc_end
 ; ===========================================================================
 
 PLC2_DEZ1_Enemy: plrlistheader
-		plreq $100, ArtKosM_Spikebonker					; Spikebonker badnik
+		plreq $500, ArtKosM_Spikebonker					; Spikebonker badnik
 PLC2_DEZ1_Enemy_end
 
 ; ===========================================================================
@@ -86,7 +86,7 @@ PLC1_DEZ2_Misc_end
 ; ===========================================================================
 
 PLC2_DEZ2_Enemy: plrlistheader
-		plreq $100, ArtKosM_Spikebonker					; Spikebonker badnik
+		plreq $500, ArtKosM_Spikebonker					; Spikebonker badnik
 PLC2_DEZ2_Enemy_end
 
 ; ===========================================================================
@@ -101,7 +101,7 @@ PLC1_DEZ3_Misc_end
 ; ===========================================================================
 
 PLC2_DEZ3_Enemy: plrlistheader
-		plreq $100, ArtKosM_Spikebonker					; Spikebonker badnik
+		plreq $500, ArtKosM_Spikebonker					; Spikebonker badnik
 PLC2_DEZ3_Enemy_end
 
 ; ===========================================================================
@@ -116,5 +116,5 @@ PLC1_DEZ4_Misc_end
 ; ===========================================================================
 
 PLC2_DEZ4_Enemy: plrlistheader
-		plreq $100, ArtKosM_Spikebonker					; Spikebonker badnik
+		plreq $500, ArtKosM_Spikebonker					; Spikebonker badnik
 PLC2_DEZ4_Enemy_end
