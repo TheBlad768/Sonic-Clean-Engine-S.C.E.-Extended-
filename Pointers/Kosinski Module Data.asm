@@ -18,6 +18,8 @@ ArtKosM_SpikesSprings:			binclude "Objects/Spikes/KosinskiM Art/SpikesSprings.bi
 	even
 ArtKosM_RobotnikShip:			binclude "Objects/Robotnik/KosinskiM Art/Robotnik Ship.bin"
 	even
+ArtKosM_EggRoboHead:			binclude "Objects/Robotnik/KosinskiM Art/Egg Robo Head.bin"
+	even
 ArtKosM_EggRoboBadnik:			binclude "Objects/Robotnik/KosinskiM Art/Egg Robo Badnik.bin"
 	even
 ArtKosM_BossExplosion:			binclude "Objects/Explosion/KosinskiM Art/Boss Explosion.bin"

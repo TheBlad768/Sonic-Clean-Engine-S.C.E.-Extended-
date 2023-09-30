@@ -23,9 +23,18 @@ DebugMode:
 		beq.s	.select
 		movea.w	a0,a1
 		jsr	Player_ResetAirTimer(pc)
+
+		; Sonic/Knux
 		move.w	#$600,(Max_speed).w
 		move.w	#$C,(Acceleration).w
 		move.w	#$80,(Deceleration).w
+
+		; Tails
+		cmpi.w	#2,(Player_mode).w
+		bne.s	.select
+		move.w	#$600,(Max_speed_P2).w
+		move.w	#$C,(Acceleration_P2).w
+		move.w	#$80,(Deceleration_P2).w
 
 .select
 		moveq	#0,d0
@@ -165,7 +174,8 @@ DebugMode:
 		move.b	(Debug_object).w,d0
 		add.w	d0,d0
 		move.w	d0,d1
-		lsl.w	#2,d0
+		add.w	d0,d0
+		add.w	d0,d0
 		add.w	d1,d0
 		move.b	4(a2,d0.w),subtype(a1)
 		move.l	(a2,d0.w),address(a1)
@@ -207,7 +217,8 @@ DebugMode:
 		move.b	(Debug_object).w,d0
 		add.w	d0,d0
 		move.w	d0,d1
-		lsl.w	#2,d0
+		add.w	d0,d0
+		add.w	d0,d0
 		add.w	d1,d0
 		move.l	4(a2,d0.w),mappings(a0)		; load mappings for item
 		move.w	8(a2,d0.w),art_tile(a0)			; load VRAM setting for item

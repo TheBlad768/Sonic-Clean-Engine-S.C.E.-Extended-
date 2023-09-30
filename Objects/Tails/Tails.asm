@@ -2,25 +2,31 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Tails:
+		; Load some addresses into registers
+		; This is done to allow some subroutines to be
+		; shared with Tails/Knuckles.
 		lea	(Max_speed_P2).w,a4
 		lea	(Distance_from_top_P2).w,a5
 		lea	(v_Dust_P2).w,a6
 
+	if GameDebug
 		cmpi.w	#2,(Player_mode).w
 		bne.s	Tails_Normal
 		tst.w	(Debug_placement_mode).w
 		beq.s	Tails_Normal
+
+		; debug only code
 		cmpi.b	#1,(Debug_placement_type).w
 		beq.s	loc_136A8
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_1368C
-		move.w	#0,(Debug_placement_mode).w
+		clr.w	(Debug_placement_mode).w
 
 loc_1368C:
 		addq.b	#1,mapping_frame(a0)
 		cmpi.b	#$FB,mapping_frame(a0)
-		blo.s	loc_1369E
-		move.b	#0,mapping_frame(a0)
+		blo.s		loc_1369E
+		clr.b	mapping_frame(a0)
 
 loc_1369E:
 		bsr.w	Tails_Load_PLC
@@ -32,32 +38,30 @@ loc_136A8:
 ; ---------------------------------------------------------------------------
 
 Tails_Normal:
+	endif
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Tails_Index(pc,d0.w),d1
 		jmp	Tails_Index(pc,d1.w)
 ; ---------------------------------------------------------------------------
 
-Tails_Index:
-		dc.w Tails_Init-Tails_Index
-		dc.w Tails_Control-Tails_Index
-		dc.w loc_1569C-Tails_Index
-		dc.w loc_1578E-Tails_Index
-		dc.w loc_157E0-Tails_Index
-		dc.w loc_157F4-Tails_Index
-		dc.w loc_15810-Tails_Index
+Tails_Index: offsetTable
+		offsetTableEntry.w Tails_Init		; 0
+		offsetTableEntry.w Tails_Control	; 2
+		offsetTableEntry.w Tails_Hurt		; 4
+		offsetTableEntry.w Tails_Death		; 6
+		offsetTableEntry.w Tails_Restart		; 8
+		offsetTableEntry.w loc_157F4		; A
+		offsetTableEntry.w Tails_Drown		; C
 ; ---------------------------------------------------------------------------
 
 Tails_Init:
 		addq.b	#2,routine(a0)
-		move.b	#$F,y_radius(a0)
-		move.b	#9,x_radius(a0)
-		move.b	#$F,default_y_radius(a0)
-		move.b	#9,default_x_radius(a0)
+		move.w	#bytes_to_word(30/2,18/2),y_radius(a0)	; set y_radius and x_radius	; this sets Tails's collision height (2*pixels)
+		move.w	#bytes_to_word(30/2,18/2),default_y_radius(a0)	; set default_y_radius and default_x_radius
 		move.l	#Map_Tails,mappings(a0)
 		move.w	#$100,priority(a0)
-		move.b	#$18,width_pixels(a0)
-		move.b	#$18,height_pixels(a0)
+		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
 		move.b	#$84,render_flags(a0)
 		move.b	#1,character_id(a0)
 		move.w	#$600,Max_speed_P2-Max_speed_P2(a4)
@@ -88,14 +92,14 @@ loc_1375E:
 		ori.w	#$8000,art_tile(a0)
 
 Tails_Init_Continued:
-		move.b	#0,flips_remaining(a0)
+		clr.b	flips_remaining(a0)
 		move.b	#4,flip_speed(a0)
-		move.b	#$1E,air_left(a0)
+		move.b	#30,air_left(a0)
 		cmpi.w	#$20,(Tails_CPU_routine).w
 		beq.s	loc_137A4
 		cmpi.w	#$12,(Tails_CPU_routine).w
 		beq.s	loc_137A4
-		move.w	#0,(Tails_CPU_routine).w
+		clr.w	(Tails_CPU_routine).w
 
 loc_137A4:
 		clr.w	(Tails_CPU_idle_timer).w
@@ -107,29 +111,31 @@ loc_137A4:
 ; ---------------------------------------------------------------------------
 
 Tails_Control:
+	if GameDebug
 		cmpi.w	#2,(Player_mode).w
 		bne.s	loc_13808
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_13808
-		bclr	#6,(Ctrl_1_pressed).w
+		bclr	#button_A,(Ctrl_1_pressed).w
 		beq.s	loc_137E0
 		eori.b	#1,(Reverse_gravity_flag).w
 
 loc_137E0:
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_13808
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
-		btst	#5,(Ctrl_1).w
+		btst	#button_C,(Ctrl_1_held).w
 		beq.s	locret_13806
 		move.w	#2,(Debug_placement_mode).w
-		move.b	#0,anim(a0)
+		clr.b	anim(a0)
 
 locret_13806:
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_13808:
+	endif
 		cmpa.w	#Player_1,a0
 		bne.s	loc_13830
 		move.w	(Ctrl_1_logical).w,(Ctrl_2_logical).w
@@ -158,7 +164,7 @@ loc_13840:
 loc_1384A:
 		btst	#0,$2E(a0)
 		beq.s	loc_13872
-		move.b	#0,double_jump_flag(a0)
+		clr.b	double_jump_flag(a0)
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_1388C
 		lea	(Player_1).w,a1
@@ -181,7 +187,7 @@ loc_1388C:
 		cmpi.w	#-$100,(Camera_min_Y_pos).w
 		bne.s	loc_1389C
 		move.w	(Screen_Y_wrap_value).w,d0
-		and.w	d0,$14(a0)
+		and.w	d0,y_pos(a0)
 
 loc_1389C:
 		bsr.s	Tails_Display
@@ -215,10 +221,12 @@ loc_138E4:
 locret_138F4:
 		rts
 ; ---------------------------------------------------------------------------
-Tails_Modes:	dc.w Tails_Stand_Path-Tails_Modes
-		dc.w Tails_Stand_Freespace-Tails_Modes
-		dc.w Tails_Spin_Path-Tails_Modes
-		dc.w Tails_Spin_Freespace-Tails_Modes
+
+Tails_Modes: offsetTable
+		offsetTableEntry.w Tails_Stand_Path			; 0
+		offsetTableEntry.w Tails_Stand_Freespace	; 2
+		offsetTableEntry.w Tails_Spin_Path			; 4
+		offsetTableEntry.w Tails_Spin_Freespace		; 6
 ; ---------------------------------------------------------------------------
 
 Tails_Display:
@@ -245,8 +253,8 @@ loc_13912:
 		bne.s	loc_13948
 		tst.b	(Boss_flag).w
 		bne.s	loc_13948
-		cmpi.b	#$C,$2C(a0)
-		blo.s	loc_13948
+		cmpi.b	#12,$2C(a0)
+		blo.s		loc_13948
 		move.w	(Current_music).w,d0
 		jsr	(SMPS_QueueSound1).w					; stop playing invincibility theme and resume normal level music
 
@@ -267,7 +275,8 @@ loc_1394E:
 		move.w	#$C,2(a4)
 		move.w	#$80,4(a4)
 		bclr	#2,$2B(a0)
-		music	mus_Slowdown						; run music at normal speed
+		music	mus_Slowdown,1						; run music at normal speed
+; ---------------------------------------------------------------------------
 
 locret_139A6:
 		rts
@@ -287,25 +296,25 @@ loc_139DC:
 		jmp	off_139EC(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
-off_139EC:
-		dc.w loc_13A10-off_139EC
-		dc.w Tails_Catch_Up_Flying-off_139EC
-		dc.w Tails_FlySwim_Unknown-off_139EC
-		dc.w loc_13D4A-off_139EC
-		dc.w loc_13F40-off_139EC
-		dc.w locret_13FC0-off_139EC
-		dc.w loc_13FC2-off_139EC
-		dc.w loc_13FFA-off_139EC
-		dc.w loc_1408A-off_139EC
-		dc.w loc_140C6-off_139EC
-		dc.w loc_140CE-off_139EC
-		dc.w loc_14106-off_139EC
-		dc.w loc_1414C-off_139EC
-		dc.w loc_141F2-off_139EC
-		dc.w loc_1421C-off_139EC
-		dc.w loc_14254-off_139EC
-		dc.w loc_1425C-off_139EC
-		dc.w loc_14286-off_139EC
+off_139EC: offsetTable
+		offsetTableEntry.w loc_13A10					; 0
+		offsetTableEntry.w Tails_Catch_Up_Flying		; 2
+		offsetTableEntry.w Tails_FlySwim_Unknown		; 4
+		offsetTableEntry.w loc_13D4A					; 6
+		offsetTableEntry.w loc_13F40					; 8
+		offsetTableEntry.w locret_13FC0					; A
+		offsetTableEntry.w loc_13FC2					; C
+		offsetTableEntry.w loc_13FFA					; E
+		offsetTableEntry.w loc_1408A					; 10
+		offsetTableEntry.w loc_140C6					; 12
+		offsetTableEntry.w loc_140CE					; 14
+		offsetTableEntry.w loc_14106					; 16
+		offsetTableEntry.w loc_1414C					; 18
+		offsetTableEntry.w loc_141F2					; 1A
+		offsetTableEntry.w loc_1421C					; 1C
+		offsetTableEntry.w loc_14254					; 1E
+		offsetTableEntry.w loc_1425C					; 20
+		offsetTableEntry.w loc_14286					; 22
 ; ---------------------------------------------------------------------------
 
 loc_13A10:
@@ -1279,7 +1288,7 @@ loc_1463A:
 		bset	#Status_Underwater,status(a0)
 		bne.s	locret_14638
 		addq.b	#1,(Water_entered_counter).w
-		movea.l	a0,a1
+		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
 		move.l	#Obj_AirCountdown,(v_Breathing_bubbles_P2+address).w
 		move.b	#$81,(v_Breathing_bubbles_P2+subtype).w
@@ -1305,7 +1314,7 @@ loc_146BA:
 		bclr	#Status_Underwater,status(a0)
 		beq.w	locret_14638
 		addq.b	#1,(Water_entered_counter).w
-		movea.l	a0,a1
+		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
@@ -2244,7 +2253,7 @@ loc_15024:
 		bsr.w	CalcRoomOverHead
 		movem.l	(sp)+,a4-a6
 		cmpi.w	#6,d1
-		blt.w	locret_150D0
+		blt.s		locret_15000
 		move.w	#$680,d2
 		btst	#6,$2A(a0)
 		beq.s	loc_1504C
@@ -2270,7 +2279,7 @@ loc_1504C:
 		move.b	$44(a0),$1E(a0)
 		move.b	$45(a0),$1F(a0)
 		btst	#2,$2A(a0)
-		bne.s	loc_150D2
+		bne.s	locret_150D0
 		move.b	#$E,$1E(a0)
 		move.b	#7,$1F(a0)
 		move.b	#2,anim(a0)
@@ -2286,11 +2295,6 @@ loc_150CC:
 		sub.w	d0,$14(a0)
 
 locret_150D0:
-		rts
-; ---------------------------------------------------------------------------
-
-loc_150D2:
-		bset	#4,$2A(a0)
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -2786,12 +2790,13 @@ loc_1565E:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_1569C:
+Tails_Hurt:
+	if GameDebug
 		cmpi.w	#2,(Player_mode).w
 		bne.s	loc_156BE
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_156BE
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_156BE
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
@@ -2799,6 +2804,7 @@ loc_1569C:
 ; ---------------------------------------------------------------------------
 
 loc_156BE:
+	endif
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_156D6
 		lea	(Player_1).w,a1
@@ -2873,12 +2879,13 @@ loc_15788:
 		jmp	(Kill_Character).l
 ; ---------------------------------------------------------------------------
 
-loc_1578E:
+Tails_Death:
+	if GameDebug
 		cmpi.w	#2,(Player_mode).w
 		bne.s	loc_157B0
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_157B0
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_157B0
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
@@ -2886,6 +2893,7 @@ loc_1578E:
 ; ---------------------------------------------------------------------------
 
 loc_157B0:
+	endif
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_157C8
 		lea	(Player_1).w,a1
@@ -2901,7 +2909,7 @@ loc_157C8:
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
-loc_157E0:
+Tails_Restart:
 		tst.w	$3E(a0)
 		beq.s	locret_157F2
 		subq.w	#1,$3E(a0)
@@ -2924,7 +2932,21 @@ loc_15806:
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
-loc_15810:
+Tails_Drown:
+	if GameDebug
+		cmpi.w	#2,(Player_mode).w
+		bne.s	loc_15720
+		tst.b	(Debug_mode_flag).w
+		beq.s	loc_15720
+		btst	#button_B,(Ctrl_1_pressed).w
+		beq.s	loc_15720
+		move.w	#1,(Debug_placement_mode).w
+		clr.b	(Ctrl_1_locked).w
+		rts
+; ---------------------------------------------------------------------------
+
+loc_15720:
+	endif
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_15828
 		lea	(Player_1).w,a1
@@ -2945,7 +2967,7 @@ sub_15842:
 		bsr.s	Animate_Tails
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_15856
-		eori.b	#2,4(a0)
+		eori.b	#2,render_flags(a0)
 
 loc_15856:
 		bra.w	Tails_Load_PLC
@@ -2961,8 +2983,8 @@ Animate_Tails_Part2:
 		cmp.b	$21(a0),d0
 		beq.s	loc_1588A
 		move.b	d0,$21(a0)
-		move.b	#0,$23(a0)
-		move.b	#0,$24(a0)
+		clr.b	$23(a0)
+		clr.b	$24(a0)
 		bclr	#5,$2A(a0)
 
 loc_1588A:

@@ -28,9 +28,18 @@ DebugMode:
 		beq.s	.control
 		movea.w	a0,a1
 		jsr	Player_ResetAirTimer(pc)
+
+		; Sonic/Knux
 		move.w	#$600,(Max_speed).w
 		move.w	#$C,(Acceleration).w
 		move.w	#$80,(Deceleration).w
+
+		; Tails
+		cmpi.w	#2,(Player_mode).w
+		bne.s	.control
+		move.w	#$600,(Max_speed_P2).w
+		move.w	#$C,(Acceleration_P2).w
+		move.w	#$80,(Deceleration_P2).w
 
 .control
 		pea	(Draw_Sprite).w

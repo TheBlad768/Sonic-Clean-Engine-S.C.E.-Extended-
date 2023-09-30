@@ -330,9 +330,10 @@ Monitor_Give_Rings:
 		lea	(Extra_life_flags).w,a4
 
 		addi.w	#10,(a2)										; add 10 to rings
-		cmpi.w	#999,(a2)									; does the player 1 have 999 or less rings?
-		blo.s		loc_1D8DA									; if yes, branch
-		move.w	#999,(a2)									; set max rings
+		move.w	#999,d0
+		cmp.w	(a2),d0										; does the player 1 have 999 or less rings?
+		bhs.s	loc_1D8DA									; if yes, branch
+		move.w	d0,(a2)										; set max rings
 
 loc_1D8DA:
 		ori.b	#1,(a3)										; update the rings counter

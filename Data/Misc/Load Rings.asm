@@ -297,9 +297,10 @@ AddRings:
 GiveRing:
 CollectRing:
 		addq.w	#1,(Ring_count).w					; add 1 to rings
-		cmpi.w	#999,(Ring_count).w				; does the player 1 have 999 or less rings?
-		blo.s		.skip							; if yes, branch
-		move.w	#999,(Ring_count).w				; set max rings
+		move.w	#999,d0
+		cmp.w	(Ring_count).w,d0				; does the player 1 have 999 or less rings?
+		bhs.s	.skip							; if yes, branch
+		move.w	d0,(Ring_count).w				; set max rings
 
 .skip
 		ori.b	#1,(Update_HUD_ring_count).w	; update the rings counter

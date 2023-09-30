@@ -2,23 +2,29 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Knuckles:
+		; Load some addresses into registers
+		; This is done to allow some subroutines to be
+		; shared with Tails/Knuckles.
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
 		lea	(v_Dust).w,a6
 
+	if GameDebug
 		tst.w	(Debug_placement_mode).w
 		beq.s	Knuckles_Normal
+
+		; debug only code
 		cmpi.b	#1,(Debug_placement_type).w
 		beq.s	loc_16488
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_1646C
-		move.w	#0,(Debug_placement_mode).w
+		clr.w	(Debug_placement_mode).w
 
 loc_1646C:
 		addq.b	#1,mapping_frame(a0)
 		cmpi.b	#$FB,mapping_frame(a0)
 		blo.s		loc_1647E
-		move.b	#0,mapping_frame(a0)
+		clr.b	mapping_frame(a0)
 
 loc_1647E:
 		bsr.w	Knuckles_Load_PLC
@@ -30,32 +36,30 @@ loc_16488:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Normal:
+	endif
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Knuckles_Index(pc,d0.w),d1
 		jmp	Knuckles_Index(pc,d1.w)
 ; ---------------------------------------------------------------------------
 
-Knuckles_Index:
-		dc.w Knuckles_Init-Knuckles_Index
-		dc.w Knuckles_Control-Knuckles_Index
-		dc.w loc_17BB6-Knuckles_Index
-		dc.w loc_17C88-Knuckles_Index
-		dc.w loc_17CBA-Knuckles_Index
-		dc.w loc_17CCE-Knuckles_Index
-		dc.w loc_17CEA-Knuckles_Index
+Knuckles_Index: offsetTable
+		offsetTableEntry.w Knuckles_Init		; 0
+		offsetTableEntry.w Knuckles_Control		; 2
+		offsetTableEntry.w Knuckles_Hurt		; 4
+		offsetTableEntry.w Knuckles_Death		; 6
+		offsetTableEntry.w Knuckles_Restart		; 8
+		offsetTableEntry.w loc_17CCE			; A
+		offsetTableEntry.w Knuckles_Drown		; C
 ; ---------------------------------------------------------------------------
 
 Knuckles_Init:
 		addq.b	#2,routine(a0)
-		move.b	#$13,y_radius(a0)
-		move.b	#9,x_radius(a0)
-		move.b	#$13,default_y_radius(a0)
-		move.b	#9,default_x_radius(a0)
+		move.w	#bytes_to_word(38/2,18/2),y_radius(a0)	; set y_radius and x_radius	; this sets Sonic's collision height (2*pixels)
+		move.w	#bytes_to_word(38/2,18/2),default_y_radius(a0)	; set default_y_radius and default_x_radius
 		move.l	#Map_Knuckles,mappings(a0)
 		move.w	#$100,priority(a0)
-		move.b	#$18,width_pixels(a0)
-		move.b	#$18,height_pixels(a0)
+		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
 		move.b	#4,render_flags(a0)
 		move.b	#2,character_id(a0)
 		move.w	#$600,Max_speed-Max_speed(a4)
@@ -75,30 +79,31 @@ Knuckles_Init:
 		move.w	top_solid_bit(a0),(Saved_solid_bits).w
 
 Knuckles_Init_Continued:
-		move.b	#0,flips_remaining(a0)
+		clr.b	flips_remaining(a0)
 		move.b	#4,flip_speed(a0)
-		move.b	#$1E,air_left(a0)
+		move.b	#30,air_left(a0)
 		subi.w	#$20,x_pos(a0)
-		addi.w	#4,y_pos(a0)
+		addq.w	#4,y_pos(a0)
 		jsr	(Reset_Player_Position_Array).l
 		addi.w	#$20,x_pos(a0)
-		subi.w	#4,y_pos(a0)
+		subq.w	#4,y_pos(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
 Knuckles_Control:
+	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_165A2
-		bclr	#6,(Ctrl_1_pressed).w
+		bclr	#button_A,(Ctrl_1_pressed).w
 		beq.s	loc_16580
 		eori.b	#1,(Reverse_gravity_flag).w
 
 loc_16580:
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_165A2
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
-		btst	#5,(Ctrl_1).w
+		btst	#button_C,(Ctrl_1_held).w
 		beq.s	locret_165A0
 		move.w	#2,(Debug_placement_mode).w
 
@@ -107,6 +112,7 @@ locret_165A0:
 ; ---------------------------------------------------------------------------
 
 loc_165A2:
+	endif
 		tst.b	(Ctrl_1_locked).w
 		bne.s	loc_165AE
 		move.w	(Ctrl_1).w,(Ctrl_1_logical).w
@@ -114,7 +120,7 @@ loc_165A2:
 loc_165AE:
 		btst	#0,$2E(a0)
 		beq.s	loc_165BE
-		move.b	#0,double_jump_flag(a0)
+		clr.b	double_jump_flag(a0)
 		bra.s	loc_165D8
 ; ---------------------------------------------------------------------------
 
@@ -128,10 +134,10 @@ loc_165BE:
 		movem.l	(sp)+,a4-a6
 
 loc_165D8:
-		cmpi.w	#$FF00,(Camera_min_Y_pos).w
+		cmpi.w	#-$100,(Camera_min_Y_pos).w
 		bne.s	loc_165E8
 		move.w	(Screen_Y_wrap_value).w,d0
-		and.w	d0,$14(a0)
+		and.w	d0,y_pos(a0)
 
 loc_165E8:
 		bsr.s	Knuckles_Display
@@ -158,20 +164,21 @@ loc_1662C:
 
 loc_16630:
 		move.b	$2E(a0),d0
-		andi.b	#-$60,d0
+		andi.b	#$A0,d0
 		bne.s	locret_16640
 		jsr	(TouchResponse).l
 
 locret_16640:
 		rts
 ; ---------------------------------------------------------------------------
-Knux_Modes:	dc.w Knux_Stand_Path-Knux_Modes
-		dc.w Knux_Stand_Freespace-Knux_Modes
-		dc.w Knux_Spin_Path-Knux_Modes
-		dc.w Knux_Spin_Freespace-Knux_Modes
+
+Knux_Modes: offsetTable
+		offsetTableEntry.w Knux_Stand_Path		; 0
+		offsetTableEntry.w Knux_Stand_Freespace	; 2
+		offsetTableEntry.w Knux_Spin_Path			; 4
+		offsetTableEntry.w Knux_Spin_Freespace		; 6
 
 ; =============== S U B R O U T I N E =======================================
-
 
 Knuckles_Display:
 		move.b	$34(a0),d0
@@ -197,7 +204,7 @@ loc_1665E:
 		bne.s	loc_16694
 		tst.b	(Boss_flag).w
 		bne.s	loc_16694
-		cmpi.b	#$C,$2C(a0)
+		cmpi.b	#12,$2C(a0)
 		blo.s		loc_16694
 		move.w	(Current_music).w,d0
 		jsr	(SMPS_QueueSound1).w					; stop playing invincibility theme and resume normal level music
@@ -219,7 +226,8 @@ loc_1669A:
 		move.w	#$C,2(a4)
 		move.w	#$80,4(a4)
 		bclr	#2,$2B(a0)
-		music	mus_Slowdown						; run music at normal speed
+		music	mus_Slowdown,1						; run music at normal speed
+; ---------------------------------------------------------------------------
 
 locret_166EC:
 		rts
@@ -395,7 +403,7 @@ Knux_Gliding_HitFloor:
 		beq.s	loc_1693E
 
 		move.w	ground_vel(a0),x_vel(a0)
-		move.w	#0,y_vel(a0)
+		clr.w	y_vel(a0)
 
 		bra.w	Knux_TouchFloor
 ; ---------------------------------------------------------------------------
@@ -1548,11 +1556,12 @@ loc_173B0:
 		tst.w	d1
 		bpl.s	locret_17426
 		asl.w	#8,d1
-		cmpi.b	#8,(Current_zone).w
-		bne.s	loc_173D2
-		tst.b	d0
-		bpl.s	loc_173D2
-		subq.b	#1,d0
+
+;		cmpi.b	#8,(Current_zone).w
+;		bne.s	loc_173D2
+;		tst.b	d0
+;		bpl.s	loc_173D2
+;		subq.b	#1,d0
 
 loc_173D2:
 		addi.b	#$20,d0
@@ -1936,12 +1945,12 @@ Knux_Jump:
 		subi.b	#$40,d0
 
 loc_17732:
-		addi.b	#-$80,d0
+		addi.b	#$80,d0
 		movem.l	a4-a6,-(sp)
 		jsr	(CalcRoomOverHead).l
 		movem.l	(sp)+,a4-a6
 		cmpi.w	#6,d1
-		blt.w	locret_177E0
+		blt.s		locret_1770E
 		move.w	#$600,d2
 		btst	#6,$2A(a0)
 		beq.s	loc_1775C
@@ -1967,7 +1976,7 @@ loc_1775C:
 		move.b	$44(a0),$1E(a0)
 		move.b	$45(a0),$1F(a0)
 		btst	#2,$2A(a0)
-		bne.s	loc_177E2
+		bne.s	locret_177E0
 		move.b	#$E,$1E(a0)
 		move.b	#7,$1F(a0)
 		move.b	#2,anim(a0)
@@ -1983,11 +1992,6 @@ loc_177DC:
 		sub.w	d0,$14(a0)
 
 locret_177E0:
-		rts
-; ---------------------------------------------------------------------------
-
-loc_177E2:
-		bset	#4,$2A(a0)
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -2297,10 +2301,11 @@ locret_17BB4:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_17BB6:
+Knuckles_Hurt:
+	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17BD0
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17BD0
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
@@ -2308,6 +2313,7 @@ loc_17BB6:
 ; ---------------------------------------------------------------------------
 
 loc_17BD0:
+	endif
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$30,$1A(a0)
 		btst	#6,$2A(a0)
@@ -2373,10 +2379,11 @@ loc_17C82:
 		jmp	(Kill_Character).l
 ; ---------------------------------------------------------------------------
 
-loc_17C88:
+Knuckles_Death:
+	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17CA2
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17CA2
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
@@ -2384,6 +2391,7 @@ loc_17C88:
 ; ---------------------------------------------------------------------------
 
 loc_17CA2:
+	endif
 		bsr.w	sub_123C2
 		jsr	(MoveSprite_TestGravity).w
 		bsr.w	Sonic_RecordPos
@@ -2391,7 +2399,7 @@ loc_17CA2:
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
-loc_17CBA:
+Knuckles_Restart:
 		tst.w	$3E(a0)
 		beq.s	locret_17CCC
 		subq.w	#1,$3E(a0)
@@ -2414,10 +2422,11 @@ loc_17CE0:
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
-loc_17CEA:
+Knuckles_Drown:
+	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17D04
-		btst	#4,(Ctrl_1_pressed).w
+		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17D04
 		move.w	#1,(Debug_placement_mode).w
 		clr.b	(Ctrl_1_locked).w
@@ -2425,6 +2434,7 @@ loc_17CEA:
 ; ---------------------------------------------------------------------------
 
 loc_17D04:
+	endif
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$10,$1A(a0)
 		bsr.w	Sonic_RecordPos
@@ -2437,7 +2447,7 @@ sub_17D1E:
 		bsr.s	Animate_Knuckles
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_17D2C
-		eori.b	#2,4(a0)
+		eori.b	#2,render_flags(a0)
 
 loc_17D2C:
 		bra.w	Knuckles_Load_PLC
@@ -2451,8 +2461,8 @@ Animate_Knuckles:
 		cmp.b	$21(a0),d0
 		beq.s	loc_17D58
 		move.b	d0,$21(a0)
-		move.b	#0,$23(a0)
-		move.b	#0,$24(a0)
+		clr.b	$23(a0)
+		clr.b	$24(a0)
 		bclr	#5,$2A(a0)
 
 loc_17D58:

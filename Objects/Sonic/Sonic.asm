@@ -217,10 +217,12 @@ Sonic_ChkShoes:										; checks if Speed Shoes have expired and disables them 
 		move.w	#$C,2(a4)							; set Acceleration
 		move.w	#$80,4(a4)							; set Deceleration
 		bclr	#Status_SpeedShoes,status_secondary(a0)
-		music	mus_Slowdown						; run music at normal speed
+		music	mus_Slowdown,1						; run music at normal speed
+; ---------------------------------------------------------------------------
 
 Sonic_ExitChk:
 		rts
+
 ; ---------------------------------------------------------------------------
 ; Subroutine to record Sonic's previous positions for invincibility stars
 ; and input/status flags for Tails' AI to follow

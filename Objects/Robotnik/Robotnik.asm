@@ -23,6 +23,11 @@ Obj_RobotnikHead3Init:
 		lea	ObjDat_RobotnikHead(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#AniRaw_RobotnikHead,$30(a0)
+		cmpi.b	#2,(Player_1+character_id).w
+		bne.s	loc_67C76
+		bsr.w	sub_67B14
+
+loc_67C76:
 		movea.w	parent3(a0),a1
 		btst	#7,art_tile(a1)
 		beq.s	+
@@ -31,19 +36,24 @@ Obj_RobotnikHead3Init:
 ; ---------------------------------------------------------------------------
 
 Obj_RobotnikHead3Main:
+		movea.w	parent3(a0),a3
 		cmpi.b	#id_SonicHurt,(Player_1+routine).w
 		bhs.s	Obj_RobotnikHead3_Laugh
+		cmpi.b	#id_SonicHurt,(Player_2+routine).w
+		bhs.s	Obj_RobotnikHead3_Laugh
 		jsr	(Animate_Raw).w
-		movea.w	parent3(a0),a1
-		btst	#7,status(a1)
+		btst	#7,status(a3)
 		bne.s	++
-		btst	#6,status(a1)
+		btst	#6,status(a3)
 		beq.s	+
 		move.b	#2,mapping_frame(a0)
 +		rts
 ; ---------------------------------------------------------------------------
 +		move.b	#4,routine(a0)
 		move.b	#5,mapping_frame(a0)
+		cmpi.w	#3,(Player_mode).w
+		blo.s		Obj_RobotnikHeadEnd
+		move.b	#3,mapping_frame(a0)
 
 Obj_RobotnikHeadEnd:
 		rts
@@ -59,7 +69,13 @@ Obj_RobotnikHead3End:
 
 Obj_RobotnikHead3_Laugh:
 		lea	AniRaw_RobotnikHead_Laugh(pc),a1
+		cmpi.b	#2,(Player_1+character_id).w
+		bne.s	.skip
+		lea	AniRaw_EggRoboHead_Laugh(pc),a1
+
+.skip
 		jmp	(Animate_RawNoSST).w
+
 ; ---------------------------------------------------------------------------
 ; Robotnik Head 4
 ; ---------------------------------------------------------------------------
@@ -87,6 +103,7 @@ RobotnikHead4_Index: offsetTable
 
 loc_67CFE:
 		jmp	(Delete_Current_Sprite).w
+
 ; ---------------------------------------------------------------------------
 ; Robotnik Ship Flame
 ; ---------------------------------------------------------------------------
@@ -106,11 +123,30 @@ RobotnikShipFlame_Main:
 		btst	#0,(V_int_run_count+3).w
 		bne.s	Obj_RobotnikHeadEnd
 		tst.w	x_vel(a1)
-		beq.s	Obj_RobotnikHeadEnd
+		beq.w	Obj_RobotnikHeadEnd
 		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
+sub_67B14:
+		move.l	#Map_EggRoboHead,mappings(a0)		; if player is Knuckles, use Egg Robo head
+
+loc_67B1C:
+		move.l	#AniRaw_EggRoboHead,$30(a0)
+		lea	(ArtKosM_EggRoboHead).l,a1
+		move.w	#tiles_to_bytes($380),d2
+		jmp	(Queue_Kos_Module).w
+
+; =============== S U B R O U T I N E =======================================
+
+ObjDat_RobotnikShip:
+		dc.l Map_RobotnikShip
+		dc.w $380
+		dc.w $200
+		dc.b 64/2
+		dc.b 64/2
+		dc.b $C
+		dc.b $F
 ObjDat_RobotnikHead:
 		dc.l Map_RobotnikShip
 		dc.w $52E
@@ -129,6 +165,10 @@ AniRaw_RobotnikHead:
 		dc.b 5, 0, 1, arfEnd
 AniRaw_RobotnikHead_Laugh:
 		dc.b 5, 3, 4, arfEnd
+AniRaw_EggRoboHead:
+		dc.b $F, 0, 1, arfEnd
+AniRaw_EggRoboHead_Laugh:
+		dc.b 3, 0, 1, arfEnd
 Child1_MakeRoboHead3:
 		dc.w 1-1
 		dc.l Obj_RobotnikHead3
@@ -145,3 +185,4 @@ Child1_MakeRoboShipFlame:
 
 		include "Objects/Robotnik/Object Data/Map - Robotnik Ship.asm"
 		include "Objects/Robotnik/Object Data/Map - Eggrobo.asm"
+		include "Objects/Robotnik/Object Data/Map - Egg Robo Head.asm"
