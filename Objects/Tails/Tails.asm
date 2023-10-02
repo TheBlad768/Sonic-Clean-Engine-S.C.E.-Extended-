@@ -1162,9 +1162,9 @@ loc_144E4:
 		move.b	d0,mapping_frame(a1)
 		moveq	#0,d0
 		move.b	mapping_frame(a1),d0
-		move.l	a2,-(sp)
-		jsr	(Perform_Player_DPLC).l
-		movea.l	(sp)+,a2
+		pea	(a2)							; save a2
+		bsr.w	Perform_Player_DPLC
+		movea.l	(sp)+,a2					; restore a2
 
 loc_144F8:
 		move.w	x_vel(a0),(Player_1+x_vel).w
