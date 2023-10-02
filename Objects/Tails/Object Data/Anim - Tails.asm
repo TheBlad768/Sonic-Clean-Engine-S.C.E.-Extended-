@@ -42,24 +42,16 @@ AniTails:
 		dc.w AniTails28-AniTails
 		dc.w AniTails29-AniTails
 AniTails00:	dc.b  $FF,   7,	  8,   1,   2,	 3,   4,   5,	6, $FF
-
-					; ROM:00015AB0o
-AniTails01:	dc.b  $FF, $21,	$22, $23, $24, $FF, $FF, $FF, $FF, $FF
-
-					; ROM:00015AB0o
-AniTails02:	dc.b	1, $96,	$97, $98, $FF
-					; ROM:00015AB0o
-AniTails03:	dc.b	0, $96,	$97, $98, $FF
-					; ROM:00015AB0o
-AniTails04:	dc.b  $FD, $A9,	$AA, $AB, $AC, $FF, $FF, $FF, $FF, $FF
-
-					; ROM:00015AB0o
+AniTails01:	dc.b  $FF, $21, $22, $23, $24, $FF, $FF, $FF, $FF, $FF
+AniTails02:	dc.b	1, $96, $97, $98, $FF
+AniTails03:	dc.b	0, $96, $97, $98, $FF
+AniTails04:	dc.b  $FD, $A9, $AA, $AB, $AC, $FF, $FF, $FF, $FF, $FF
 AniTails05:	dc.b    7, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AF, $AE, $AD, $AD, $AD, $AD, $AD, $AD, $AD
-		dc.b  $AD, $AF, $AE, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1
-		dc.b  $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B2, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B2
-		dc.b  $FE, $1C
+			dc.b  $AD, $AF, $AE, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1
+			dc.b  $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B2, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B2
+			dc.b  $FE, $1C
 AniTails06:	dc.b    9, $9A, $9A, $9B, $9B, $9A, $9A, $9B, $9B, $9A, $9A, $9B, $9B, $9A, $9A, $9B, $9B, $9A, $9A, $9B
-		dc.b  $9B, $9A, $9B, $FF
+			dc.b  $9B, $9A, $9B, $FF
 AniTails07:	dc.b  $3F, $B0,	$FF
 AniTails08:	dc.b  $3F, $99,	$FF
 AniTails09:	dc.b	0, $86,	$87, $88, $FF
@@ -89,7 +81,6 @@ AniTails1E:	dc.b	3,   1,	  2,   3,   4,	 5,   6,   7,	8, $FF
 
 AniTails1F:	dc.b  $FF, $C3,	$C4, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-					; ROM:00015AB0o
 AniTails20:	dc.b  $1F, $A0,	$FF
 AniTails21:	dc.b  $1F, $A0,	$FF
 AniTails22:	dc.b  $1F, $A2,	$FF
@@ -100,4 +91,4 @@ AniTails26:	dc.b	3, $BD,	$BE, $BF, $C0, $C1, $FF
 AniTails27:	dc.b	4, $CF,	$D0, $FF
 AniTails28:	dc.b   $B, $C2,	$CD, $CE, $FF
 AniTails29:	dc.b	2, $EB,	$EB, $EC, $ED, $EC, $ED, $EC, $ED, $EC,	$ED, $EC, $ED, $FD,   0
-
+	even
