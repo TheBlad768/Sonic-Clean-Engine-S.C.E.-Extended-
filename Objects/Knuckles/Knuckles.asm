@@ -2385,7 +2385,7 @@ locret_17CCC:
 ; ---------------------------------------------------------------------------
 
 loc_17CCE:
-		tst.w	(Camera_RAM).w
+		tst.w	(H_scroll_amount).w
 		bne.s	loc_17CE0
 		tst.w	(V_scroll_amount).w
 		bne.s	loc_17CE0
