@@ -2228,10 +2228,7 @@ loc_12432:
 		bne.s	loc_12498
 		clr.w	restart_timer(a0)
 		move.l	#Obj_GameOver,(Reserved_object_3+address).w
-		move.l	#Obj_GameOver,(Dynamic_object_RAM+address).w
-		clr.b	(Reserved_object_3+mapping_frame).w
-		move.b	#1,(Dynamic_object_RAM+mapping_frame).w
-		move.w	a0,(Reserved_object_3+objoff_3E).w
+		move.b	#1,(Reserved_object_3+mapping_frame).w
 		clr.b	(Time_over_flag).w
 
 loc_12478:
@@ -2248,10 +2245,7 @@ loc_12498:
 		beq.s	locret_1258E
 		clr.w	restart_timer(a0)
 		move.l	#Obj_GameOver,(Reserved_object_3+address).w
-		move.l	#Obj_GameOver,(Dynamic_object_RAM+address).w
-		move.b	#2,(Reserved_object_3+mapping_frame).w
-		move.b	#3,(Dynamic_object_RAM+mapping_frame).w
-		move.w	a0,(Reserved_object_3+objoff_3E).w
+		move.b	#3,(Reserved_object_3+mapping_frame).w
 		bra.s	loc_12478
 
 ; =============== S U B R O U T I N E =======================================

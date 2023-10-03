@@ -963,7 +963,6 @@ Offset_ObjectsDuringTransition:
 ; =============== S U B R O U T I N E =======================================
 
 Change_ActSizes:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#3,d0
@@ -980,7 +979,6 @@ Change_ActSizes:
 ; =============== S U B R O U T I N E =======================================
 
 LoadLevelLoadBlock:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#4,d0
@@ -1007,7 +1005,6 @@ LoadLevelLoadBlock:
 ; =============== S U B R O U T I N E =======================================
 
 LoadLevelLoadBlock2:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#4,d0
@@ -1032,7 +1029,6 @@ LoadLevelLoadBlock2:
 ; =============== S U B R O U T I N E =======================================
 
 Load_Level:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#4,d0
@@ -1048,7 +1044,6 @@ Load_Level2:
 ; =============== S U B R O U T I N E =======================================
 
 LoadLevelPointer:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#3,d0
@@ -1072,7 +1067,6 @@ LoadLevelPointer:
 ; =============== S U B R O U T I N E =======================================
 
 Load_Solids:
-		moveq	#0,d0
 		move.w	(Current_zone_and_act).w,d0
 		ror.b	#2,d0
 		lsr.w	#4,d0

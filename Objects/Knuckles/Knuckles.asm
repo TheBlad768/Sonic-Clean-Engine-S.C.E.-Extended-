@@ -2374,9 +2374,9 @@ loc_17CA2:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Restart:
-		tst.w	$3E(a0)
+		tst.w	restart_timer(a0)
 		beq.s	locret_17CCC
-		subq.w	#1,$3E(a0)
+		subq.w	#1,restart_timer(a0)
 		bne.s	locret_17CCC
 		st	(Restart_level_flag).w
 
