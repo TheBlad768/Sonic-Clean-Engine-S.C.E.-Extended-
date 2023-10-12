@@ -104,7 +104,7 @@ loc_5C3EE:
 		move.l	#Obj_Continue_TailsWSonic,(Player_2+address).w
 
 loc_5C3FE:
-		move.l	#loc_5C838,(Reserved_object_3).w
+		move.l	#Obj_5C838,(Reserved_object_3).w
 		lea	(Dynamic_object_RAM).w,a1
 		move.l	#loc_5C4D6,address(a1)
 		move.w	a1,(_unkFAA4).w
@@ -150,21 +150,24 @@ locret_5C4D4:
 loc_5C4D6:
 		move.l	#loc_5C4E6,address(a0)
 		clr.w	(_unkFA82).w
-		move.b	#$A,(_unkFA84).w
+		move.b	#10,(_unkFA84).w
 
 loc_5C4E6:
 		btst	#7,(Ctrl_1_pressed).w
 		bne.s	loc_5C51C
 		btst	#7,(Ctrl_2_pressed).w
 		bne.s	loc_5C51C
+
 		subq.w	#1,(_unkFA82).w
 		bpl.s	locret_5C512
-		move.w	#$3B,(_unkFA82).w
+		move.w	#60-1,(_unkFA82).w
+
 		move.b	(_unkFA84).w,d0
 		subq.b	#1,d0
 		bmi.s	loc_5C514
 		move.b	d0,(_unkFA84).w
-		bsr.w	sub_5CAAE
+		bra.w	sub_5CAAE
+; ---------------------------------------------------------------------------
 
 locret_5C512:
 		rts
@@ -177,32 +180,33 @@ loc_5C514:
 
 loc_5C51C:
 		move.l	#locret_5C528,address(a0)
-		bset	#3,$38(a0)
+		bset	#3,objoff_38(a0)
 
 locret_5C528:
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_SonicWTails:
-		move.l	#Map_ContinueSprites,$C(a0)
-		move.w	#$8C,$A(a0)
-		move.w	#$280,8(a0)
-		move.b	#$C,7(a0)
-		move.b	#$14,6(a0)
-		move.w	#$118,$10(a0)
-		move.w	#$120,$14(a0)
+		move.l	#Map_ContinueSprites,mappings(a0)
+		move.w	#$8C,art_tile(a0)
+		move.w	#$280,priority(a0)
+		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)		; set height and width
+		move.w	#$118,x_pos(a0)
+		move.w	#$120,y_pos(a0)
 		move.l	#loc_5C55C,address(a0)
 
 loc_5C55C:
 		movea.w	(_unkFAA4).w,a1
-		btst	#3,$38(a1)
+		btst	#3,objoff_38(a1)
 		bne.s	loc_5C582
-		move.b	#0,$22(a0)
+		moveq	#0,d0
 		btst	#4,(V_int_run_count+3).w
 		beq.s	loc_5C57C
-		move.b	#1,$22(a0)
+		addq.b	#1,d0
 
 loc_5C57C:
+		move.b	d0,mapping_frame(a0)
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
@@ -211,7 +215,7 @@ loc_5C582:
 
 loc_5C588:
 		moveq	#0,d0
-		move.b	5(a0),d0
+		move.b	routine(a0),d0
 		move.w	off_5C5A2(pc,d0.w),d1
 		jsr	off_5C5A2(pc,d1.w)
 		jsr	(Sonic_Load_PLC).l
@@ -227,44 +231,50 @@ off_5C5A2: offsetTable
 ; ---------------------------------------------------------------------------
 
 loc_5C5AC:
-		addq.b	#2,5(a0)
-		move.l	#Map_Sonic,$C(a0)
-		move.w	#ArtTile_Player_1,$A(a0)
+		addq.b	#2,routine(a0)
+		move.l	#Map_Sonic,mappings(a0)
+		move.w	#ArtTile_Player_1,art_tile(a0)
 		clr.b	(Player_prev_frame).w
-		move.b	#$5A,$22(a0)
-		move.b	#6,$24(a0)
+		move.b	#$5A,mapping_frame(a0)
+		move.b	#6,anim_frame_timer(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C5D0:
-		subq.b	#1,$24(a0)
+		subq.b	#1,anim_frame_timer(a0)
 		bpl.s	locret_5C606
-		move.b	#6,$24(a0)
+		move.b	#6,anim_frame_timer(a0)
 		moveq	#0,d0
-		move.b	$23(a0),d0
+		move.b	anim_frame(a0),d0
 		addq.w	#2,d0
-		cmpi.b	#$A,d0
+		cmpi.b	#10,d0
 		bhs.s	loc_5C608
-		move.b	d0,$23(a0)
+		move.b	d0,anim_frame(a0)
 		lea	RawAni_5C622(pc,d0.w),a2
-		move.b	(a2)+,$22(a0)
-		bclr	#0,4(a0)
+		move.b	(a2)+,mapping_frame(a0)
+		bclr	#0,render_flags(a0)
 		tst.b	(a2)
 		beq.s	locret_5C606
-		bset	#0,4(a0)
+		bset	#0,render_flags(a0)
 
 locret_5C606:
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C608:
-		move.b	#4,5(a0)
-		move.w	#1,$20(a0)
-		move.w	#$600,$1C(a0)
+		move.b	#4,routine(a0)
+		move.w	#$0001,anim(a0)
+		move.w	#$600,ground_vel(a0)
 		move.w	#$F,$2E(a0)
 		rts
 ; ---------------------------------------------------------------------------
-RawAni_5C622:	dc.b  $5A,   1, $59,   1, $55,   0, $56,   0, $57,   0
+
+RawAni_5C622:		; frame, flipx flag
+		dc.b $5A, 1
+		dc.b $59, 1
+		dc.b $55, 0
+		dc.b $56, 0
+		dc.b $57, 0
 ; ---------------------------------------------------------------------------
 
 loc_5C62C:
@@ -275,30 +285,29 @@ loc_5C62C:
 ; ---------------------------------------------------------------------------
 
 loc_5C63A:
-		move.b	#6,5(a0)
+		move.b	#6,routine(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C642:
 		jsr	(Animate_Sonic).l
-		addq.w	#6,$10(a0)
-		cmpi.w	#$1E0,$10(a0)
+		addq.w	#6,x_pos(a0)
+		cmpi.w	#$1E0,x_pos(a0)
 		bhs.s	loc_5C656
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C656:
-		move.b	#8,5(a0)
-		rts
-; ---------------------------------------------------------------------------
+		move.b	#8,routine(a0)
 
 locret_5C65E:
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_SonicAlone:
 		moveq	#0,d0
-		move.b	5(a0),d0
+		move.b	routine(a0),d0
 		move.w	off_5C67A(pc,d0.w),d1
 		jsr	off_5C67A(pc,d1.w)
 		jsr	(Sonic_Load_PLC).l
@@ -314,26 +323,25 @@ off_5C67A: offsetTable
 ; ---------------------------------------------------------------------------
 
 loc_5C684:
-		move.b	#2,5(a0)
-		move.l	#Map_Sonic,$C(a0)
-		move.w	#ArtTile_Player_1,$A(a0)
-		move.w	#$280,8(a0)
-		move.b	#$C,7(a0)
-		move.b	#$14,6(a0)
-		move.w	#$120,$10(a0)
-		move.w	#$120,$14(a0)
+		move.b	#2,routine(a0)
+		move.l	#Map_Sonic,mappings(a0)
+		move.w	#ArtTile_Player_1,art_tile(a0)
+		move.w	#$280,priority(a0)
+		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)		; set height and width
+		move.w	#$120,x_pos(a0)
+		move.w	#$120,y_pos(a0)
 
 loc_5C6B6:
 		movea.w	(_unkFAA4).w,a1
-		btst	#2,$38(a1)
+		btst	#2,objoff_38(a1)
 		bne.s	loc_5C6CC
 		lea	byte_5CBC5(pc),a1
 		jmp	(Animate_RawNoSSTCheckResult).w
 ; ---------------------------------------------------------------------------
 
 loc_5C6CC:
-		move.b	#4,5(a0)
-		move.b	#-$46,$22(a0)
+		move.b	#4,routine(a0)
+		move.b	#$BA,mapping_frame(a0)
 		move.w	#7,$2E(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -341,63 +349,65 @@ loc_5C6CC:
 loc_5C6E0:
 		subq.w	#1,$2E(a0)
 		bpl.s	locret_5C6F2
-		move.b	#6,5(a0)
-		move.b	#$21,$22(a0)
+		move.b	#6,routine(a0)
+		move.b	#$21,mapping_frame(a0)
 
 locret_5C6F2:
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C6F4:
-		addq.w	#6,$10(a0)
-		cmpi.w	#$1E0,$10(a0)
+		addq.w	#6,x_pos(a0)
+		cmpi.w	#$1E0,x_pos(a0)
 		bhs.s	loc_5C70A
 		lea	byte_5CBB4(pc),a1
 		jmp	(Animate_RawNoSSTCheckResult).w
 ; ---------------------------------------------------------------------------
 
 loc_5C70A:
-		move.b	#8,5(a0)
+		move.b	#8,routine(a0)
 		move.b	#1,(_unkFAA9).w
 
 locret_5C716:
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_TailsWSonic:
-		move.l	#Map_ContinueSprites,$C(a0)
-		move.w	#$8C,$A(a0)
-		move.w	#$200,8(a0)
-		move.b	#$10,7(a0)
-		move.b	#$14,6(a0)
-		move.w	#$12C,$10(a0)
-		move.w	#$120,$14(a0)
+		move.l	#Map_ContinueSprites,mappings(a0)
+		move.w	#$8C,art_tile(a0)
+		move.w	#$200,priority(a0)
+		move.w	#bytes_to_word(40/2,32/2),height_pixels(a0)			; set height and width
+		move.w	#$12C,x_pos(a0)
+		move.w	#$120,y_pos(a0)
 		move.l	#loc_5C74A,address(a0)
 
 loc_5C74A:
 		movea.w	(_unkFAA4).w,a1
-		btst	#3,$38(a1)
+		btst	#3,objoff_38(a1)
 		bne.s	loc_5C770
-		move.b	#5,$22(a0)
+
+		moveq	#5,d0
 		btst	#5,(V_int_run_count+3).w
 		beq.s	loc_5C76A
-		move.b	#6,$22(a0)
+		addq.b	#1,d0
 
 loc_5C76A:
+		move.b	d0,mapping_frame(a0)
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
 loc_5C770:
 		move.l	#loc_5C790,address(a0)
-		addq.w	#4,$14(a0)
+		addq.w	#4,y_pos(a0)
 		lea	(v_Tails_tails).w,a1
 		move.l	#Obj_Tails_Tail,address(a1)
-		move.w	a0,$30(a1)
-		move.l	#loc_5C82C,(v_Dust+address).w
+		move.w	a0,objoff_30(a1)
+		move.l	#Obj_5C82C,(v_Dust+address).w
 
 loc_5C790:
 		moveq	#0,d0
-		move.b	5(a0),d0
+		move.b	routine(a0),d0
 		move.w	off_5C7AA(pc,d0.w),d1
 		jsr	off_5C7AA(pc,d1.w)
 		jsr	(Tails_Load_PLC).l
@@ -412,13 +422,13 @@ off_5C7AA: offsetTable
 ; ---------------------------------------------------------------------------
 
 loc_5C7B2:
-		addq.b	#2,5(a0)
-		move.l	#Map_Tails,$C(a0)
-		move.w	#ArtTile_Player_2,$A(a0)
-		move.w	#$280,8(a0)
+		addq.b	#2,routine(a0)
+		move.l	#Map_Tails,mappings(a0)
+		move.w	#ArtTile_Player_2,art_tile(a0)
+		move.w	#$280,priority(a0)
 		clr.b	(Player_prev_frame_P2).w
-		move.w	#$500,$20(a0)
-		move.w	#-$5300,$22(a0)
+		move.w	#$0500,anim(a0)						; set anim and prev_anim
+		move.w	#$AD00,mapping_frame(a0)			; set frame and clear anim_frame
 		move.w	#$27,$2E(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -426,66 +436,63 @@ loc_5C7B2:
 loc_5C7E2:
 		subq.w	#1,$2E(a0)
 		bpl.w	locret_5C4D4
-		move.b	#4,5(a0)
-		move.b	#0,$20(a0)
-		move.w	#$600,$1C(a0)
+		move.b	#4,routine(a0)
+		clr.b	anim(a0)
+		move.w	#$600,ground_vel(a0)
 		move.w	#$13,$2E(a0)
 
 loc_5C802:
 		subq.w	#1,$2E(a0)
 		bpl.s	loc_5C80E
-		move.b	#6,5(a0)
+		move.b	#6,routine(a0)
 
 loc_5C80E:
 		jmp	(Animate_Tails).l
 ; ---------------------------------------------------------------------------
 
 loc_5C814:
-		addq.w	#6,$10(a0)
-		cmpi.w	#$1E0,$10(a0)
-		blo.s	loc_5C826
+		addq.w	#6,x_pos(a0)
+		cmpi.w	#$1E0,x_pos(a0)
+		blo.s		loc_5C826
 		move.b	#1,(_unkFAA9).w
 
 loc_5C826:
 		jmp	(Animate_Tails).l
-; ---------------------------------------------------------------------------
 
-loc_5C82C:
+; =============== S U B R O U T I N E =======================================
+
+Obj_5C82C:
 		bclr	#2,(v_Tails_tails+render_flags).w
 		jmp	(Delete_Current_Sprite).w
-; ---------------------------------------------------------------------------
 
-loc_5C838:
+; =============== S U B R O U T I N E =======================================
+
+Obj_5C838:
 		cmpi.w	#3,(Player_mode).w
 		beq.s	loc_5C854
 		lea	loc_5C8C8(pc),a1
 		move.l	a1,address(a0)
-		move.w	#$40,$10(a0)
-		move.w	#$120,$14(a0)
+		move.w	#$40,x_pos(a0)
+		move.w	#$120,y_pos(a0)
 		jmp	(a1)
 ; ---------------------------------------------------------------------------
 
 loc_5C854:
-		lea	loc_5C85A(pc),a1
-		move.l	a1,address(a0)
-
-loc_5C85A:
-		move.l	#Map_ContinueSprites,$C(a0)
-		move.w	#$608C,$A(a0)
-		move.w	#$200,8(a0)
-		move.b	#$10,7(a0)
-		move.b	#$18,6(a0)
-		move.w	#$11C,$10(a0)
-		move.w	#$120,$14(a0)
+		move.l	#Map_ContinueSprites,mappings(a0)
+		move.w	#$608C,art_tile(a0)
+		move.w	#$200,priority(a0)
+		move.w	#bytes_to_word(48/2,32/2),height_pixels(a0)			; set height and width
+		move.w	#$11C,x_pos(a0)
+		move.w	#$120,y_pos(a0)
 		move.l	#loc_5C88C,address(a0)
 
 loc_5C88C:
 		move.w	#$2F,$2E(a0)
 		movea.w	(_unkFAA4).w,a1
-		btst	#3,$38(a1)
+		btst	#3,objoff_38(a1)
 		beq.s	loc_5C8AC
 		move.l	#loc_5C8AC,address(a0)
-		move.l	#loc_5C972,(Dynamic_object_RAM+(object_size*13)).w
+		move.l	#Obj_5C972,(Dynamic_object_RAM+(object_size*13)).w
 
 loc_5C8AC:
 		subq.w	#1,$2E(a0)
@@ -500,7 +507,7 @@ loc_5C8B8:
 
 loc_5C8C8:
 		moveq	#0,d0
-		move.b	5(a0),d0
+		move.b	routine(a0),d0
 		move.w	off_5C8E2(pc,d0.w),d1
 		jsr	off_5C8E2(pc,d1.w)
 		jsr	(Knuckles_Load_PLC_661E0).l
@@ -515,36 +522,35 @@ off_5C8E2: offsetTable
 ; ---------------------------------------------------------------------------
 
 loc_5C8EA:
-		addq.b	#2,5(a0)
-		move.l	#Map_Knuckles,$C(a0)
-		move.w	#make_art_tile(ArtTile_CutsceneKnux,3,0),$A(a0)
-		move.w	#$80,8(a0)
-		move.b	#7,$22(a0)
-		move.b	#$20,7(a0)
-		move.b	#$30,6(a0)
-		clr.b	$24(a0)
-		clr.b	$23(a0)
+		addq.b	#2,routine(a0)
+		move.l	#Map_Knuckles,mappings(a0)
+		move.w	#make_art_tile(ArtTile_CutsceneKnux,3,0),art_tile(a0)
+		move.w	#$80,priority(a0)
+		move.b	#7,mapping_frame(a0)
+		move.w	#bytes_to_word(96/2,64/2),height_pixels(a0)			; set height and width
+		clr.b	anim_frame_timer(a0)
+		clr.b	anim_frame(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C91E:
 		movea.w	(_unkFAA4).w,a1
-		btst	#3,$38(a1)
+		btst	#3,objoff_38(a1)
 		bne.s	loc_5C92C
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_5C92C:
-		move.b	#4,5(a0)
+		move.b	#4,routine(a0)
 
 loc_5C932:
-		move.w	$10(a0),d0
+		move.w	x_pos(a0),d0
 		addq.w	#6,d0
-		move.w	d0,$10(a0)
+		move.w	d0,x_pos(a0)
 		movea.w	(_unkFAA4).w,a1
 		cmpi.w	#$120,d0
-		blo.s	loc_5C94C
-		bset	#2,$38(a1)
+		blo.s		loc_5C94C
+		bset	#2,objoff_38(a1)
 
 loc_5C94C:
 		cmpi.w	#$1E0,d0
@@ -554,37 +560,37 @@ loc_5C94C:
 ; ---------------------------------------------------------------------------
 
 loc_5C95C:
-		move.b	#6,5(a0)
+		move.b	#6,routine(a0)
 		cmpi.w	#3,(Player_mode).w
 		bne.s	locret_5C970
 		move.b	#1,(_unkFAA9).w
 
 locret_5C970:
 		rts
-; ---------------------------------------------------------------------------
 
-loc_5C972:
-		lea	ObjDat3_919A6(pc),a1
+; =============== S U B R O U T I N E =======================================
+
+Obj_5C972:
+		lea	ObjDat_919A6(pc),a1
 		jsr	(SetUp_ObjAttributes).w
-		bclr	#2,4(a0)
-		bset	#0,4(a0)
+		bclr	#2,render_flags(a0)
+		bset	#0,render_flags(a0)
 		move.l	#Obj_Continue_EggRobo_5C9C4,address(a0)
-		move.w	#$60,$10(a0)
-		move.w	#$F0,$14(a0)
-		move.w	#$600,$18(a0)
+		move.w	#$60,x_pos(a0)
+		move.w	#$F0,y_pos(a0)
+		move.w	#$600,x_vel(a0)
 		jsr	(Swing_Setup1).w
 		lea	ChildObjDat_919D0(pc),a2
 		jsr	(CreateChild1_Normal).w
 		lea	(ArtKosM_EggRoboBadnik).l,a1
-		move.w	#$A000,d2
+		move.w	#tiles_to_bytes($500),d2
 		jmp	(Queue_Kos_Module).w
 ; ---------------------------------------------------------------------------
 
 Obj_Continue_EggRobo_5C9C4:
+		pea	(Draw_Sprite).w
 		jsr	(Swing_UpAndDown).w
 		jsr	(MoveSprite2).w
-		jsr	sub_91988
-		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -595,20 +601,19 @@ sub_91988:
 		moveq	#3,d0
 
 loc_91994:
-		move.b	d0,$22(a0)
+		move.b	d0,mapping_frame(a0)
 		rts
 
 ; =============== S U B R O U T I N E =======================================
 
 loc_5C9DC:
-		move.l	#Map_ContinueSprites,$C(a0)
-		move.w	#$408C,$A(a0)
-		move.w	#$380,8(a0)
-		move.b	#7,$22(a0)
-		move.b	#8,7(a0)
-		move.b	#8,6(a0)
-		move.w	#$120,$10(a0)
-		move.w	#$F5,$14(a0)
+		move.l	#Map_ContinueSprites,mappings(a0)
+		move.w	#$408C,art_tile(a0)
+		move.w	#$380,priority(a0)
+		move.b	#7,mapping_frame(a0)
+		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)		; set height and width
+		move.w	#$120,x_pos(a0)
+		move.w	#$F5,y_pos(a0)
 		move.l	#loc_5CA14,address(a0)
 
 loc_5CA14:
@@ -616,19 +621,18 @@ loc_5CA14:
 
 ; =============== S U B R O U T I N E =======================================
 
-loc_5CA1A:
-		move.l	#Map_ContinueIcons,$C(a0)
-		move.w	#$D9,$A(a0)
+Obj_5CA1A:
+		move.l	#Map_ContinueIcons,mappings(a0)
+		move.w	#$D9,art_tile(a0)
 		cmpi.w	#3,(Player_mode).w
 		bne.s	loc_5CA36
-		move.w	#$60D9,$A(a0)
+		move.w	#$60D9,art_tile(a0)
 
 loc_5CA36:
-		move.w	#$380,8(a0)
-		move.b	#8,7(a0)
-		move.b	#8,6(a0)
+		move.w	#$380,priority(a0)
+		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)		; set height and width
 		bsr.w	sub_5CB4A
-		move.w	#$D8,$14(a0)
+		move.w	#$D8,y_pos(a0)
 		move.l	#loc_5CA5C,address(a0)
 		bsr.w	sub_5CB6A
 
@@ -639,18 +643,18 @@ loc_5CA5C:
 		addq.w	#1,d0
 
 loc_5CA68:
-		movea.l	$30(a0),a1
-		move.b	(a1,d0.w),$22(a0)
+		movea.l	objoff_30(a0),a1
+		move.b	(a1,d0.w),mapping_frame(a0)
 		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
 Knuckles_Load_PLC_661E0:
 		moveq	#0,d0
-		move.b	$22(a0),d0
-		cmp.b	$3A(a0),d0
+		move.b	mapping_frame(a0),d0
+		cmp.b	objoff_3A(a0),d0
 		beq.s	locret_66234
-		move.b	d0,$3A(a0)
+		move.b	d0,objoff_3A(a0)
 		lea	(DPLC_Knuckles).l,a2
 		add.w	d0,d0
 		adda.w	(a2,d0.w),a2
@@ -682,11 +686,10 @@ locret_66234:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_5CA78:
-		move.l	#Map_ContinueIcons,$C(a0)
-		move.w	#$D9,$A(a0)
-		move.w	#$280,8(a0)
-		move.b	#8,7(a0)
-		move.b	#8,6(a0)
+		move.l	#Map_ContinueIcons,mappings(a0)
+		move.w	#$D9,art_tile(a0)
+		move.w	#$280,priority(a0)
+		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)		; set height and width
 		move.l	#loc_5CA9E,address(a0)
 
 loc_5CA9E:
@@ -727,11 +730,11 @@ sub_5CAAE:
 		addi.l	#$800000,d3
 		lea	(RAM_start+$2000).l,a1
 		move.l	d2,VDP_control_port-VDP_data_port(a6)
-		move.w	(a1)+,(a6)
-		move.w	(a1)+,(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
 		move.l	d3,VDP_control_port-VDP_data_port(a6)
-		move.w	(a1)+,(a6)
-		move.w	(a1)+,(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
 		enableInts
 		rts
 
@@ -752,18 +755,18 @@ sub_5B318:
 		move.l	d2,d3
 		addi.l	#$800000,d3
 		lea	(RAM_start+$7000).l,a1
-		move.l	d2,4(a6)
+		move.l	d2,VDP_control_port-VDP_data_port(a6)
 		subq.w	#1,d0
 		move.w	d0,d1
 
 loc_5B350:
-		move.w	(a1)+,(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
 		dbf	d0,loc_5B350
 		lea	(RAM_start+$7080).l,a1
 		move.l	d3,VDP_control_port-VDP_data_port(a6)
 
 loc_5B360:
-		move.w	(a1)+,(a6)
+		move.w	(a1)+,VDP_data_port-VDP_data_port(a6)
 		dbf	d1,loc_5B360
 		enableInts
 		rts
@@ -786,9 +789,9 @@ loc_5CB2C:
 
 loc_5CB32:
 		subq.b	#1,d0
-		beq.w	locret_5C4D4
-		move.l	#loc_5CA1A,address(a1)
-		move.b	d1,$2C(a1)
+		beq.s	locret_5CB56
+		move.l	#Obj_5CA1A,address(a1)
+		move.b	d1,subtype(a1)
 		addq.w	#2,d1
 		lea	next_object(a1),a1
 		bra.s	loc_5CB32
@@ -797,8 +800,10 @@ loc_5CB32:
 
 sub_5CB4A:
 		moveq	#0,d0
-		move.b	$2C(a0),d0
-		move.w	word_5CB58(pc,d0.w),$10(a0)
+		move.b	subtype(a0),d0
+		move.w	word_5CB58(pc,d0.w),x_pos(a0)
+
+locret_5CB56:
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -815,13 +820,13 @@ word_5CB58:
 
 ; =============== S U B R O U T I N E =======================================
 
-loc_916A8:
-		lea	word_919BE(pc),a1
+Obj_916A8:
+		lea	ObjDat3_919BE(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
-		movea.w	$46(a0),a1
-		btst	#2,4(a1)
+		movea.w	parent3(a0),a1
+		btst	#2,render_flags(a1)
 		bne.s	loc_916C4
-		bclr	#2,4(a0)
+		bclr	#2,render_flags(a0)
 
 loc_916C4:
 		move.l	#loc_916CC,address(a0)
@@ -831,26 +836,26 @@ loc_916C4:
 loc_916CC:
 		jsr	(Refresh_ChildPositionAdjusted).w
 		moveq	#6,d0
-		move.w	$1A(a1),d1
+		move.w	y_vel(a1),d1
 		bmi.s	loc_916E4
 		moveq	#5,d0
 		cmpi.w	#$20,d1
-		blo.s	loc_916E4
+		blo.s		loc_916E4
 		moveq	#4,d0
 
 loc_916E4:
-		move.b	d0,$22(a0)
+		move.b	d0,mapping_frame(a0)
 		jmp	(Child_Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
-loc_916EE:
-		lea	word_919C4(pc),a1
+Obj_916EE:
+		lea	ObjDat3_919C4(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
-		movea.w	$46(a0),a1
-		btst	#2,4(a1)
+		movea.w	parent3(a0),a1
+		btst	#2,render_flags(a1)
 		bne.s	loc_9170A
-		bclr	#2,4(a0)
+		bclr	#2,render_flags(a0)
 
 loc_9170A:
 		move.l	#loc_91712,address(a0)
@@ -859,7 +864,7 @@ loc_9170A:
 
 loc_91712:
 		bsr.w	sub_91930
-		btst	#1,$38(a1)
+		btst	#1,objoff_38(a1)
 		beq.s	loc_91734
 		move.l	#loc_9173A,address(a0)
 		move.w	#$5F,$2E(a0)
@@ -874,16 +879,16 @@ loc_9173A:
 		subq.w	#1,$2E(a0)
 		bpl.s	loc_91750
 		move.l	#loc_91712,address(a0)
-		movea.w	$46(a0),a1
-		bclr	#1,$38(a1)
+		movea.w	parent3(a0),a1
+		bclr	#1,objoff_38(a1)
 
 loc_91750:
 		jmp	(Child_Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
-loc_91756:
-		lea	word_919CA(pc),a1
+Obj_91756:
+		lea	ObjDat3_919CA(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#loc_9176C,address(a0)
 		move.w	#$1F,$2E(a0)
@@ -895,19 +900,19 @@ loc_9176C:
 		moveq	#7,d0
 
 loc_91778:
-		move.b	d0,$22(a0)
+		move.b	d0,mapping_frame(a0)
 		subq.w	#1,$2E(a0)
 		bpl.s	loc_917AE
 		move.l	#loc_917B4,address(a0)
-		move.b	#7,$22(a0)
-		move.b	#-$64,$28(a0)
+		move.b	#7,mapping_frame(a0)
+		move.b	#$1C|$80,collision_flags(a0)
 		move.w	#-$800,d0
-		btst	#0,4(a0)
+		btst	#0,render_flags(a0)
 		beq.s	loc_917A2
 		neg.w	d0
 
 loc_917A2:
-		move.w	d0,$18(a0)
+		move.w	d0,x_vel(a0)
 		sfx	sfx_Laser
 
 loc_917AE:
@@ -934,7 +939,7 @@ sub_91930:
 loc_91954:
 		add.w	d1,d0
 		move.w	d0,x_pos(a0)
-		move.w	$32(a1),d0
+		move.w	objoff_32(a1),d0
 		bne.s	loc_91964
 		move.w	y_pos(a1),d0
 
@@ -1104,7 +1109,8 @@ sub_5CB6A:
 		jsr	(CreateChild6_Simple).w
 
 loc_5CB7E:
-		lsl.w	#2,d4
+		add.w	d4,d4
+		add.w	d4,d4
 		move.l	off_5CB8E(pc,d4.w),$30(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -1120,7 +1126,7 @@ off_5CB8E:
 aCONTINUE:		dc.b "C O N T I N U E",0
 	even
 
-ObjDat3_919A6:
+ObjDat_919A6:
 		dc.l Map_EggRobo
 		dc.w $8500
 		dc.w $280
@@ -1128,71 +1134,42 @@ ObjDat3_919A6:
 		dc.b $18
 		dc.b 1
 		dc.b 6
-byte_5CBAE:
-		dc.b 0
-		dc.b 1
-byte_5CBB0:
-		dc.b 2
-		dc.b 3
-byte_5CBB2:
-		dc.b 7
-		dc.b 8
-byte_5CBB4:
-		dc.b 2
-		dc.b $21
-		dc.b $22
-		dc.b $23
-		dc.b $24
-		dc.b $FF
-		dc.b $FC
-byte_5CBBB:
-		dc.b 8
-		dc.b 4
-		dc.b 5
-		dc.b 6
-		dc.b $FC
-byte_5CBC0:
-		dc.b $B
-		dc.b 2
-		dc.b 2
-		dc.b 4
-		dc.b $FC
-byte_5CBC5:
-		dc.b $B
-		dc.b $BD
-		dc.b $BE
-		dc.b $FF
-		dc.b $FC
-ChildObjDat_919D0:
-		dc.w 1
-		dc.l loc_916A8
-		dc.b $F4
-		dc.b $1C
-		dc.l loc_916EE
-		dc.b $E4
-		dc.b $FC
-ChildObjDat_919DE:
-		dc.w 0
-		dc.l loc_91756
-		dc.b $B
-		dc.b $FC
 
-word_919BE:
+byte_5CBAE:		dc.b 0, 1
+byte_5CBB0:		dc.b 2, 3
+byte_5CBB2:		dc.b 7, 8
+byte_5CBB4:		dc.b 2, $21, $22, $23, $24, $FF, $FC
+byte_5CBBB:		dc.b 8, 4, 5, 6, $FC
+byte_5CBC0:		dc.b $B, 2, 2, 4, $FC
+byte_5CBC5:		dc.b $B, $BD, $BE, $FF, $FC
+
+ChildObjDat_919D0:
+		dc.w 2-1
+		dc.l Obj_916A8
+		dc.b -12, 28
+		dc.l Obj_916EE
+		dc.b -28, -4
+ChildObjDat_919DE:
+		dc.w 1-1
+		dc.l Obj_91756
+		dc.b 11, -4
+
+ObjDat3_919BE:
 		dc.w $280
-		dc.b $C
-		dc.b $10
+		dc.b 24/2
+		dc.b 32/2
 		dc.b 6
 		dc.b 0
-word_919C4:
+ObjDat3_919C4:
 		dc.w $280
-		dc.b $10
-		dc.b $C
+		dc.b 32/2
+		dc.b 24/2
 		dc.b 2
 		dc.b 0
-word_919CA:
+ObjDat3_919CA:
 		dc.w $280
-		dc.b $20
-		dc.b 4
+		dc.b 64/2
+		dc.b 8/2
 		dc.b 7
 		dc.b 0
 

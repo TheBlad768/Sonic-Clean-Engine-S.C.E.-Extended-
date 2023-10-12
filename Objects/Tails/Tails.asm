@@ -422,8 +422,9 @@ loc_13C3A:
 
 loc_13C50:
 		lea	(Pos_table).w,a2
-		move.w	#$10,d2
-		lsl.b	#2,d2
+		moveq	#$10,d2
+		add.b	d2,d2
+		add.b	d2,d2
 		addq.b	#4,d2
 		move.w	(Pos_table_index).w,d3
 		sub.b	d2,d3
@@ -546,8 +547,9 @@ loc_13D78:
 
 loc_13DA6:
 		lea	(Pos_table).w,a2
-		move.w	#$10,d1
-		lsl.b	#2,d1
+		moveq	#$10,d1
+		add.b	d2,d2
+		add.b	d2,d2
 		addq.b	#4,d1
 		move.w	(Pos_table_index).w,d0
 		sub.b	d1,d0
