@@ -24,7 +24,7 @@ SolidObjectFull:
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1
 		tst.b	render_flags(a1)
-		bpl.w	locret_1DCB4
+		bpl.s	locret_1DCB4
 		addq.b	#1,d6
 
 SolidObjectFull_1P:
