@@ -6,7 +6,7 @@
 
 DeformBgLayer:
 		tst.b	(Deform_lock).w
-		bne.s	locret_1C0E6
+		bne.w	locret_1C0E6
 		clr.l	(H_scroll_amount).w	; clear horizontal and vertical scroll amount
 		tst.b	(Scroll_lock).w
 		bne.s	.events
@@ -18,13 +18,22 @@ DeformBgLayer:
 		lea	(Pos_table).w,a6
 		bsr.s	MoveCameraX
 		lea	(Camera_Y_pos).w,a1
-		lea	(Camera_min_X_pos).w,a2
+		lea	(Camera_min_Y_pos).w,a2
 		lea	(V_scroll_amount).w,a4
 		move.w	(Distance_from_top).w,d3
+		cmpi.w	#2,(Player_mode).w
+		bne.s	.nottails
+		move.w	(Distance_from_top_P2).w,d3
+
+.nottails
+	if	ExtendedCamera
 		bsr.w	MoveCameraY
+	else
+		bsr.s	MoveCameraY
+	endif
 
 .events
-		jmp	Do_ResizeEvents(pc)
+		bra.w	Do_ResizeEvents
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to scroll the level horizontally as Sonic moves
@@ -266,7 +275,7 @@ loc_1C1D8:
 		swap	d1
 
 loc_1C1E2:
-		cmp.w	Camera_min_Y_pos-Camera_min_X_pos(a2),d1
+		cmp.w	(a2),d1
 		bgt.s	loc_1C21A
 		cmpi.w	#-$100,d1
 		bgt.s	loc_1C1F4
@@ -275,7 +284,7 @@ loc_1C1E2:
 ; ---------------------------------------------------------------------------
 
 loc_1C1F4:
-		move.w	Camera_min_Y_pos-Camera_min_X_pos(a2),d1
+		move.w	(a2),d1
 		bra.s	loc_1C21A
 ; ---------------------------------------------------------------------------
 
@@ -286,7 +295,7 @@ loc_1C1FA:
 		swap	d1
 
 loc_1C202:
-		cmp.w	Camera_max_Y_pos-Camera_min_X_pos(a2),d1
+		cmp.w	Camera_max_Y_pos-Camera_min_Y_pos(a2),d1
 		blt.s		loc_1C21A
 		move.w	(Screen_Y_wrap_value).w,d3
 		addq.w	#1,d3
@@ -297,7 +306,7 @@ loc_1C202:
 ; ---------------------------------------------------------------------------
 
 loc_1C216:
-		move.w	Camera_max_Y_pos-Camera_min_X_pos(a2),d1
+		move.w	Camera_max_Y_pos-Camera_min_Y_pos(a2),d1
 
 loc_1C21A:
 		move.w	(a1),d4
