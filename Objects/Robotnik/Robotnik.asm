@@ -134,14 +134,31 @@ sub_67B14:
 loc_67B1C:
 		move.l	#AniRaw_EggRoboHead,$30(a0)
 		lea	(ArtKosM_EggRoboHead).l,a1
-		move.w	#tiles_to_bytes($380),d2
+		move.w	#tiles_to_bytes($52E),d2
 		jmp	(Queue_Kos_Module).w
+
+; ---------------------------------------------------------------------------
+; Robotnik Ship Pieces
+; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
+
+Obj_RobotnikShipPieces:
+		lea	ObjDat_RobotnikShipPieces(pc),a1
+		jsr	(SetUp_ObjAttributes).w
+		move.l	#Obj_FlickerMove,address(a0)
+		moveq	#0,d0
+		move.b	subtype(a0),d0
+		lsr.w	d0
+		move.b	d0,mapping_frame(a0)
+		moveq	#2<<2,d0
+		jmp	(Set_IndexedVelocity).w
 
 ; =============== S U B R O U T I N E =======================================
 
 ObjDat_RobotnikShip:
 		dc.l Map_RobotnikShip
-		dc.w $380
+		dc.w $52E
 		dc.w $200
 		dc.b 64/2
 		dc.b 64/2
@@ -160,6 +177,14 @@ ObjDat2_RoboShipFlame:
 		dc.b 16/2
 		dc.b 8/2
 		dc.b 8
+		dc.b 0
+ObjDat_RobotnikShipPieces:
+		dc.l Map_RobotnikShipPieces
+		dc.w $852E
+		dc.w 0
+		dc.b 64/2
+		dc.b 64/2
+		dc.b 0
 		dc.b 0
 AniRaw_RobotnikHead:
 		dc.b 5, 0, 1, arfEnd
@@ -181,8 +206,12 @@ Child1_MakeRoboShipFlame:
 		dc.w 1-1
 		dc.l Obj_RobotnikShipFlame
 		dc.b 30, 0
+Child6_MakeRobotnikShipPieces:
+		dc.w 4-1
+		dc.l Obj_RobotnikShipPieces
 ; ---------------------------------------------------------------------------
 
 		include "Objects/Robotnik/Object Data/Map - Robotnik Ship.asm"
+		include "Objects/Robotnik/Object Data/Map - Robotnik Ship Pieces.asm"
 		include "Objects/Robotnik/Object Data/Map - Eggrobo.asm"
 		include "Objects/Robotnik/Object Data/Map - Egg Robo Head.asm"
