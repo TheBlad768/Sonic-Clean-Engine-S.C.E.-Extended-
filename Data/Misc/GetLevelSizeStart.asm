@@ -10,8 +10,9 @@ Get_LevelSizeStart:
 		move.b	d0,(Scroll_lock).w
 		move.b	d0,(Fast_V_scroll_flag).w
 		bsr.w	Change_ActSizes
-		move.w	#$60,(Distance_from_top).w
-		move.w	#$60,(Distance_from_top_P2).w
+		moveq	#$60,d0
+		move.w	d0,(Distance_from_top).w
+		move.w	d0,(Distance_from_top_P2).w
 	if	ExtendedCamera
 		move.w	#320/2,(Camera_X_center).w
 	endif
