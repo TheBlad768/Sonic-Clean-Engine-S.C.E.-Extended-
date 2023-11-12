@@ -3244,7 +3244,7 @@ Tails_Load_PLC2:
 		bmi.s	locret_15CCE
 		move.w	#tiles_to_bytes(ArtTile_Player_2),d4
 		move.l	#ArtUnc_Tails>>1,d6
-		cmpi.w	#$D1*2,d0
+		cmpi.w	#$D1*2,d0								; mapping frame * 2
 		blo.s		loc_15CA6
 		move.l	#ArtUnc_Tails_Extra>>1,d6
 

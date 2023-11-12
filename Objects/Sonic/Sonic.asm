@@ -2714,7 +2714,7 @@ Sonic_Load_PLC2:
 		bmi.s	.return
 		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
 		move.l	#ArtUnc_Sonic>>1,d6
-		cmpi.w	#$DA*2,d0
+		cmpi.w	#$DA*2,d0								; mapping frame * 2
 		blo.s		.loop
 		move.l	#ArtUnc_Sonic_Extra>>1,d6
 
