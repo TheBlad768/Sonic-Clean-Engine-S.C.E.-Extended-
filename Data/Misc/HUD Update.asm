@@ -34,9 +34,12 @@ HUD_AddToScore:
 ; =============== S U B R O U T I N E =======================================
 
 UpdateHUD:
-		lea	(VDP_data_port).l,a6
+
+	if GameDebug
 		tst.w	(Debug_placement_mode).w					; is debug mode on?
 		bne.w	HudDebug									; if yes, branch
+	endif
+
 		tst.b	(Update_HUD_score).w							; does the score need updating?
 		beq.s	.chkrings										; if not, branch
 		clr.b	(Update_HUD_score).w
@@ -109,12 +112,9 @@ loc_DD9E:
 
 loc_DDBE:
 		tst.b	(Update_HUD_life_count).w
-		beq.s	locret_DDCC
+		beq.s	UpdateHUD_TimeOver.return
 		clr.b	(Update_HUD_life_count).w
-		bsr.w	HUD_Lives
-
-locret_DDCC:
-		rts
+		bra.w	HUD_Lives
 ; ---------------------------------------------------------------------------
 
 UpdateHUD_TimeOver:
@@ -127,15 +127,19 @@ UpdateHUD_TimeOver:
 
 .finish
 		st	(Time_over_flag).w
+
+.return
 		rts
 ; ---------------------------------------------------------------------------
+
+	if GameDebug
 
 HudDebug:
 		bsr.w	HUD_Debug
 		tst.b	(Update_HUD_ring_count).w						; does the ring counter need updating?
 		beq.s	.objcounter									; if not, branch
 		bpl.s	.notzero
-		bsr.w	HUD_DrawZeroRings							; reset rings to 0 if Sonic is hit
+		bsr.s	HUD_DrawZeroRings							; reset rings to 0 if Sonic is hit
 
 .notzero:
 		clr.b	(Update_HUD_ring_count).w
@@ -161,9 +165,7 @@ HudDebug:
 .chkbonus
 		tst.b	(Game_paused).w
 		bne.s	.return
-		lea	(Timer).w,a1
-		cmpi.l	#(9*$10000)+(59*$100)+59,(a1)+				; is the time 9:59:59?
-		nop
+		lea	(Timer+4).w,a1
 		addq.b	#1,-(a1)										; increment 1/60s counter
 		cmpi.b	#60,(a1)										; check if passed 60
 		blo.s		.return
@@ -180,6 +182,8 @@ HudDebug:
 .return
 		rts
 
+	endif
+
 ; ---------------------------------------------------------------------------
 ; Subroutine to load "0" on the HUD
 ; ---------------------------------------------------------------------------
@@ -187,7 +191,7 @@ HudDebug:
 ; =============== S U B R O U T I N E =======================================
 
 HUD_DrawZeroRings:
-		locVRAM	tiles_to_bytes(ArtTile_HUD+$36),VDP_control_port-VDP_data_port(a6)
+		locVRAM	tiles_to_bytes(ArtTile_HUD+$36),VDP_control_port-VDP_control_port(a5)
 		lea	HUD_Zero_Rings(pc),a2
 		moveq	#3-1,d2
 		bra.s	HUD_DrawInitial.main
@@ -200,8 +204,9 @@ HUD_DrawZeroRings:
 
 HUD_DrawInitial:
 		lea	(VDP_data_port).l,a6
+		lea	VDP_control_port-VDP_data_port(a6),a5
 		bsr.w	HUD_Lives
-		locVRAM	tiles_to_bytes(ArtTile_HUD+$18),VDP_control_port-VDP_data_port(a6)
+		locVRAM	tiles_to_bytes(ArtTile_HUD+$18),VDP_control_port-VDP_control_port(a5)
 		lea	HUD_Initial_Parts(pc),a2
 		moveq	#(HUD_Initial_Parts_end-HUD_Initial_Parts)-1,d2
 
@@ -209,16 +214,14 @@ HUD_DrawInitial:
 		lea	(ArtUnc_HUDDigits).l,a1
 
 .loop
-		moveq	#(8*2)-1,d1
 		move.b	(a2)+,d0
 		bmi.s	.clear
 		ext.w	d0
 		lsl.w	#5,d0
 		lea	(a1,d0.w),a3
-
-.copy
+	rept 16
 		move.l	(a3)+,VDP_data_port-VDP_data_port(a6)
-		dbf	d1,.copy
+	endr
 
 .next
 		dbf	d2,.loop
@@ -226,8 +229,10 @@ HUD_DrawInitial:
 ; ---------------------------------------------------------------------------
 
 .clear
-		move.l	#0,VDP_data_port-VDP_data_port(a6)
-		dbf	d1,.clear
+		moveq	#0,d5
+	rept 16
+		move.l	d5,VDP_data_port-VDP_data_port(a6)
+	endr
 		bra.s	.next
 ; ---------------------------------------------------------------------------
 
@@ -257,6 +262,8 @@ HUD_Initial_Parts_end
 
 		CHARSET ; reset character set
 
+	if GameDebug
+
 ; ---------------------------------------------------------------------------
 ; Subroutine to load debug mode numbers patterns
 ; ---------------------------------------------------------------------------
@@ -264,7 +271,7 @@ HUD_Initial_Parts_end
 ; =============== S U B R O U T I N E =======================================
 
 HUD_Debug:
-		locVRAM	tiles_to_bytes(ArtTile_HUD+$18),VDP_control_port-VDP_data_port(a6)	; set VRAM address
+		locVRAM	tiles_to_bytes(ArtTile_HUD+$18),VDP_control_port-VDP_control_port(a5)	; set VRAM address
 		move.w	(Camera_X_pos).w,d1	; load camera x-position
 		swap	d1
 		move.w	(Player_1+x_pos).w,d1	; load Sonic's x-position
@@ -295,6 +302,8 @@ HUD_Debug:
 		dbf	d6,.loop	; repeat 7 more times
 		rts
 
+	endif
+
 ; ---------------------------------------------------------------------------
 ; Subroutine to load rings numbers patterns
 ; ---------------------------------------------------------------------------
@@ -304,7 +313,7 @@ HUD_Debug:
 DrawThreeDigitNumber:
 		lea	Hud_100(pc),a2
 		moveq	#3-1,d6
-		bra.s	Hud_LoadArt
+		bra.s	DrawSixDigitNumber.loadart
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load score numbers patterns
@@ -313,43 +322,38 @@ DrawThreeDigitNumber:
 ; =============== S U B R O U T I N E =======================================
 
 DrawSixDigitNumber:
-		lea	Hud_100000(pc),a2
 		moveq	#6-1,d6
+		lea	Hud_100000(pc),a2
 
-Hud_LoadArt:
-		moveq	#0,d4
+.loadart
+		moveq	#0,d4					; set clr flag
 		lea	(ArtUnc_HUDDigits).l,a1
 
-Hud_ScoreLoop:
-		moveq	#0,d2
-		move.l	(a2)+,d3
+.loop
+		moveq	#-1,d2
 
-loc_1C8EC:
-		sub.l	d3,d1
-		blo.s		loc_1C8F4
+.finddigit
 		addq.w	#1,d2
-		bra.s	loc_1C8EC
-; ---------------------------------------------------------------------------
+		sub.l	(a2),d1
+		bhs.s	.finddigit
+		add.l	(a2)+,d1
+		tst.w	d2						; is zero?
+		beq.s	.zero					; if yes, branch
+		moveq	#1,d4					; set draw flag
 
-loc_1C8F4:
-		add.l	d3,d1
-		tst.w	d2
-		beq.s	loc_1C8FE
-		moveq	#1,d4
-
-loc_1C8FE:
-		tst.w	d4
-		beq.s	loc_1C92C
+.zero
+		tst.b	d4
+		beq.s	.next
 		lsl.w	#6,d2
-		move.l	d0,VDP_control_port-VDP_data_port(a6)
+		move.l	d0,VDP_control_port-VDP_control_port(a5)
 		lea	(a1,d2.w),a3
 	rept 16
 		move.l	(a3)+,VDP_data_port-VDP_data_port(a6)
 	endr
 
-loc_1C92C:
-		addi.l	#$400000,d0
-		dbf	d6,Hud_ScoreLoop
+.next
+		addi.l	#vdpCommDelta(tiles_to_bytes(2)),d0
+		dbf	d6,.loop
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -372,7 +376,7 @@ Hud_1:			dc.l 1
 DrawSingleDigitNumber:
 		lea	Hud_1(pc),a2
 		moveq	#1-1,d6
-		bra.s	loc_1C9BA
+		bra.s	DrawTwoDigitNumber.loadart
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -380,36 +384,25 @@ DrawTwoDigitNumber:
 		lea	Hud_10(pc),a2
 		moveq	#2-1,d6
 
-loc_1C9BA:
-		moveq	#0,d4
+.loadart
 		lea	(ArtUnc_HUDDigits).l,a1
 
-Hud_TimeLoop:
-		moveq	#0,d2
-		move.l	(a2)+,d3
+.loop
+		moveq	#-1,d2
 
-loc_1C9C4:
-		sub.l	d3,d1
-		blo.s		loc_1C9CC
+.finddigit
 		addq.w	#1,d2
-		bra.s	loc_1C9C4
-; ---------------------------------------------------------------------------
-
-loc_1C9CC:
-		add.l	d3,d1
-		tst.w	d2
-		beq.s	loc_1C9D6
-		moveq	#1,d4
-
-loc_1C9D6:
+		sub.l	(a2),d1
+		bhs.s	.finddigit
+		add.l	(a2)+,d1
 		lsl.w	#6,d2
-		move.l	d0,VDP_control_port-VDP_data_port(a6)
+		move.l	d0,VDP_control_port-VDP_control_port(a5)
 		lea	(a1,d2.w),a3
 	rept 16
 		move.l	(a3)+,VDP_data_port-VDP_data_port(a6)
 	endr
-		addi.l	#$400000,d0
-		dbf	d6,Hud_TimeLoop
+		addi.l	#vdpCommDelta(tiles_to_bytes(2)),d0
+		dbf	d6,.loop
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -420,49 +413,46 @@ HUD_Lives:
 		move.b	(Life_count).w,d1
 		lea	Hud_10(pc),a2
 		moveq	#2-1,d6
-		moveq	#0,d4
+
+		; load art
+		moveq	#0,d4					; set clr flag
 		lea	(ArtUnc_LivesDigits).l,a1
 
-loc_E138:
-		move.l	d0,VDP_control_port-VDP_data_port(a6)
-		moveq	#0,d2
-		move.l	(a2)+,d3
+.loop
+		move.l	d0,VDP_control_port-VDP_control_port(a5)
+		moveq	#-1,d2
 
-loc_E140:
-		sub.l	d3,d1
-		bcs.s	loc_E148
+.finddigit
 		addq.w	#1,d2
-		bra.s	loc_E140
-; ---------------------------------------------------------------------------
+		sub.l	(a2),d1
+		bhs.s	.finddigit
+		add.l	(a2)+,d1
+		tst.w	d2						; is zero?
+		beq.s	.zero					; if yes, branch
+		moveq	#1,d4					; set draw flag
 
-loc_E148:
-		add.l	d3,d1
-		tst.w	d2
-		beq.s	loc_E152
-		move.w	#1,d4
+.zero
+		tst.b	d4
+		beq.s	.clr
 
-loc_E152:
-		tst.w	d4
-		beq.s	loc_E178
-
-loc_E156:
+.load
 		lsl.w	#5,d2
 		lea	(a1,d2.w),a3
 	rept 8
 		move.l	(a3)+,VDP_data_port-VDP_data_port(a6)
 	endr
 
-loc_E16C:
-		addi.l	#$400000,d0
-		dbf	d6,loc_E138
+.next
+		addi.l	#vdpCommDelta(tiles_to_bytes(2)),d0
+		dbf	d6,.loop
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_E178:
+.clr
 		tst.w	d6
-		beq.s	loc_E156
+		beq.s	.load
 		moveq	#0,d5
 	rept 8
 		move.l	d5,VDP_data_port-VDP_data_port(a6)
 	endr
-		bra.s	loc_E16C
+		bra.s	.next
