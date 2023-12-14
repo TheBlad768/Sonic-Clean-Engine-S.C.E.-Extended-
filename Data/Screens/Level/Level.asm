@@ -71,6 +71,11 @@ Level_Screen:
 
 		; load HUD art
 		move.w	(Player_mode).w,d0
+		subq.w	#1,d0
+		bhs.s	.loadplc
+		moveq	#0,d0
+
+.loadplc
 		add.w	d0,d0
 		add.w	d0,d0
 		lea	PLC_PlayerIndex(pc),a5
@@ -203,10 +208,9 @@ Level_Screen:
 ; ---------------------------------------------------------------------------
 
 PLC_PlayerIndex:
-		dc.l PLC_Sonic		; 0
-		dc.l PLC_Sonic		; 1
-		dc.l PLC_Tails		; 2
-		dc.l PLC_Knuckles		; 3
+		dc.l PLC1_Sonic		; 0
+		dc.l PLC1_Tails		; 1
+		dc.l PLC1_Knuckles	; 2
 
 ; =============== S U B R O U T I N E =======================================
 

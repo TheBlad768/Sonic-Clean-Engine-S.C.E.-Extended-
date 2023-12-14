@@ -20,51 +20,51 @@ Offs_PLC: offsetTable
 ; Pattern load cues - Sonic
 ; ===========================================================================
 
-PLC_Sonic: plrlistheader
+PLC1_Sonic: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
 		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_SonicLifeIcon		; life icon
-PLC_Sonic_end
+PLC1_Sonic_end
 
 ; ===========================================================================
 ; Pattern load cues - Tails
 ; ===========================================================================
 
-PLC_Tails: plrlistheader
+PLC1_Tails: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
 		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_TailsLifeIcon			; life icon
-PLC_Tails_end
+PLC1_Tails_end
 
 ; ===========================================================================
 ; Pattern load cues - Knuckles
 ; ===========================================================================
 
-PLC_Knuckles: plrlistheader
+PLC1_Knuckles: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
 		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_KnucklesLifeIcon		; life icon
-PLC_Knuckles_end
+PLC1_Knuckles_end
 
 ; ===========================================================================
-; Pattern load cues - Main 2
+; Pattern load cues 2 - Sonic
 ; ===========================================================================
 
-PLC_Main2: plrlistheader
-		plreq $47E, ArtKosM_GrayButton					; button
+PLC2_Sonic: plrlistheader
 		plreq ArtTile_SpikesSprings, ArtKosM_SpikesSprings	; spikes and normal spring
 		plreq ArtTile_Monitors, ArtKosM_Monitors			; monitors
 		plreq $5A0, ArtKosM_Explosion						; explosion
-PLC_Main2_end
+PLC2_Sonic_end
 
 ; ===========================================================================
 ; Pattern load cues - Death Egg (Before)
 ; ===========================================================================
 
 PLC1_DEZ1_Before: plrlistheader
+		plreq $47E, ArtKosM_GrayButton					; button
 PLC1_DEZ1_Before_end
 
 ; ===========================================================================
@@ -80,6 +80,7 @@ PLC2_DEZ1_After_end
 ; ===========================================================================
 
 PLC1_DEZ2_Before: plrlistheader
+		plreq $47E, ArtKosM_GrayButton					; button
 PLC1_DEZ2_Before_end
 
 ; ===========================================================================
@@ -95,6 +96,7 @@ PLC2_DEZ2_After_end
 ; ===========================================================================
 
 PLC1_DEZ3_Before: plrlistheader
+		plreq $47E, ArtKosM_GrayButton					; button
 PLC1_DEZ3_Before_end
 
 ; ===========================================================================
@@ -110,6 +112,7 @@ PLC2_DEZ3_After_end
 ; ===========================================================================
 
 PLC1_DEZ4_Before: plrlistheader
+		plreq $47E, ArtKosM_GrayButton					; button
 PLC1_DEZ4_Before_end
 
 ; ===========================================================================
