@@ -226,9 +226,9 @@ loc_1669A:
 		bne.s	locret_166F4
 		subq.b	#1,speed_shoes_timer(a0)
 		bne.s	locret_166F4
-		move.w	#$600,(a4)
-		move.w	#$C,2(a4)
-		move.w	#$80,4(a4)
+		move.w	#$600,Max_speed-Max_speed(a4)
+		move.w	#$C,Acceleration-Max_speed(a4)
+		move.w	#$80,Deceleration-Max_speed(a4)
 		bclr	#2,status_secondary(a0)
 		music	mus_Slowdown,1						; run music at normal speed
 
@@ -1298,9 +1298,9 @@ loc_17138:
 ; =============== S U B R O U T I N E =======================================
 
 Knux_InputAcceleration_Path:
-		move.w	(a4),d6
-		move.w	2(a4),d5
-		move.w	4(a4),d4
+		move.w	Max_speed-Max_speed(a4),d6
+		move.w	Acceleration-Max_speed(a4),d5
+		move.w	Deceleration-Max_speed(a4),d4
 		tst.b	status_secondary(a0)
 		bmi.w	loc_17364
 		tst.w	move_lock(a0)
@@ -1691,9 +1691,9 @@ locret_17538:
 ; =============== S U B R O U T I N E =======================================
 
 Knux_RollSpeed:
-		move.w	(a4),d6
+		move.w	Max_speed-Max_speed(a4),d6
 		asl.w	d6
-		move.w	2(a4),d5
+		move.w	Acceleration-Max_speed(a4),d5
 		asr.w	d5
 		moveq	#$20,d4
 		tst.b	spin_dash_flag(a0)
@@ -1839,8 +1839,8 @@ loc_1767A:
 
 ; sub_17680:
 Knux_ChgJumpDir:
-		move.w	(a4),d6
-		move.w	2(a4),d5
+		move.w	Max_speed-Max_speed(a4),d6
+		move.w	Acceleration-Max_speed(a4),d5
 		asl.w	d5
 		btst	#Status_RollJump,status(a0)
 		bne.s	loc_176D4

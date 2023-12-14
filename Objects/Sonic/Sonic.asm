@@ -226,9 +226,9 @@ Sonic_ChkShoes:										; checks if Speed Shoes have expired and disables them 
 		bne.s	Sonic_ExitChk
 		subq.b	#1,speed_shoes_timer(a0)				; reduce speed_shoes_timer only on every 8th frame
 		bne.s	Sonic_ExitChk
-		move.w	#$600,(a4)							; set Max_speed
-		move.w	#$C,2(a4)							; set Acceleration
-		move.w	#$80,4(a4)							; set Deceleration
+		move.w	#$600,Max_speed-Max_speed(a4)		; set Max_speed
+		move.w	#$C,Acceleration-Max_speed(a4)		; set Acceleration
+		move.w	#$80,Deceleration-Max_speed(a4)		; set Deceleration
 		bclr	#Status_SpeedShoes,status_secondary(a0)
 		music	mus_Slowdown,1						; run music at normal speed
 ; ---------------------------------------------------------------------------
@@ -898,9 +898,9 @@ locret_11506:
 ; =============== S U B R O U T I N E =======================================
 
 Sonic_RollSpeed:
-		move.w	(a4),d6
+		move.w	Max_speed-Max_speed(a4),d6
 		asl.w	d6
-		move.w	2(a4),d5
+		move.w	Acceleration-Max_speed(a4),d5
 		asr.w	d5
 		move.w	#$20,d4
 		tst.b	spin_dash_flag(a0)
@@ -2408,7 +2408,7 @@ loc_126DC:
 loc_12700:
 		add.w	(HScroll_Shift).w,d2
 		tst.b	status_secondary(a0)
-		bpl.w	loc_1270A
+		bpl.s	loc_1270A
 		add.w	d2,d2
 
 loc_1270A:
