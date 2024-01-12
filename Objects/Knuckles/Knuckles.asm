@@ -328,7 +328,7 @@ Knux_Stand_Freespace:
 
 loc_16872:
 		bsr.w	Player_JumpAngle
-		bra.w	Player_DoLevelCollision
+		bra.w	SonicKnux_DoLevelCollision
 ; ---------------------------------------------------------------------------
 
 Knux_Glide_Freespace:
@@ -1154,6 +1154,10 @@ Knuckles_Move_Glide:
 		bne.w	.doNotKillspeed
 
 		move.w	ground_vel(a0),d0
+		bpl.s	.abs
+		neg.w	d0					; +++
+
+.abs
 		cmpi.w	#$400,d0
 		bhs.s	.mediumSpeed
 
@@ -1293,7 +1297,7 @@ Knux_Spin_Freespace:
 
 loc_17138:
 		bsr.w	Player_JumpAngle
-		bra.w	Player_DoLevelCollision
+		bra.w	SonicKnux_DoLevelCollision
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -1531,7 +1535,7 @@ loc_173B0:
 		move.b	angle(a0),d0
 		add.b	d1,d0
 		move.w	d0,-(sp)
-		jsr	(sub_F61C).w
+		bsr.w	CalcRoomInFront
 		move.w	(sp)+,d0
 		tst.w	d1
 		bpl.s	locret_17400
@@ -2331,7 +2335,7 @@ loc_17C2E:
 
 loc_17C3C:
 		movem.l	a4-a6,-(sp)
-		bsr.w	Player_DoLevelCollision
+		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,a4-a6
 		btst	#Status_InAir,status(a0)
 		bne.s	locret_17C80

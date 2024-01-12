@@ -400,7 +400,7 @@ Sonic_MdAir:
 
 loc_10FD6:
 		bsr.w	Player_JumpAngle
-		bra.w	Player_DoLevelCollision
+		bra.w	SonicKnux_DoLevelCollision
 ; ---------------------------------------------------------------------------
 ; Start of subroutine Sonic_MdRoll
 ; Called if Sonic is in a ball, but not airborne (thus, probably rolling)
@@ -434,7 +434,7 @@ Sonic_MdJump:
 
 loc_11056:
 		bsr.w	Player_JumpAngle
-		bra.w	Player_DoLevelCollision
+		bra.w	SonicKnux_DoLevelCollision
 
 	if RollInAir
 
@@ -1720,7 +1720,7 @@ locret_11EEA:
 ; =============== S U B R O U T I N E =======================================
 
 ; Sonic_Floor:
-Player_DoLevelCollision:
+SonicKnux_DoLevelCollision:
 		move.l	(Primary_collision_addr).w,(Collision_addr).w
 		cmpi.b	#$C,top_solid_bit(a0)
 		beq.s	+
@@ -2144,7 +2144,7 @@ loc_12336:
 
 loc_12344:
 		movem.l	a4-a6,-(sp)
-		bsr.w	Player_DoLevelCollision
+		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,a4-a6
 		btst	#Status_InAir,status(a0)
 		bne.s	locret_12388

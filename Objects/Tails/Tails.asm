@@ -1178,7 +1178,7 @@ loc_144F8:
 		move.w	y_vel(a0),(_unkF74C).w
 		movem.l	d0-a6,-(sp)
 		lea	(Player_1).w,a0
-		bsr.w	Player_DoLevelCollision
+		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,d0-a6
 		rts
 ; ---------------------------------------------------------------------------
