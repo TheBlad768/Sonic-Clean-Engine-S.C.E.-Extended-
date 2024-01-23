@@ -1931,7 +1931,7 @@ Knux_Jump:
 loc_17732:
 		addi.b	#$80,d0
 		movem.l	a4-a6,-(sp)
-		jsr	(CalcRoomOverHead).l
+		jsr	(CalcRoomOverHead).w
 		movem.l	(sp)+,a4-a6
 		cmpi.w	#6,d1
 		blt.s		locret_1770E
