@@ -13,7 +13,7 @@ Get_LevelSizeStart:
 		moveq	#$60,d0
 		move.w	d0,(Distance_from_top).w
 		move.w	d0,(Distance_from_top_P2).w
-	if	ExtendedCamera
+	if ExtendedCamera
 		move.w	#320/2,(Camera_X_center).w
 	endif
 		move.w	#-1,d0

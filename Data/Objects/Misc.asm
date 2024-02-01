@@ -209,7 +209,7 @@ Song_Fade_Transition_Wait:
 		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
 		bne.s	Song_Fade_Transition_Return
 		move.b	subtype(a0),d0
-		move.w	d0,(Current_music).w
+		move.b	d0,(Current_music+1).w
 		jsr	(SMPS_QueueSound1).w	; play music
 		jmp	(Delete_Current_Sprite).w
 

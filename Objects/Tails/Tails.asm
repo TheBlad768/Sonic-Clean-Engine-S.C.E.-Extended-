@@ -34,15 +34,15 @@ loc_1369E:
 ; ---------------------------------------------------------------------------
 
 loc_136A8:
-		jmp	(DebugMode).l
+		jmp	(Debug_Mode).l
 ; ---------------------------------------------------------------------------
 
 Tails_Normal:
 	endif
 		moveq	#0,d0
 		move.b	routine(a0),d0
-		move.w	Tails_Index(pc,d0.w),d1
-		jmp	Tails_Index(pc,d1.w)
+		move.w	Tails_Index(pc,d0.w),d0
+		jmp	Tails_Index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
 Tails_Index: offsetTable
@@ -176,11 +176,10 @@ loc_1384A:
 
 loc_13872:
 		movem.l	a4-a6,-(sp)
-		moveq	#0,d0
-		move.b	status(a0),d0
-		andi.w	#6,d0
-		move.w	Tails_Modes(pc,d0.w),d1
-		jsr	Tails_Modes(pc,d1.w)					; run Tails's movement control code
+		moveq	#6,d0
+		and.b	status(a0),d0
+		move.w	Tails_Modes(pc,d0.w),d0
+		jsr	Tails_Modes(pc,d0.w)					; run Tails's movement control code
 		movem.l	(sp)+,a4-a6
 
 loc_1388C:
@@ -238,7 +237,7 @@ Tails_Display:
 		beq.s	loc_1390C
 		subq.b	#1,invulnerability_timer(a0)
 		lsr.b	#3,d0
-		bcc.s	Tails_ChkInvin
+		bhs.s	Tails_ChkInvin
 
 loc_1390C:
 		jsr	(Draw_Sprite).w
@@ -248,8 +247,8 @@ Tails_ChkInvin:
 		beq.s	Tails_ChkShoes
 		tst.b	invincibility_timer(a0)
 		beq.s	Tails_ChkShoes
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	Tails_ChkShoes
 		subq.b	#1,invincibility_timer(a0)
 		bne.s	Tails_ChkShoes
@@ -270,8 +269,8 @@ Tails_ChkShoes:
 		beq.s	Tails_ExitChk
 		tst.b	speed_shoes_timer(a0)
 		beq.s	Tails_ExitChk
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	Tails_ExitChk
 		subq.b	#1,speed_shoes_timer(a0)
 		bne.s	Tails_ExitChk
@@ -288,12 +287,12 @@ Tails_ExitChk:
 ; =============== S U B R O U T I N E =======================================
 
 Tails_CPU_Control:
-		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#$7F,d0
-		beq.s	loc_139DC
-		move.w	#600,(Tails_CPU_idle_timer).w
+		moveq	#btnDir+btnABC,d0
+		and.b	(Ctrl_2_logical).w,d0
+		beq.s	.skip
+		move.w	#10*60,(Tails_CPU_idle_timer).w		; set wait
 
-loc_139DC:
+.skip
 		lea	(Player_1).w,a1
 		move.w	(Tails_CPU_routine).w,d0
 		move.w	off_139EC(pc,d0.w),d0
@@ -345,10 +344,10 @@ locret_13B1E:
 
 Tails_Catch_Up_Flying:
 		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#$F0,d0
+		andi.b	#btnABCS,d0
 		bne.s	loc_13B50
-		move.w	(Level_frame_counter).w,d0
-		andi.w	#$3F,d0
+		moveq	#$3F,d0
+		and.w	(Level_frame_counter).w,d0
 		bne.s	locret_13B1E
 		tst.b	object_control(a1)
 		bmi.s	locret_13B1E
@@ -643,8 +642,8 @@ loc_13E8C:
 		blo.s		loc_13EB8
 
 loc_13E9C:
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$3F,d0
+		moveq	#$3F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_13EB8
 		cmpi.b	#id_Duck,anim(a0)
 		beq.s	loc_13EB8
@@ -725,13 +724,13 @@ loc_13F40:
 		bclr	#0,status(a0)
 		move.w	x_pos(a0),d0
 		sub.w	x_pos(a1),d0
-		bcs.s	loc_13F74
+		blo.s		loc_13F74
 		bset	#0,status(a0)
 
 loc_13F74:
 		move.w	#$0202,(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$7F,d0
+		moveq	#$7F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		beq.s	loc_13FA4
 		cmpi.b	#id_Duck,anim(a0)
 		bne.s	locret_13FBE
@@ -741,8 +740,8 @@ loc_13F74:
 
 loc_13F94:
 		move.w	#$0202,(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$7F,d0
+		moveq	#$7F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_13FB2
 
 loc_13FA4:
@@ -774,8 +773,8 @@ loc_13FC2:
 loc_13FFA:
 		clr.w	(Tails_CPU_idle_timer).w
 		clr.w	(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$1F,d0
+		moveq	#$1F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_14016
 		ori.w	#$0808,(Ctrl_2_logical).w
 
@@ -812,8 +811,8 @@ loc_1408A:
 		clr.w	(Tails_CPU_idle_timer).w
 		move.b	#$F0,double_jump_property(a0)
 		clr.w	(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$F,d0
+		moveq	#$F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_140AC
 		ori.w	#$7878,(Ctrl_2_logical).w
 
@@ -850,8 +849,8 @@ loc_14106:
 		clr.w	(Tails_CPU_idle_timer).w
 		move.b	#$F0,double_jump_property(a0)
 		clr.w	(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_14128
 		ori.w	#$7070,(Ctrl_2_logical).w
 
@@ -912,8 +911,8 @@ loc_141BA:
 		ori.w	#$7070,(Ctrl_2_logical).w
 
 loc_141D2:
-		move.b	(Ctrl_1).w,d0
-		andi.b	#btnL+btnR,d0
+		moveq	#btnLR,d0
+		and.b	(Ctrl_1).w,d0
 		or.b	(Ctrl_2_logical).w,d0
 		move.b	d0,(Ctrl_2_logical).w
 
@@ -936,8 +935,8 @@ loc_1421C:
 		clr.w	(Tails_CPU_idle_timer).w
 		move.b	#$F0,double_jump_property(a0)
 		clr.w	(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_1423E
 		ori.w	#$7070,(Ctrl_2_logical).w
 
@@ -968,8 +967,8 @@ loc_1425C:
 loc_14286:
 		clr.w	(Tails_CPU_idle_timer).w
 		clr.w	(Ctrl_2_logical).w
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#$1F,d0
+		moveq	#$1F,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_142A2
 		ori.w	#$0808,(Ctrl_2_logical).w
 
@@ -1142,8 +1141,8 @@ loc_14474:
 loc_14492:
 		andi.b	#-4,render_flags(a1)
 		andi.b	#-2,status(a1)
-		move.b	status(a0),d0
-		andi.b	#1,d0
+		moveq	#1,d0
+		and.b	status(a0),d0
 		or.b	d0,render_flags(a1)
 		or.b	d0,status(a1)
 		tst.b	(Reverse_gravity_flag).w
@@ -1242,8 +1241,8 @@ sub_1459E:
 		clr.b	spin_dash_flag(a1)
 		andi.b	#-4,render_flags(a1)
 		andi.b	#-2,status(a1)
-		move.b	status(a0),d0
-		andi.b	#1,d0
+		moveq	#1,d0
+		and.b	status(a0),d0
 		or.b	d0,render_flags(a1)
 		or.b	d0,status(a1)
 		move.w	x_vel(a0),(_unkF744).w
@@ -1348,7 +1347,7 @@ loc_14760:
 		bsr.w	Player_SlopeResist
 		bsr.w	Tails_InputAcceleration_Path
 		bsr.w	Tails_Roll
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
 		bra.w	Player_SlopeRepel
@@ -1363,7 +1362,7 @@ Tails_Stand_Freespace:
 	endif
 		bsr.w	Tails_JumpHeight
 		bsr.w	Tails_InputAcceleration_Freespace
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
 		btst	#Status_Underwater,status(a0)
 		beq.s	loc_147DE
@@ -1378,7 +1377,7 @@ loc_147DE:
 Tails_FlyingSwimming:
 		bsr.s	Tails_Move_FlySwim
 		bsr.w	Tails_InputAcceleration_Freespace
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Player_JumpAngle
 		movem.l	a4-a6,-(sp)
@@ -1398,8 +1397,8 @@ locret_14820:
 ; =============== S U B R O U T I N E =======================================
 
 Tails_Move_FlySwim:
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#1,d0
+		moveq	#1,d0
+		and.b	(Level_frame_counter+1).w,d0
 		beq.s	loc_14836
 		tst.b	double_jump_property(a0)
 		beq.s	loc_14836
@@ -1423,8 +1422,8 @@ loc_1485E:
 ; ---------------------------------------------------------------------------
 
 loc_14860:
-		move.b	(Ctrl_2_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	loc_1488C
 		cmpi.w	#-$100,y_vel(a0)
 		blt.s		loc_1488C
@@ -1486,16 +1485,12 @@ locret_148F2:
 loc_148F4:
 		move.b	d0,anim(a0)
 		tst.b	render_flags(a0)
-		bpl.s	locret_14912
+		bpl.s	locret_148F2
 		move.b	(Level_frame_counter+1).w,d0
 		addq.b	#8,d0
 		andi.b	#$F,d0
-		bne.s	locret_14912
+		bne.s	locret_148F2
 		sfx	sfx_Flying,1
-; ---------------------------------------------------------------------------
-
-locret_14912:
-		rts
 ; ---------------------------------------------------------------------------
 
 loc_14914:
@@ -1535,7 +1530,7 @@ loc_1494C:
 loc_14956:
 		bsr.w	Player_RollRepel
 		bsr.w	Tails_RollSpeed
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
 		bra.w	Player_SlopeRepel
@@ -1552,7 +1547,7 @@ Tails_Spin_Freespace:
 loc_149BA:
 		bsr.w	Tails_JumpHeight
 		bsr.w	Tails_InputAcceleration_Freespace
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
 		btst	#Status_Underwater,status(a0)
 		beq.s	loc_149DA
@@ -1694,21 +1689,21 @@ loc_14B14:
 loc_14B1A:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_14B26
-		bcc.s	loc_14B24
+		bhs.s	loc_14B24
 		addq.w	#4,(a5)
 
 loc_14B24:
 		subq.w	#2,(a5)
 
 loc_14B26:
-		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#btnL+btnR,d0
+		moveq	#btnLR,d0
+		and.b	(Ctrl_2_logical).w,d0
 		bne.s	loc_14B5C
 		move.w	ground_vel(a0),d0
 		beq.s	loc_14B5C
 		bmi.s	loc_14B50
 		sub.w	d5,d0
-		bcc.s	loc_14B4A
+		bhs.s	loc_14B4A
 		moveq	#0,d0
 
 loc_14B4A:
@@ -1718,7 +1713,7 @@ loc_14B4A:
 
 loc_14B50:
 		add.w	d5,d0
-		bcc.s	loc_14B58
+		bhs.s	loc_14B58
 		moveq	#0,d0
 
 loc_14B58:
@@ -1737,8 +1732,8 @@ loc_14B5C:
 loc_14B7A:
 		btst	#6,object_control(a0)
 		bne.s	locret_14BF8
-		move.b	angle(a0),d0
-		andi.b	#$3F,d0
+		moveq	#$3F,d0
+		and.b	angle(a0),d0
 		beq.s	loc_14B9A
 		move.b	angle(a0),d0
 		addi.b	#$40,d0
@@ -1831,7 +1826,7 @@ loc_14C4E:
 
 loc_14C5A:
 		sub.w	d4,d0
-		bcc.s	loc_14C62
+		bhs.s	loc_14C62
 		moveq	#-$80,d0
 
 loc_14C62:
@@ -1882,7 +1877,7 @@ loc_14CD4:
 
 loc_14CE0:
 		add.w	d4,d0
-		bcc.s	loc_14CE8
+		bhs.s	loc_14CE8
 		move.w	#$80,d0
 
 loc_14CE8:
@@ -1934,7 +1929,7 @@ loc_14D78:
 		beq.s	loc_14D9A
 		bmi.s	loc_14D8E
 		sub.w	d5,d0
-		bcc.s	loc_14D88
+		bhs.s	loc_14D88
 		moveq	#0,d0
 
 loc_14D88:
@@ -1944,7 +1939,7 @@ loc_14D88:
 
 loc_14D8E:
 		add.w	d5,d0
-		bcc.s	loc_14D96
+		bhs.s	loc_14D96
 		moveq	#0,d0
 
 loc_14D96:
@@ -1985,7 +1980,7 @@ loc_14DDE:
 loc_14DF0:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_14DFC
-		bcc.s	loc_14DFA
+		bhs.s	loc_14DFA
 		addq.w	#4,(a5)
 
 loc_14DFA:
@@ -2027,7 +2022,7 @@ loc_14E3A:
 
 loc_14E48:
 		sub.w	d4,d0
-		bcc.s	loc_14E50
+		bhs.s	loc_14E50
 		moveq	#-$80,d0
 
 loc_14E50:
@@ -2046,7 +2041,7 @@ sub_14E56:
 
 loc_14E6A:
 		add.w	d4,d0
-		bcc.s	loc_14E72
+		bhs.s	loc_14E72
 		move.w	#$80,d0
 
 loc_14E72:
@@ -2093,7 +2088,7 @@ loc_14EC8:
 loc_14ECC:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_14ED8
-		bcc.s	loc_14ED6
+		bhs.s	loc_14ED6
 		addq.w	#4,(a5)
 
 loc_14ED6:
@@ -2108,7 +2103,7 @@ loc_14ED8:
 		beq.s	locret_14F06
 		bmi.s	loc_14EFA
 		sub.w	d1,d0
-		bcc.s	loc_14EF4
+		bhs.s	loc_14EF4
 		moveq	#0,d0
 
 loc_14EF4:
@@ -2118,7 +2113,7 @@ loc_14EF4:
 
 loc_14EFA:
 		sub.w	d1,d0
-		bcs.s	loc_14F02
+		blo.s		loc_14F02
 		moveq	#0,d0
 
 loc_14F02:
@@ -2129,64 +2124,13 @@ locret_14F06:
 
 ; =============== S U B R O U T I N E =======================================
 
-Tails_Check_Screen_Boundaries:
-		move.l	x_pos(a0),d1
-		move.w	x_vel(a0),d0
-		ext.l	d0
-		asl.l	#8,d0
-		add.l	d0,d1
-		swap	d1
-		move.w	(Camera_min_X_pos).w,d0
-		addi.w	#$10,d0
-		cmp.w	d1,d0
-		bhi.s	loc_14F5C
-		move.w	(Camera_max_X_pos).w,d0
-		addi.w	#$128,d0
-		cmp.w	d1,d0
-		blo.s		loc_14F5C
-
-loc_14F30:
-		tst.b	(Disable_death_plane).w
-		bne.s	locret_14F4A
-		tst.b	(Reverse_gravity_flag).w
-		bne.s	loc_14F4C
-		move.w	(Camera_max_Y_pos).w,d0
-		cmp.w	(Camera_target_max_Y_pos).w,d0
-		blt.s		locret_14F4A
-		move.w	(Camera_max_Y_pos).w,d0
-		addi.w	#224,d0
-		cmp.w	y_pos(a0),d0
-		blt.s		loc_14F56
-
-locret_14F4A:
-		rts
-; ---------------------------------------------------------------------------
-
-loc_14F4C:
-		move.w	(Camera_min_Y_pos).w,d0
-		cmp.w	y_pos(a0),d0
-		blt.s		locret_14F4A
-
-loc_14F56:
-		jmp	Kill_Character(pc)
-; ---------------------------------------------------------------------------
-
-loc_14F5C:
-		move.w	d0,x_pos(a0)
-		clr.w	2+x_pos(a0)
-		clr.w	x_vel(a0)
-		clr.w	ground_vel(a0)
-		bra.s	loc_14F30
-
-; =============== S U B R O U T I N E =======================================
-
 Tails_Roll:
 		tst.b	status_secondary(a0)
 		bmi.s	locret_14FA8
 		tst.w	(HScroll_Shift).w
 		bne.s	locret_14FA8
-		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#btnL+btnR,d0
+		moveq	#btnLR,d0
+		and.b	(Ctrl_2_logical).w,d0
 		bne.s	locret_14FA8
 		btst	#button_down,(Ctrl_2_logical).w
 		beq.s	loc_14FAA
@@ -2239,9 +2183,9 @@ locret_15000:
 ; =============== S U B R O U T I N E =======================================
 
 Tails_Jump:
-		move.b	(Ctrl_2_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
-		beq.w	locret_150D0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_pressed_logical).w,d0
+		beq.s	locret_15000
 		moveq	#0,d0
 		move.b	angle(a0),d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2312,8 +2256,8 @@ Tails_JumpHeight:
 loc_150F0:
 		cmp.w	y_vel(a0),d1
 		ble.s		Tails_Test_For_Flight
-		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_logical).w,d0
 		bne.s	locret_15104
 		move.w	d1,y_vel(a0)
 
@@ -2335,8 +2279,8 @@ locret_1511A:
 Tails_Test_For_Flight:
 		tst.b	double_jump_flag(a0)
 		bne.s	locret_1511A
-		move.b	(Ctrl_2_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	locret_1511A
 		cmpi.w	#2,(Player_mode).w
 		bne.s	loc_15156
@@ -2376,8 +2320,8 @@ Tails_Spindash:
 		bne.s	loc_1527C
 		cmpi.b	#id_Duck,anim(a0)
 		bne.s	locret_1527A
-		move.b	(Ctrl_2_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	locret_1527A
 		move.b	#id_SpinDash,anim(a0)
 		sfx	sfx_SpinDash
@@ -2389,7 +2333,7 @@ Tails_Spindash:
 		move.b	#2,anim(a6)		; v_Dust
 
 loc_15242:
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		bra.w	Call_Player_AnglePos
 ; ---------------------------------------------------------------------------
 
@@ -2465,12 +2409,12 @@ loc_15332:
 		move.w	spin_dash_counter(a0),d0
 		lsr.w	#5,d0
 		sub.w	d0,spin_dash_counter(a0)
-		bcc.s	loc_1534A
+		bhs.s	loc_1534A
 		clr.w	spin_dash_counter(a0)
 
 loc_1534A:
-		move.b	(Ctrl_2_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	loc_1537A
 		move.w	#bytes_to_word(id_SpinDash,id_Walk),anim(a0)
 		sfx	sfx_SpinDash
@@ -2480,17 +2424,27 @@ loc_1534A:
 		move.w	#$800,spin_dash_counter(a0)
 
 loc_1537A:
+	if ExtendedCamera
+		moveq	#0,d0
+		move.b	spin_dash_counter(a0),d0
+		add.w	d0,d0
+		move.w	word_1530E(pc,d0.w),ground_vel(a0)
+		btst	#Status_Facing,status(a0)
+		beq.s	+
+		neg.w	ground_vel(a0)
++
+	endif
 		addq.w	#4,sp
 		cmpi.w	#$60,(a5)
 		beq.s	loc_15388
-		bcc.s	loc_15386
+		bhs.s	loc_15386
 		addq.w	#4,(a5)
 
 loc_15386:
 		subq.w	#2,(a5)
 
 loc_15388:
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		bra.w	Call_Player_AnglePos
 
 ; =============== S U B R O U T I N E =======================================
@@ -2820,7 +2774,7 @@ loc_156F0:
 
 loc_15700:
 		bsr.s	sub_15716
-		bsr.w	Tails_Check_Screen_Boundaries
+		bsr.w	Player_LevelBound
 		bsr.w	Sonic_RecordPos
 		bsr.w	sub_15842
 		jmp	(Draw_Sprite).w
@@ -2983,8 +2937,8 @@ loc_1588A:
 		adda.w	(a1,d0.w),a1
 		move.b	(a1),d0
 		bmi.s	loc_158FA
-		move.b	status(a0),d1
-		andi.b	#1,d1
+		moveq	#1,d1
+		and.b	status(a0),d1
 		andi.b	#-4,render_flags(a0)
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
@@ -3050,8 +3004,8 @@ loc_158FA:
 		subq.b	#1,d0
 
 loc_1591E:
-		move.b	status(a0),d2
-		andi.b	#1,d2
+		moveq	#1,d2
+		and.b	status(a0),d2
 		bne.s	loc_1592A
 		not.b	d0
 
@@ -3124,8 +3078,8 @@ locret_159C6:
 loc_159C8:
 		addq.b	#1,d0
 		bne.s	loc_15A3C
-		move.b	status(a0),d1
-		andi.b	#1,d1
+		moveq	#1,d1
+		and.b	status(a0),d1
 		andi.b	#-4,render_flags(a0)
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
@@ -3179,8 +3133,8 @@ loc_15A3C:
 		move.w	y_vel(a2),d2
 		jsr	(GetArcTan).w
 		moveq	#0,d1
-		move.b	status(a0),d2
-		andi.b	#1,d2
+		moveq	#1,d2
+		and.b	status(a0),d2
 		bne.s	loc_15A6E
 		not.b	d0
 		bra.s	loc_15A72
@@ -3210,21 +3164,24 @@ loc_15A92:
 		move.b	#3,anim_frame_timer(a0)
 		bsr.w	sub_158B0
 		add.b	d3,mapping_frame(a0)
+
+.return
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 Tails_Tail_Load_PLC:
 		moveq	#0,d0
 		move.b	mapping_frame(a0),d0
 		cmp.b	(Player_prev_frame_P2_tail).w,d0
-		beq.w	locret_15CCE
+		beq.s	loc_15A92.return
 		move.b	d0,(Player_prev_frame_P2_tail).w
 		lea	(DPLC_Tails_Tail).l,a2
 		add.w	d0,d0
 		adda.w	(a2,d0.w),a2
 		move.w	(a2)+,d5
 		subq.w	#1,d5
-		bmi.s	locret_15CCE
+		bmi.s	loc_15A92.return
 		move.w	#tiles_to_bytes(ArtTile_Player_2_Tail),d4
 		move.l	#ArtUnc_Tails_Tail>>1,d6
 		bra.s	loc_15CA6

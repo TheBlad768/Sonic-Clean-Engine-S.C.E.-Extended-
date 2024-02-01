@@ -309,6 +309,8 @@ Water_full_screen_flag:				ds.b 1					; Set if water covers the entire screen (i
 Water_flag:							ds.b 1
 
 Next_extra_life_score:					ds.l 1
+Debug_saved_mappings:				ds.l 1					; player 1 mappings before entering debug mode
+Debug_saved_art_tile:					ds.w 1					; player 1 art_tile before entering debug mode
 Graphics_flags:						ds.b 1					; Bit 7 set = English system, bit 6 set = PAL system
 Last_star_post_hit:					= *
 Last_star_pole_hit:					ds.b 1

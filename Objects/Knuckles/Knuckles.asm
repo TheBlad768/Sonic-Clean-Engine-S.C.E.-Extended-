@@ -32,15 +32,15 @@ loc_1647E:
 ; ---------------------------------------------------------------------------
 
 loc_16488:
-		jmp	(DebugMode).l
+		jmp	(Debug_Mode).l
 ; ---------------------------------------------------------------------------
 
 Knuckles_Normal:
 	endif
 		moveq	#0,d0
 		move.b	routine(a0),d0
-		move.w	Knuckles_Index(pc,d0.w),d1
-		jmp	Knuckles_Index(pc,d1.w)
+		move.w	Knuckles_Index(pc,d0.w),d0
+		jmp	Knuckles_Index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
 Knuckles_Index: offsetTable
@@ -126,11 +126,10 @@ loc_165AE:
 
 loc_165BE:
 		movem.l	a4-a6,-(sp)
-		moveq	#0,d0
-		move.b	status(a0),d0
-		andi.w	#6,d0
-		move.w	Knux_Modes(pc,d0.w),d1
-		jsr	Knux_Modes(pc,d1.w)					; run Knuckles's movement control code
+		moveq	#6,d0
+		and.b	status(a0),d0
+		move.w	Knux_Modes(pc,d0.w),d0
+		jsr	Knux_Modes(pc,d0.w)					; run Knuckles's movement control code
 		movem.l	(sp)+,a4-a6
 
 loc_165D8:
@@ -189,7 +188,7 @@ Knuckles_Display:
 		beq.s	loc_16658
 		subq.b	#1,invulnerability_timer(a0)
 		lsr.b	#3,d0
-		bcc.s	loc_1665E
+		bhs.s	loc_1665E
 
 loc_16658:
 		jsr	(Draw_Sprite).w
@@ -199,8 +198,8 @@ loc_1665E:
 		beq.s	loc_1669A
 		tst.b	invincibility_timer(a0)
 		beq.s	loc_1669A
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_1669A
 		subq.b	#1,invincibility_timer(a0)
 		bne.s	loc_1669A
@@ -221,8 +220,8 @@ loc_1669A:
 		beq.s	locret_166F4
 		tst.b	speed_shoes_timer(a0)
 		beq.s	locret_166F4
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	locret_166F4
 		subq.b	#1,speed_shoes_timer(a0)
 		bne.s	locret_166F4
@@ -359,8 +358,8 @@ Knuckles_Glide:
 		btst	#Status_Push,(Gliding_collision_flags).w
 		bne.w	Knuckles_Gliding_HitWall
 
-		move.b	(Ctrl_1_logical).w,d0
-		andi.b	#button_A_mask|button_B_mask|button_C_mask,d0
+		moveq	#button_A_mask|button_B_mask|button_C_mask,d0
+		and.b	(Ctrl_1_logical).w,d0
 		bne.s	.continueGliding
 
 		; The player has let go of the jump button, so exit the gliding state
@@ -578,8 +577,8 @@ Knuckles_Fall_From_Glide:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Sliding:
-		move.b	(Ctrl_1_logical).w,d0
-		andi.b	#button_A_mask|button_B_mask|button_C_mask,d0
+		moveq	#button_A_mask|button_B_mask|button_C_mask,d0
+		and.b	(Ctrl_1_logical).w,d0
 		beq.s	.getUp
 
 		tst.w	x_vel(a0)
@@ -643,8 +642,8 @@ Knuckles_Sliding:
 		move.b	d3,angle(a0)
 
 		; Play the sliding sound every 8 frames.
-		move.b	(Level_frame_counter+1).w,d0
-		andi.b	#7,d0
+		moveq	#7,d0
+		and.b	(Level_frame_counter+1).w,d0
 		bne.s	.skip3
 		sfx	sfx_GroundSlide
 
@@ -937,8 +936,8 @@ Knuckles_Wall_Climb:
 		; Knuckles seems to detach from the wall in Hill Top Zone's
 		; rising wall section just fine, so I'm not sure whether this
 		; code was ever actually needed in the first place.
-		move.b	(Ctrl_1_held_logical).w,d0
-		andi.b	#button_up_mask|button_down_mask,d0
+		moveq	#button_up_mask|button_down_mask,d0
+		and.b	(Ctrl_1_held_logical).w,d0
 		bne.s	.isMovingUpOrDown
 
 		; Get Knuckles' distance from the floor in 'd1'.
@@ -988,8 +987,8 @@ Knuckles_Wall_Climb:
 		move.b	#$20,anim_frame_timer(a0)
 		clr.b	anim_frame(a0)
 
-		move.w	(Ctrl_1_logical).w,d0
-		andi.w	#button_A_mask|button_B_mask|button_C_mask,d0
+		moveq	#button_A_mask|button_B_mask|button_C_mask,d0
+		and.w	(Ctrl_1_logical).w,d0
 		beq.s	.hasNotJumped
 
 		; Knuckles has jumped off the wall.
@@ -1173,8 +1172,8 @@ Knuckles_Move_Glide:
 		bhs.s	.applySpeed
 
 		; If Knuckles is turning, then don't increase his speed either.
-		move.b	double_jump_property(a0),d1
-		andi.b	#$7F,d1
+		moveq	#$7F,d1
+		and.b	double_jump_property(a0),d1
 		bne.s	.applySpeed
 
 		; Increase Knuckles' speed.
@@ -1474,21 +1473,21 @@ loc_1731C:
 loc_17322:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_1732E
-		bcc.s	loc_1732C
+		bhs.s	loc_1732C
 		addq.w	#4,(a5)
 
 loc_1732C:
 		subq.w	#2,(a5)
 
 loc_1732E:
-		move.b	(Ctrl_1_logical).w,d0
-		andi.b	#$C,d0
+		moveq	#btnLR,d0
+		and.b	(Ctrl_1_logical).w,d0
 		bne.s	loc_17364
 		move.w	ground_vel(a0),d0
 		beq.s	loc_17364
 		bmi.s	loc_17358
 		sub.w	d5,d0
-		bcc.s	loc_17352
+		bhs.s	loc_17352
 		moveq	#0,d0
 
 loc_17352:
@@ -1498,7 +1497,7 @@ loc_17352:
 
 loc_17358:
 		add.w	d5,d0
-		bcc.s	loc_17360
+		bhs.s	loc_17360
 		moveq	#0,d0
 
 loc_17360:
@@ -1517,8 +1516,8 @@ loc_17364:
 loc_17382:
 		btst	#6,object_control(a0)
 		bne.s	locret_17400
-		move.b	angle(a0),d0
-		andi.b	#$3F,d0
+		moveq	#$3F,d0
+		and.b	angle(a0),d0
 		beq.s	loc_173A2
 		move.b	angle(a0),d0
 		addi.b	#$40,d0
@@ -1617,7 +1616,7 @@ loc_17456:
 
 loc_17462:
 		sub.w	d4,d0
-		bcc.s	loc_1746A
+		bhs.s	loc_1746A
 		moveq	#-$80,d0
 
 loc_1746A:
@@ -1668,7 +1667,7 @@ loc_174DC:
 
 loc_174E8:
 		add.w	d4,d0
-		bcc.s	loc_174F0
+		bhs.s	loc_174F0
 		move.w	#$80,d0
 
 loc_174F0:
@@ -1720,7 +1719,7 @@ loc_17580:
 		beq.s	loc_175A2
 		bmi.s	loc_17596
 		sub.w	d5,d0
-		bcc.s	loc_17590
+		bhs.s	loc_17590
 		moveq	#0,d0
 
 loc_17590:
@@ -1730,7 +1729,7 @@ loc_17590:
 
 loc_17596:
 		add.w	d5,d0
-		bcc.s	loc_1759E
+		bhs.s	loc_1759E
 		moveq	#0,d0
 
 loc_1759E:
@@ -1771,7 +1770,7 @@ loc_175E6:
 loc_175F8:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_17604
-		bcc.s	loc_17602
+		bhs.s	loc_17602
 		addq.w	#4,(a5)
 
 loc_17602:
@@ -1813,7 +1812,7 @@ loc_17642:
 
 loc_17650:
 		sub.w	d4,d0
-		bcc.s	loc_17658
+		bhs.s	loc_17658
 		moveq	#-$80,d0
 
 loc_17658:
@@ -1832,7 +1831,7 @@ sub_1765E:
 
 loc_17672:
 		add.w	d4,d0
-		bcc.s	loc_1767A
+		bhs.s	loc_1767A
 		move.w	#$80,d0
 
 loc_1767A:
@@ -1880,7 +1879,7 @@ loc_176D0:
 loc_176D4:
 		cmpi.w	#$60,(a5)
 		beq.s	loc_176E0
-		bcc.s	loc_176DE
+		bhs.s	loc_176DE
 		addq.w	#4,(a5)
 
 loc_176DE:
@@ -1895,7 +1894,7 @@ loc_176E0:
 		beq.s	locret_1770E
 		bmi.s	loc_17702
 		sub.w	d1,d0
-		bcc.s	loc_176FC
+		bhs.s	loc_176FC
 		moveq	#0,d0
 
 loc_176FC:
@@ -1905,7 +1904,7 @@ loc_176FC:
 
 loc_17702:
 		sub.w	d1,d0
-		bcs.s	loc_1770A
+		blo.s		loc_1770A
 		moveq	#0,d0
 
 loc_1770A:
@@ -1917,8 +1916,8 @@ locret_1770E:
 ; =============== S U B R O U T I N E =======================================
 
 Knux_Jump:
-		move.b	(Ctrl_1_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_1_pressed_logical).w,d0
 		beq.s	locret_1770E
 		moveq	#0,d0
 		move.b	angle(a0),d0
@@ -1989,9 +1988,9 @@ Knux_JumpHeight:
 
 loc_17800:
 		cmp.w	y_vel(a0),d1
-		ble.w	Knux_Test_For_Glide
-		move.b	(Ctrl_1_logical).w,d0
-		andi.b	#$70,d0
+		ble.s		Knux_Test_For_Glide
+		moveq	#btnABC,d0
+		and.b	(Ctrl_1_logical).w,d0
 		bne.s	locret_17816
 		move.w	d1,y_vel(a0)
 
@@ -2013,8 +2012,8 @@ locret_1782C:
 Knux_Test_For_Glide:
 		tst.b	double_jump_flag(a0)
 		bne.s	locret_1782C
-		move.b	(Ctrl_1_pressed_logical).w,d0
-		andi.b	#btnA+btnB+btnC,d0
+		moveq	#btnABC,d0
+		and.b	(Ctrl_1_pressed_logical).w,d0
 		beq.s	locret_1782C
 		bclr	#Status_Roll,status(a0)
 		move.w	#bytes_to_word(20/2,20/2),y_radius(a0)	; set y_radius and x_radius
@@ -2448,8 +2447,8 @@ loc_17D58:
 		adda.w	(a1,d0.w),a1
 		move.b	(a1),d0
 		bmi.s	loc_17DC8
-		move.b	status(a0),d1
-		andi.b	#1,d1
+		moveq	#1,d1
+		and.b	status(a0),d1
 		andi.b	#-4,render_flags(a0)
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
@@ -2513,8 +2512,8 @@ loc_17DC8:
 		subq.b	#1,d0
 
 loc_17DEC:
-		move.b	status(a0),d2
-		andi.b	#1,d2
+		moveq	#1,d2
+		and.b	status(a0),d2
 		bne.s	loc_17DF8
 		not.b	d0
 
@@ -2579,8 +2578,8 @@ locret_17E82:
 ; ---------------------------------------------------------------------------
 
 loc_17E84:
-		move.b	status(a0),d1
-		andi.b	#1,d1
+		moveq	#1,d1
+		and.b	status(a0),d1
 		andi.b	#-4,render_flags(a0)
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)

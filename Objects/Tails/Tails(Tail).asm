@@ -41,66 +41,78 @@ loc_16106:
 		moveq	#4,d0
 
 loc_1612C:
-		cmp.b	objoff_34(a0),d0								; Has the input parent anim changed since last check?
-		beq.s	loc_1613C									; If not, branch and skip setting a matching Tails' Tails anim
-		move.b	d0,objoff_34(a0)								; Store d0 for the above comparision
-		move.b	Obj_Tails_Tail_AniSelection(pc,d0.w),anim(a0)	; Load anim relative to parent's
+		cmp.b	objoff_34(a0),d0								; has the input parent anim changed since last check?
+		beq.s	loc_1613C									; if not, branch and skip setting a matching Tails' Tails anim
+		move.b	d0,objoff_34(a0)								; store d0 for the above comparision
+		move.b	Obj_Tails_Tail_AniSelection(pc,d0.w),anim(a0)	; load anim relative to parent's
 
 loc_1613C:
 		lea	(AniTails_Tail).l,a1
 		bsr.w	Animate_Tails_Part2
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_1615A
-		cmpi.b	#3,anim(a0)									; Is this the Directional animation?
-		beq.s	loc_1615A									; If so, skip the mirroring
-		eori.b	#2,render_flags(a0)							; Reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
+		cmpi.b	#3,anim(a0)									; is this the Directional animation?
+		beq.s	loc_1615A									; if so, skip the mirroring
+		eori.b	#2,render_flags(a0)							; reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
 
 loc_1615A:
 		bsr.w	Tails_Tail_Load_PLC
 		jmp	(Draw_Sprite).w
+
 ; ---------------------------------------------------------------------------
 ; animation master script table for the tails
 ; chooses which animation script to run depending on what Tails is doing
+; ---------------------------------------------------------------------------
 
 Obj_Tails_Tail_AniSelection:
-		dc.b 0,0		; TailsAni_Walk,Run	->
-		dc.b 3		; TailsAni_Roll		-> Directional
-		dc.b 3		; TailsAni_Roll2	-> Directional
-		dc.b 9		; TailsAni_Push		-> Pushing
-		dc.b 1		; TailsAni_Wait		-> Swish
-		dc.b 0		; TailsAni_Balance	-> Blank
-		dc.b 2		; TailsAni_LookUp	-> Flick
-		dc.b 1		; TailsAni_Duck		-> Swish
-		dc.b 7		; TailsAni_Spindash	-> Spindash
-		dc.b 0,0,0	; TailsAni_Dummy1,2,3	->
-		dc.b 8		; TailsAni_Stop		-> Skidding
-		dc.b 0,0		; TailsAni_Float,2	->
-		dc.b 0		; TailsAni_Spring	->
-		dc.b 0		; TailsAni_Hang		->
-		dc.b 0		;
-		dc.b 0		; TailsAni_Victory	->
-		dc.b $A		; TailsAni_Hang2	-> Hanging
-		dc.b 0		; TailsAni_Bubble	->
-		dc.b 0,0,0	; TailsAni_Death,2,3	->
-		dc.b 0		; TailsAni_Slide2?	->
-		dc.b 0,0		; TailsAni_Hurt,Slide	->
-		dc.b 0		; TailsAni_Blank	->
-		dc.b 0,0		; TailsAni_Dummy4,5	->
-		dc.b 0		; TailsAni_HaulAss	->
-		dc.b $B,$C	; TailsAni_Fly,2	-> Fly1,2
-		dc.b $B		; TailsAni_Carry	-> Fly1
-		dc.b $C		; TailsAni_Ascend	-> Fly2
-		dc.b $B		; TailsAni_Tired	-> Fly1
-		dc.b 0,0		; TailsAni_Swim,2	->
-		dc.b 0		; TailsAni_Tired2	->
-		dc.b 0		; TailsAni_Tired3	->
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
-		dc.b 0
+		dc.b 0		; TailsAni_Walk		->					; 0
+		dc.b 0		; Run				->					; 1
+		dc.b 3		; TailsAni_Roll		-> Directional			; 2
+		dc.b 3		; TailsAni_Roll2		-> Directional			; 3
+		dc.b 9		; TailsAni_Push		-> Pushing			; 4
+		dc.b 1		; TailsAni_Wait		-> Swish				; 5
+		dc.b 0		; TailsAni_Balance	-> Blank				; 6
+		dc.b 2		; TailsAni_LookUp	-> Flick				; 7
+		dc.b 1		; TailsAni_Duck		-> Swish				; 8
+		dc.b 7		; TailsAni_Spindash	-> Spindash			; 9
+		dc.b 0		; TailsAni_Dummy1	->					; A
+		dc.b 0		; TailsAni_Dummy2	->					; B
+		dc.b 0		; TailsAni_Dummy3	->					; C
+		dc.b 8		; TailsAni_Stop		-> Skidding			; D
+		dc.b 0		; TailsAni_Float1		->					; E
+		dc.b 0		; TailsAni_Float2		->					; F
+		dc.b 0		; TailsAni_Spring		->					; 10
+		dc.b 0		; TailsAni_Hang		->					; 11
+		dc.b 0		; (Unused?)								; 12
+		dc.b 0		; TailsAni_Victory		->					; 13
+		dc.b $A		; TailsAni_Hang2		-> Hanging			; 14
+		dc.b 0		; TailsAni_Bubble		->					; 15
+		dc.b 0		; TailsAni_Death1		->					; 16
+		dc.b 0		; TailsAni_Death2		->					; 17
+		dc.b 0		; TailsAni_Death3		->					; 18
+		dc.b 0		; TailsAni_Hurt		->					; 19
+		dc.b 0		; TailsAni_Hurt2		->					; 1A
+		dc.b 0		; TailsAni_Slide		->					; 1B
+		dc.b 0		; TailsAni_Blank		->					; 1C
+		dc.b 0		; TailsAni_Dummy4	->					; 1D
+		dc.b 0		; TailsAni_Dummy5	->					; 1E
+		dc.b 0		; TailsAni_HaulAss	->					; 1F
+		dc.b $B		; TailsAni_Fly			-> Fly1				; 20
+		dc.b $C		; TailsAni_Fly2		-> Fly2				; 21
+		dc.b $B		; TailsAni_Carry		-> Fly1				; 22
+		dc.b $C		; TailsAni_Ascend		-> Fly2				; 23
+		dc.b $B		; TailsAni_Tired		-> Fly1				; 24
+		dc.b 0		; TailsAni_Swim		->					; 25
+		dc.b 0		; TailsAni_Swim2		->					; 26
+		dc.b 0		; TailsAni_Tired2		->					; 27
+		dc.b 0		; TailsAni_Tired3		->					; 28
+		dc.b 0												; 29
+		dc.b 0												; 2A
+		dc.b 0												; 2B
+		dc.b 0												; 2C
+		dc.b 0												; 2D
+		dc.b 0												; 2E
+		dc.b 0												; 2F
+		dc.b 0												; 30
+		dc.b 0												; 31
 	even
