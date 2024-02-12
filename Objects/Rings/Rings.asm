@@ -46,6 +46,7 @@ Obj_RingSparkle:
 
 Obj_RingDelete:
 		jmp	(Delete_Current_Sprite).w
+
 ; ---------------------------------------------------------------------------
 ; Bouncing ring (Object)
 ; ---------------------------------------------------------------------------
@@ -156,7 +157,7 @@ loc_1A75C:
 		bne.s	loc_1A7B0
 		tst.b	render_flags(a0)
 		bpl.s	loc_1A79C
-		jsr	(RingCheckFloorDist).l
+		jsr	(RingCheckFloorDist).w
 		tst.w	d1
 		bpl.s	loc_1A79C
 		add.w	d1,y_pos(a0)
@@ -224,6 +225,7 @@ loc_1A828:
 loc_1A83C:
 		jsr	(Add_SpriteToCollisionResponseList).w
 		jmp	(Draw_Sprite).w
+
 ; ---------------------------------------------------------------------------
 ; Attracted ring (Object)
 ; ---------------------------------------------------------------------------
@@ -294,13 +296,14 @@ loc_1A934:
 ; =============== S U B R O U T I N E =======================================
 
 AttractedRing_Move:
-		; Move on X axis
-		move.w	#$30,d1
+
+		; move on x axis
+		moveq	#48,d1
 		move.w	(Player_1+x_pos).w,d0
 		cmp.w	x_pos(a0),d0
-		bhs.s	AttractedRing_MoveRight	; If ring is to the left of the player, branch
+		bhs.s	AttractedRing_MoveRight						; if ring is to the left of the player, branch
 
-;AttractedRing_MoveLeft:
+		; move left
 		neg.w	d1
 		tst.w	x_vel(a0)
 		bmi.s	AttractedRing_ApplyMovementX
@@ -317,11 +320,12 @@ AttractedRing_MoveRight:
 
 AttractedRing_ApplyMovementX:
 		add.w	d1,x_vel(a0)
-		; Move on Y axis
-		move.w	#$30,d1
+
+		; move on y axis
+		moveq	#48,d1
 		move.w	(Player_1+y_pos).w,d0
 		cmp.w	y_pos(a0),d0
-		bhs.s	AttractedRing_MoveUp	; If ring is below the player, branch
+		bhs.s	AttractedRing_MoveUp						; If ring is below the player, branch
 
 ;AttractedRing_MoveDown:
 		neg.w	d1

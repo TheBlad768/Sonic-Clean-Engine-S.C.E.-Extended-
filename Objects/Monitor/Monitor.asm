@@ -88,7 +88,7 @@ Obj_MonitorFallUpsideUp:
 		jsr	(MoveSprite).w
 		tst.w	y_vel(a0)						; Is monitor moving up?
 		bmi.s	locret_1D694						; If so, return
-		jsr	(ObjCheckFloorDist).l
+		jsr	(ObjCheckFloorDist).w
 		tst.w	d1								; Is monitor in the ground?
 		beq.s	.inground						; If so, branch
 		bpl.s	locret_1D694						; if not, return
@@ -104,7 +104,7 @@ Obj_MonitorFallUpsideDown:
 		jsr	(MoveSprite_ReverseGravity).w
 		tst.w	y_vel(a0)						; Is monitor moving down?
 		bmi.s	locret_1D694						; If so, return
-		jsr	(ObjCheckCeilingDist).l
+		jsr	(ObjCheckCeilingDist).w
 		tst.w	d1								; Is monitor in the ground (ceiling)?
 		beq.s	.inground						; If so, branch
 		bpl.s	locret_1D694						; if not, return
