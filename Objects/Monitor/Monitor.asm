@@ -7,8 +7,8 @@
 Obj_Monitor:
 		moveq	#0,d0
 		move.b	routine(a0),d0
-		move.w	Monitor_Index(pc,d0.w),d1
-		jmp	Monitor_Index(pc,d1.w)
+		move.w	Monitor_Index(pc,d0.w),d0
+		jmp	Monitor_Index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
 Monitor_Index: offsetTable
@@ -21,31 +21,31 @@ Monitor_Index: offsetTable
 
 Obj_MonitorInit:
 		addq.b	#2,routine(a0)
-		move.w	#bytes_to_word(30/2,30/2),y_radius(a0)	; set y_radius and x_radius
+		move.w	#bytes_to_word(30/2,30/2),y_radius(a0)			; set y_radius and x_radius
 		move.l	#Map_Monitor,mappings(a0)
 		move.w	#make_art_tile(ArtTile_Monitors,0,0),art_tile(a0)
 		ori.b	#4,render_flags(a0)
 		move.w	#$180,priority(a0)
 		move.w	#bytes_to_word(32/2,28/2),height_pixels(a0)		; set height and width
-		move.w	respawn_addr(a0),d0				; Get address in respawn table
-		beq.s	.notbroken						; If it's zero, it isn't remembered
-		movea.w	d0,a2							; Load address into a2
-		btst	#0,(a2)								; Is this monitor broken?
-		beq.s	.notbroken						; If not, branch
-		move.b	#$B,mapping_frame(a0)			; Use 'broken monitor' frame
+		move.w	respawn_addr(a0),d0							; get address in respawn table
+		beq.s	.notbroken									; if it's zero, it isn't remembered
+		movea.w	d0,a2										; load address into a2
+		btst	#0,(a2)											; is this monitor broken?
+		beq.s	.notbroken									; if not, branch
+		move.b	#$B,mapping_frame(a0)						; use 'broken monitor' frame
 		move.l	#Sprite_OnScreen_Test,address(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
 .notbroken:
 		move.b	#6|$40,collision_flags(a0)
-		move.b	subtype(a0),anim(a0)				; Subtype determines what powerup is inside
+		move.b	subtype(a0),anim(a0)							; subtype determines what powerup is inside
 
 Obj_MonitorMain:
 		bsr.s	Obj_MonitorFall
 
 ;SolidObject_Monitor:
-		moveq	#$19,d1							; Monitor's width
+		moveq	#$19,d1										; monitor's width
 		moveq	#$10,d2
 		move.w	d2,d3
 		addq.w	#1,d3
@@ -136,7 +136,7 @@ locret_1D6BC:
 ; ---------------------------------------------------------------------------
 
 loc_1D6BE:
-		jmp	(SolidObject_cont).l
+		jmp	(SolidObject_cont).w
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -171,15 +171,15 @@ Monitor_ChkOverEdge:
 
 Monitor_CharStandOn:
 		move.w	d4,d2
-		jsr	(MvSonicOnPtfm).l
+		jsr	(MvSonicOnPtfm).w
 		moveq	#0,d4
 		rts
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_MonitorBreak:
-		move.b	status(a0),d0
-		andi.b	#standing_mask|pushing_mask,d0	; Is someone touching the monitor?
+		moveq	#standing_mask|pushing_mask,d0	; Is someone touching the monitor?
+		and.b	status(a0),d0
 		beq.s	Obj_MonitorSpawnIcon			; If not, branch
 		move.b	d0,d1
 		andi.b	#p1_standing|p1_pushing,d1		; Is it the main character?
@@ -234,8 +234,8 @@ Obj_MonitorSpawnIcon:
 Obj_MonitorContents:
 		moveq	#0,d0
 		move.b	routine(a0),d0
-		move.w	off_1D7C8(pc,d0.w),d1
-		jmp	off_1D7C8(pc,d1.w)
+		move.w	off_1D7C8(pc,d0.w),d0
+		jmp	off_1D7C8(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
 off_1D7C8: offsetTable
@@ -249,7 +249,7 @@ loc_1D7CE:
 		move.w	#make_art_tile(ArtTile_Monitors,0,0),art_tile(a0)
 		ori.b	#$24,render_flags(a0)
 		move.w	#$180,priority(a0)
-		move.b	#16/2,width_pixels(a0)
+		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)		; set height and width
 		move.w	#-$300,y_vel(a0)
 		btst	#1,render_flags(a0)
 		beq.s	loc_1D7FC
@@ -340,41 +340,30 @@ loc_1D8DA:
 		cmpi.w	#100,(a2)									; does the player 1 have less than 100 rings?
 		blo.s		loc_1D8F6									; if yes, play the ring sound
 		bset	#1,(a4)											; test and set the flag for the first extra life
-		beq.s	loc_1D8FE									; if it was clear before, branch
+		beq.s	Monitor_Give_1up							; if it was clear before, branch
 		cmpi.w	#200,(a2)									; does the player 1 have less than 200 rings?
 		blo.s		loc_1D8F6									; if yes, play the ring sound
 		bset	#2,(a4)											; test and set the flag for the second extra life
-		beq.s	loc_1D8FE									; if it was set before, play the ring sound
+		beq.s	Monitor_Give_1up							; if it was set before, play the ring sound
 
 loc_1D8F6:
 		sfx	sfx_RingRight,1									; play ring sound
 ; ---------------------------------------------------------------------------
 
-loc_1D8FE:
-		cmpa.w	#Player_1,a1
-		beq.w	Monitor_Give_1up
-		bra.w	Monitor_Give_Eggman
-; ---------------------------------------------------------------------------
-
 Monitor_Give_SpeedShoes:
 		bset	#Status_SpeedShoes,status_secondary(a1)
 		move.b	#150,speed_shoes_timer(a1)
-		cmpa.w	#Player_1,a1
-		bne.s	loc_1D93A
-		cmpi.w	#2,(Player_mode).w
-		beq.s	loc_1D93A
-		move.w	#$C00,(Max_speed).w
-		move.w	#$18,(Acceleration).w
-		move.w	#$80,(Deceleration).w
-		bra.s	loc_1D94C
-; ---------------------------------------------------------------------------
 
-loc_1D93A:
-		move.w	#$C00,(Max_speed_P2).w
-		move.w	#$18,(Acceleration_P2).w
-		move.w	#$80,(Deceleration_P2).w
+		; set player speed
+		lea	(Max_speed).w,a4
+		cmpi.b	#1,character_id(a1)							; is player Tails?
+		bne.s	.sets											; if not, branch
+		lea	(Max_speed_P2).w,a4
 
-loc_1D94C:
+.sets
+		move.w	#$C00,Max_speed-Max_speed(a4)
+		move.w	#$18,Acceleration-Max_speed(a4)
+		move.w	#$80,Deceleration-Max_speed(a4)
 		music	mus_Speedup,1								; speed up the music
 ; ---------------------------------------------------------------------------
 
@@ -382,54 +371,27 @@ Monitor_Give_Fire_Shield:
 		andi.b	#$8E,status_secondary(a1)
 		bset	#Status_Shield,status_secondary(a1)
 		bset	#Status_FireShield,status_secondary(a1)
-		sfx	sfx_FireShield
-		tst.b	parent+1(a0)
-		bne.s	loc_1D984
 		move.l	#Obj_FireShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
-		rts
-; ---------------------------------------------------------------------------
-
-loc_1D984:
-		move.l	#Obj_FireShield,(v_Shield_P2+address).w
-		move.w	a1,(v_Shield_P2+parent).w
-		rts
+		sfx	sfx_FireShield,1
 ; ---------------------------------------------------------------------------
 
 Monitor_Give_Lightning_Shield:
 		andi.b	#$8E,status_secondary(a1)
 		bset	#Status_Shield,status_secondary(a1)
 		bset	#Status_LtngShield,status_secondary(a1)
-		sfx	sfx_LightningShield
-		tst.b	parent+1(a0)
-		bne.s	loc_1D9C2
 		move.l	#Obj_LightningShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
-		rts
-; ---------------------------------------------------------------------------
-
-loc_1D9C2:
-		move.l	#Obj_LightningShield,(v_Shield_P2+address).w
-		move.w	a1,(v_Shield_P2+parent).w
-		rts
+		sfx	sfx_LightningShield,1
 ; ---------------------------------------------------------------------------
 
 Monitor_Give_Bubble_Shield:
 		andi.b	#$8E,status_secondary(a1)
 		bset	#Status_Shield,status_secondary(a1)
 		bset	#Status_BublShield,status_secondary(a1)
-		sfx	sfx_BubbleShield
-		tst.b	parent+1(a0)
-		bne.s	loc_1DA00
 		move.l	#Obj_BubbleShield,(v_Shield+address).w
 		move.w	a1,(v_Shield+parent).w
-		rts
-; ---------------------------------------------------------------------------
-
-loc_1DA00:
-		move.l	#Obj_BubbleShield,(v_Shield_P2+address).w
-		move.w	a1,(v_Shield_P2+parent).w
-		rts
+		sfx	sfx_BubbleShield,1
 ; ---------------------------------------------------------------------------
 
 Monitor_Give_Invincibility:
@@ -444,16 +406,8 @@ Monitor_Give_Invincibility:
 		music	mus_Invincible					; if invincible, play invincibility music
 
 .skipmusic
-		tst.b	parent+1(a0)
-		bne.s	loc_1DA52
 		move.l	#Obj_Invincibility,(v_Invincibility_stars+address).w
 		move.w	a1,(v_Invincibility_stars+parent).w
-		rts
-; ---------------------------------------------------------------------------
-
-loc_1DA52:
-		move.l	#Obj_Invincibility,(v_Invincibility_stars_P2+address).w
-		move.w	a1,(v_Invincibility_stars_P2+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 

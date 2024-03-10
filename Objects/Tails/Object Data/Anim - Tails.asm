@@ -1,51 +1,57 @@
+; ---------------------------------------------------------------------------
+; Tails Animation Script
+; ---------------------------------------------------------------------------
+
 AniTails:
-		dc.w AniTails00-AniTails
-		dc.w AniTails01-AniTails
-		dc.w AniTails02-AniTails
-		dc.w AniTails03-AniTails
-		dc.w AniTails04-AniTails
-		dc.w AniTails05-AniTails
-		dc.w AniTails06-AniTails
-		dc.w AniTails07-AniTails
-		dc.w AniTails08-AniTails
-		dc.w AniTails09-AniTails
-		dc.w AniTails0A-AniTails
-		dc.w AniTails0B-AniTails
-		dc.w AniTails0C-AniTails
-		dc.w AniTails0D-AniTails
-		dc.w AniTails0E-AniTails
-		dc.w AniTails0F-AniTails
-		dc.w AniTails10-AniTails
-		dc.w AniTails11-AniTails
-		dc.w AniTails12-AniTails
-		dc.w AniTails13-AniTails
-		dc.w AniTails14-AniTails
-		dc.w AniTails15-AniTails
-		dc.w AniTails16-AniTails
-		dc.w AniTails17-AniTails
-		dc.w AniTails18-AniTails
-		dc.w AniTails19-AniTails
-		dc.w AniTails1A-AniTails
-		dc.w AniTails1B-AniTails
-		dc.w AniTails1C-AniTails
-		dc.w AniTails1D-AniTails
-		dc.w AniTails1E-AniTails
-		dc.w AniTails1F-AniTails
-		dc.w AniTails20-AniTails
-		dc.w AniTails21-AniTails
-		dc.w AniTails22-AniTails
-		dc.w AniTails23-AniTails
-		dc.w AniTails24-AniTails
-		dc.w AniTails25-AniTails
-		dc.w AniTails26-AniTails
-		dc.w AniTails27-AniTails
-		dc.w AniTails28-AniTails
-		dc.w AniTails29-AniTails
-AniTails00:	dc.b  $FF,   7,	  8,   1,   2,	 3,   4,   5,	6, $FF
-AniTails01:	dc.b  $FF, $21, $22, $23, $24, $FF, $FF, $FF, $FF, $FF
-AniTails02:	dc.b	1, $96, $97, $98, $FF
-AniTails03:	dc.b	0, $96, $97, $98, $FF
-AniTails04:	dc.b  $FD, $A9, $AA, $AB, $AC, $FF, $FF, $FF, $FF, $FF
+Ani_Tails: offsetTable
+		offsetTableEntry.w AniTails00			; 0
+		offsetTableEntry.w AniTails01			; 1
+		offsetTableEntry.w AniTails02			; 2
+		offsetTableEntry.w AniTails03			; 3
+		offsetTableEntry.w AniTails04			; 4
+		offsetTableEntry.w AniTails05			; 5
+		offsetTableEntry.w AniTails06			; 6
+		offsetTableEntry.w AniTails07			; 7
+		offsetTableEntry.w AniTails08			; 8
+		offsetTableEntry.w AniTails09			; 9
+		offsetTableEntry.w AniTails0A			; A
+		offsetTableEntry.w AniTails0B			; B
+		offsetTableEntry.w AniTails0C			; C
+		offsetTableEntry.w AniTails0D			; D
+		offsetTableEntry.w AniTails0E			; E
+		offsetTableEntry.w AniTails0F			; F
+		offsetTableEntry.w AniTails10			; 10
+		offsetTableEntry.w AniTails11			; 11
+		offsetTableEntry.w AniTails12			; 12
+		offsetTableEntry.w AniTails13			; 13
+		offsetTableEntry.w AniTails14			; 14
+		offsetTableEntry.w AniTails15			; 15
+		offsetTableEntry.w AniTails16			; 16
+		offsetTableEntry.w AniTails17			; 17
+		offsetTableEntry.w AniTails18			; 18
+		offsetTableEntry.w AniTails19			; 19
+		offsetTableEntry.w AniTails1A			; 1A
+		offsetTableEntry.w AniTails1B			; 1B
+		offsetTableEntry.w AniTails1C			; 1C
+		offsetTableEntry.w AniTails1D			; 1D
+		offsetTableEntry.w AniTails1E			; 1E
+		offsetTableEntry.w AniTails1F			; 1F
+		offsetTableEntry.w AniTails20			; 20
+		offsetTableEntry.w AniTails21			; 21
+		offsetTableEntry.w AniTails22			; 22
+		offsetTableEntry.w AniTails23			; 23
+		offsetTableEntry.w AniTails24			; 24
+		offsetTableEntry.w AniTails25			; 25
+		offsetTableEntry.w AniTails26			; 26
+		offsetTableEntry.w AniTails27			; 27
+		offsetTableEntry.w AniTails28			; 28
+		offsetTableEntry.w AniTails29			; 29
+
+AniTails00:	dc.b  $FF,   7,	  8,   1,   2,	 3,   4,   5,	6, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniTails01:	dc.b  $FF, $21, $22, $23, $24, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniTails02:	dc.b	1, $96, $97, $98, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniTails03:	dc.b	0, $96, $97, $98, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniTails04:	dc.b  $FD, $A9, $AA, $AB, $AC, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 AniTails05:	dc.b    7, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AF, $AE, $AD, $AD, $AD, $AD, $AD, $AD, $AD
 			dc.b  $AD, $AF, $AE, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $AD, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1
 			dc.b  $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B1, $B2, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B3, $B4, $B2

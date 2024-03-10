@@ -34,6 +34,8 @@ HUD_AddToScore:
 ; =============== S U B R O U T I N E =======================================
 
 UpdateHUD:
+		lea	(VDP_data_port).l,a6
+		lea	VDP_control_port-VDP_data_port(a6),a5
 
 	if GameDebug
 		tst.w	(Debug_placement_mode).w					; is debug mode on?

@@ -1,46 +1,54 @@
+; ---------------------------------------------------------------------------
+; Knuckles Animation Script
+; ---------------------------------------------------------------------------
+
 AniKnuckles:
-		dc.w AniKnux00-AniKnuckles
-		dc.w AniKnux01-AniKnuckles
-		dc.w AniKnux02-AniKnuckles
-		dc.w AniKnux03-AniKnuckles
-		dc.w AniKnux04-AniKnuckles
-		dc.w AniKnux05-AniKnuckles
-		dc.w AniKnux06-AniKnuckles
-		dc.w AniKnux07-AniKnuckles
-		dc.w AniKnux08-AniKnuckles
-		dc.w AniKnux09-AniKnuckles
-		dc.w AniKnux0A-AniKnuckles
-		dc.w AniKnux0B-AniKnuckles
-		dc.w AniKnux0C-AniKnuckles
-		dc.w AniKnux0D-AniKnuckles
-		dc.w AniKnux0E-AniKnuckles
-		dc.w AniKnux0F-AniKnuckles
-		dc.w AniKnux10-AniKnuckles
-		dc.w AniKnux11-AniKnuckles
-		dc.w AniKnux12-AniKnuckles
-		dc.w AniKnux13-AniKnuckles
-		dc.w AniKnux14-AniKnuckles
-		dc.w AniKnux15-AniKnuckles
-		dc.w AniKnux16-AniKnuckles
-		dc.w AniKnux17-AniKnuckles
-		dc.w AniKnux18-AniKnuckles
-		dc.w AniKnux19-AniKnuckles
-		dc.w AniKnux1A-AniKnuckles
-		dc.w AniKnux1B-AniKnuckles
-		dc.w AniKnux1C-AniKnuckles
-		dc.w AniKnux1D-AniKnuckles
-		dc.w AniKnux1E-AniKnuckles
-		dc.w AniKnux1F-AniKnuckles
-		dc.w AniKnux20-AniKnuckles
-		dc.w AniKnux21-AniKnuckles
-		dc.w AniKnux22-AniKnuckles
-		dc.w AniKnux23-AniKnuckles
-		dc.w AniKnux24-AniKnuckles
-AniKnux00:	dc.b  $FF,   7,	  8,   1,   2,	 3,   4,   5,	6, $FF
-AniKnux01:	dc.b  $FF, $21,	$22, $23, $24, $FF, $FF, $FF, $FF, $FF
-AniKnux02:	dc.b  $FE, $9A,	$96, $9A, $97, $9A, $98, $9A, $99, $FF
-AniKnux03:	dc.b  $FE, $9A,	$96, $9A, $97, $9A, $98, $9A, $99, $FF
-AniKnux04:	dc.b  $FD, $CE,	$CF, $D0, $D1, $FF, $FF, $FF, $FF, $FF
+Ani_Knuckles: offsetTable
+		offsetTableEntry.w AniKnux00			; 0
+		offsetTableEntry.w AniKnux01			; 1
+		offsetTableEntry.w AniKnux02			; 2
+		offsetTableEntry.w AniKnux03			; 3
+		offsetTableEntry.w AniKnux04			; 4
+		offsetTableEntry.w AniKnux05			; 5
+		offsetTableEntry.w AniKnux06			; 6
+		offsetTableEntry.w AniKnux07			; 7
+		offsetTableEntry.w AniKnux08			; 8
+		offsetTableEntry.w AniKnux09			; 9
+		offsetTableEntry.w AniKnux0A			; A
+		offsetTableEntry.w AniKnux0B			; B
+		offsetTableEntry.w AniKnux0C			; C
+		offsetTableEntry.w AniKnux0D			; D
+		offsetTableEntry.w AniKnux0E			; E
+		offsetTableEntry.w AniKnux0F			; F
+		offsetTableEntry.w AniKnux10			; 10
+		offsetTableEntry.w AniKnux11			; 11
+		offsetTableEntry.w AniKnux12			; 12
+		offsetTableEntry.w AniKnux13			; 13
+		offsetTableEntry.w AniKnux14			; 14
+		offsetTableEntry.w AniKnux15			; 15
+		offsetTableEntry.w AniKnux16			; 16
+		offsetTableEntry.w AniKnux17			; 17
+		offsetTableEntry.w AniKnux18			; 18
+		offsetTableEntry.w AniKnux19			; 19
+		offsetTableEntry.w AniKnux1A			; 1A
+		offsetTableEntry.w AniKnux1B			; 1B
+		offsetTableEntry.w AniKnux1C			; 1C
+		offsetTableEntry.w AniKnux1D			; 1D
+		offsetTableEntry.w AniKnux1E			; 1E
+		offsetTableEntry.w AniKnux1F			; 1F
+		offsetTableEntry.w AniKnux20			; 20
+		offsetTableEntry.w AniKnux21			; 21
+		offsetTableEntry.w AniKnux22			; 22
+		offsetTableEntry.w AniKnux23			; 23
+		offsetTableEntry.w AniKnux24			; 24
+		offsetTableEntry.w KnuxAni_Carry		; 25
+		offsetTableEntry.w KnuxAni_Carry2		; 26
+
+AniKnux00:	dc.b  $FF,   7,	  8,   1,   2,	 3,   4,   5,	6, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniKnux01:	dc.b  $FF, $21,	$22, $23, $24, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniKnux02:	dc.b  $FE, $9A,	$96, $9A, $97, $9A, $98, $9A, $99, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniKnux03:	dc.b  $FE, $9A,	$96, $9A, $97, $9A, $98, $9A, $99, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+AniKnux04:	dc.b  $FD, $CE,	$CF, $D0, $D1, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 AniKnux05:	dc.b    5, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56
 			dc.b  $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56
 			dc.b  $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $56, $D2, $D2, $D2, $D3, $D3, $D3, $D2, $D2, $D2
@@ -84,4 +92,6 @@ AniKnux22:	dc.b   $F, $CD,	$FD,   0
 AniKnux23:	dc.b   $F, $9C,	$FD,   0
 AniKnux24:	dc.b	7, $B1,	$B3, $B3, $B3, $B3, $B3, $B3, $B2, $B3,	$B4, $B3, $FE,	 4
 AniKnux1F:	dc.b	2, $EB,	$EB, $EC, $ED, $EC, $ED, $EC, $ED, $EC,	$ED, $EC, $ED, $FD,   0
+KnuxAni_Carry:		dc.b   $B, $90, $91, $92, $91, $FF
+KnuxAni_Carry2:		dc.b   $B, $90, $91, $92, $91, $FD,   0
 	even

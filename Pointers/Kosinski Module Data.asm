@@ -54,8 +54,6 @@ ArtKosM_Squirrel:				binclude "Objects/Animals/KosinskiM Art/Squirrel.bin"
 	even
 ArtKosM_Rabbit:					binclude "Objects/Animals/KosinskiM Art/Rabbit.bin"
 	even
-ArtKosM_SignpostStub:			binclude "Objects/Signpost/KosinskiM Art/Stub.bin"
-	even
 ArtKosM_ResultsGeneral:			binclude "Objects/Results/KosinskiM Art/Results General.bin"
 	even
 ArtKosM_ResultsSONIC:			binclude "Objects/Results/KosinskiM Art/Results SONIC.bin"

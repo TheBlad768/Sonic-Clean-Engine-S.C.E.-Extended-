@@ -1,20 +1,7 @@
 ; ===========================================================================
 ; Level pattern load cues
-; Load graphics before and after Title Card
+; Load main graphics
 ; ===========================================================================
-
-Offs_PLC: offsetTable
-
-		offsetTableEntry.w PLC1_DEZ1_Before
-		offsetTableEntry.w PLC2_DEZ1_After
-		offsetTableEntry.w PLC1_DEZ2_Before
-		offsetTableEntry.w PLC2_DEZ2_After
-		offsetTableEntry.w PLC1_DEZ3_Before
-		offsetTableEntry.w PLC2_DEZ3_After
-		offsetTableEntry.w PLC1_DEZ4_Before
-		offsetTableEntry.w PLC2_DEZ4_After
-
-		zonewarning Offs_PLC,(4*4)
 
 ; ===========================================================================
 ; Pattern load cues - Sonic
@@ -58,6 +45,11 @@ PLC2_Sonic: plrlistheader
 		plreq ArtTile_Monitors, ArtKosM_Monitors			; monitors
 		plreq $5A0, ArtKosM_Explosion						; explosion
 PLC2_Sonic_end
+
+; ===========================================================================
+; Level pattern load cues
+; Load graphics before and after Title Card
+; ===========================================================================
 
 ; ===========================================================================
 ; Pattern load cues - Death Egg (Before)
@@ -122,3 +114,17 @@ PLC1_DEZ4_Before_end
 PLC2_DEZ4_After: plrlistheader
 		plreq $500, ArtKosM_Spikebonker					; spikebonker badnik
 PLC2_DEZ4_After_end
+
+; ===========================================================================
+; Level pattern load cues
+; Load animals graphics
+; ===========================================================================
+
+; ===========================================================================
+; Pattern load cues - Animals (DEZ1)
+; ===========================================================================
+
+PLCAnimals_DEZ1: plrlistheader
+		plreq $580, ArtKosM_BlueFlicky
+		plreq $592, ArtKosM_Chicken
+PLCAnimals_DEZ1_end

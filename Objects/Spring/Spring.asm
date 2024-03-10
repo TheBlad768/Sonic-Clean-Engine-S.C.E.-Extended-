@@ -50,7 +50,7 @@ loc_22DFC:
 Spring_UpDiag:
 		move.b	#4,anim(a0)
 		move.b	#7,mapping_frame(a0)
-		move.w	#$468,art_tile(a0)	; set diagonal
+		move.w	#$468,art_tile(a0)					; set diagonal
 		move.l	#Obj_Spring_UpDiag,address(a0)
 		bra.s	Spring_Common
 ; ---------------------------------------------------------------------------
@@ -58,7 +58,7 @@ Spring_UpDiag:
 Spring_DownDiag:
 		move.b	#4,anim(a0)
 		move.b	#$A,mapping_frame(a0)
-		move.w	#$468,art_tile(a0)	; set diagonal
+		move.w	#$468,art_tile(a0)					; set diagonal
 		bset	#1,status(a0)
 		move.l	#Obj_Spring_DownDiag,address(a0)
 		bra.s	Spring_Common
@@ -72,12 +72,12 @@ loc_22E96:
 		move.l	#Obj_Spring_Up,address(a0)
 
 Spring_Common:
-		move.b	subtype(a0),d0
-		andi.w	#2,d0
+		moveq	#2,d0
+		and.b	subtype(a0),d0
 		move.w	word_22EF0(pc,d0.w),objoff_30(a0)
 		btst	#1,d0
 		beq.s	locret_22EEE
-		move.l	#Map_Spring2,mappings(a0)	; set yellow
+		move.l	#Map_Spring2,mappings(a0)			; set yellow
 
 locret_22EEE:
 		rts
@@ -89,22 +89,21 @@ word_22EF0:		dc.w -$1000, -$A00
 
 Obj_Spring_Up:
 		moveq	#$1B,d1
-		moveq	#8,d2
-		moveq	#$10,d3
+		moveq	#8,d3
 		move.w	x_pos(a0),d4
 		lea	(Player_1).w,a1
 		moveq	#p1_standing_bit,d6
-		movem.l	d1-d4,-(sp)
-		jsr	(SolidObjectFull2_1P).l
+		movem.l	d1/d3-d4,-(sp)
+		jsr	(SolidObjectTop_1P).w
 		btst	#p1_standing_bit,status(a0)
 		beq.s	loc_22F1C
 		bsr.s	sub_22F98
 
 loc_22F1C:
-		movem.l	(sp)+,d1-d4
+		movem.l	(sp)+,d1/d3-d4
 		lea	(Player_2).w,a1
 		moveq	#p2_standing_bit,d6
-		jsr	(SolidObjectFull2_1P).l
+		jsr	(SolidObjectTop_1P).w
 		btst	#p2_standing_bit,status(a0)
 		beq.s	loc_22F34
 		bsr.s	sub_22F98
@@ -117,12 +116,14 @@ loc_22F34:
 ; =============== S U B R O U T I N E =======================================
 
 sub_22F98:
-		move.w	#bytes_to_word(1,0),anim(a0)	; set anim and clear next_anim/prev_anim
+		move.w	#bytes_to_word(1,0),anim(a0)			; set anim and clear next_anim/prev_anim
 		addq.w	#8,y_pos(a1)
 		tst.b	(Reverse_gravity_flag).w
-		beq.s	+
-		subi.w	#$10,y_pos(a1)
-+		move.w	objoff_30(a0),y_vel(a1)
+		beq.s	.notgrav
+		subi.w	#8*2,y_pos(a1)
+
+.notgrav
+		move.w	objoff_30(a0),y_vel(a1)
 		bset	#Status_InAir,status(a1)
 		bclr	#Status_OnObj,status(a1)
 		clr.b	jumping(a1)
@@ -138,7 +139,7 @@ loc_22FE0:
 		beq.s	loc_23020
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 		clr.b	flips_remaining(a1)
 		move.b	#4,flip_speed(a1)
 		btst	#1,d0
@@ -170,21 +171,21 @@ loc_23048:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Spring_Horizontal:
-		move.w	#$13,d1
-		move.w	#$E,d2
-		move.w	#$F,d3
+		moveq	#$13,d1
+		moveq	#$E,d2
+		moveq	#$F,d3
 		move.w	x_pos(a0),d4
 		lea	(Player_1).w,a1
 		moveq	#p1_standing_bit,d6
 		movem.l	d1-d4,-(sp)
-		jsr	(SolidObjectFull2_1P).l
+		jsr	(SolidObjectFull2_1P).w
 		swap	d6
-		andi.w	#1,d6
+		andi.w	#p1_touch_side,d6
 		beq.s	loc_23092
 		move.b	status(a0),d1
 		move.w	x_pos(a0),d0
 		sub.w	x_pos(a1),d0
-		bcs.s	loc_23088
+		blo.s		loc_23088
 		eori.b	#1,d1
 
 loc_23088:
@@ -196,20 +197,20 @@ loc_23092:
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1
 		moveq	#p2_standing_bit,d6
-		jsr	(SolidObjectFull2_1P).l
+		jsr	(SolidObjectFull2_1P).w
 		swap	d6
-		andi.w	#2,d6
+		andi.w	#p2_touch_side,d6
 		beq.s	loc_230C4
 		move.b	status(a0),d1
 		move.w	x_pos(a0),d0
 		sub.w	x_pos(a1),d0
-		bcs.s	loc_230BA
+		blo.s		loc_230BA
 		eori.b	#1,d1
 
 loc_230BA:
-		andi.b	#1,d1
+		andi.b	#p1_touch_side,d1
 		bne.s	loc_230C4
-		bsr.w	sub_23190
+		bsr.s	sub_23190
 
 loc_230C4:
 		bsr.w	sub_2326C
@@ -221,22 +222,22 @@ loc_230C4:
 ; =============== S U B R O U T I N E =======================================
 
 sub_23190:
-		move.w	#bytes_to_word(3,0),anim(a0)	; set anim and clear next_anim/prev_anim
+		move.w	#bytes_to_word(3,0),anim(a0)			; set anim and clear next_anim/prev_anim
 		move.w	objoff_30(a0),x_vel(a1)
 		addq.w	#8,x_pos(a1)
 		bset	#Status_Facing,status(a1)
 		btst	#0,status(a0)
 		bne.s	loc_231BE
 		bclr	#Status_Facing,status(a1)
-		subi.w	#$10,x_pos(a1)
+		subi.w	#8*2,x_pos(a1)
 		neg.w	x_vel(a1)
 
 loc_231BE:
-		move.w	#$F,move_lock(a1)
+		move.w	#15,move_lock(a1)
 		move.w	x_vel(a1),ground_vel(a1)
 		btst	#Status_Roll,status(a1)
 		bne.s	loc_231D8
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 
 loc_231D8:
 		move.b	subtype(a0),d0
@@ -248,7 +249,7 @@ loc_231E4:
 		beq.s	loc_23224
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0
@@ -275,8 +276,8 @@ loc_2323A:
 		move.b	#$F,lrb_solid_bit(a1)
 
 loc_2324C:
-		bclr	#5,status(a0)
-		bclr	#6,status(a0)
+		bclr	#p1_pushing_bit,status(a0)
+		bclr	#p2_pushing_bit,status(a0)
 		bclr	#Status_Push,status(a1)
 		clr.b	double_jump_flag(a1)
 		sfx	sfx_Spring,1
@@ -288,11 +289,11 @@ sub_2326C:
 		beq.w	locret_23324
 		move.w	x_pos(a0),d0
 		move.w	d0,d1
-		addi.w	#$28,d1
+		addi.w	#40,d1
 		btst	#0,status(a0)
 		beq.s	loc_2328E
 		move.w	d0,d1
-		subi.w	#$28,d0
+		subi.w	#40,d0
 
 loc_2328E:
 		move.w	y_pos(a0),d2
@@ -346,7 +347,8 @@ loc_232FC:
 		blo.s		locret_23324
 		cmp.w	d3,d4
 		bhs.s	locret_23324
-		bsr.w	sub_23190
+		bra.w	sub_23190
+; ---------------------------------------------------------------------------
 
 locret_23324:
 		rts
@@ -354,14 +356,14 @@ locret_23324:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Spring_Down:
-		move.w	#$1B,d1
-		move.w	#8,d2
-		move.w	#9,d3
+		moveq	#$1B,d1
+		moveq	#8,d2
+		moveq	#9,d3
 		move.w	x_pos(a0),d4
 		lea	(Player_1).w,a1
 		moveq	#p1_standing_bit,d6
 		movem.l	d1-d4,-(sp)
-		jsr	(SolidObjectFull2_1P).l
+		jsr	(SolidObjectFull2_1P).w
 		cmpi.w	#-2,d4
 		bne.s	loc_2334C
 		bsr.s	sub_233CA
@@ -370,7 +372,7 @@ loc_2334C:
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1
 		moveq	#p2_standing_bit,d6
-		jsr	(SolidObjectFull2_1P).l
+		jsr	(SolidObjectFull2_1P).w
 		cmpi.w	#-2,d4
 		bne.s	loc_23362
 		bsr.s	sub_233CA
@@ -385,9 +387,11 @@ loc_23362:
 sub_233CA:
 		subq.w	#8,y_pos(a1)
 		tst.b	(Reverse_gravity_flag).w
-		beq.s	+
-		addi.w	#$10,y_pos(a1)
-+		move.w	#bytes_to_word(1,0),anim(a0)	; set anim and clear next_anim/prev_anim
+		beq.s	.notgrav
+		addi.w	#8*2,y_pos(a1)
+
+.notgrav
+		move.w	#bytes_to_word(1,0),anim(a0)			; set anim and clear next_anim/prev_anim
 		move.w	objoff_30(a0),y_vel(a1)
 		neg.w	y_vel(a1)
 		cmpi.w	#$1000,y_vel(a1)
@@ -404,7 +408,7 @@ loc_23404:
 		beq.s	loc_23444
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 		clr.b	flips_remaining(a1)
 		move.b	#4,flip_speed(a1)
 		btst	#1,d0
@@ -448,7 +452,7 @@ Obj_Spring_UpDiag:
 		lea	(Player_1).w,a1
 		moveq	#p1_standing_bit,d6
 		movem.l	d1-d4,-(sp)
-		jsr	(sub_1DD24).l
+		jsr	(sub_1DD24).w
 		btst	#p1_standing_bit,status(a0)
 		beq.s	loc_234B8
 		bsr.s	sub_234E6
@@ -457,7 +461,7 @@ loc_234B8:
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1
 		moveq	#p2_standing_bit,d6
-		jsr	(sub_1DD24).l
+		jsr	(sub_1DD24).w
 		btst	#p2_standing_bit,status(a0)
 		beq.s	loc_234D0
 		bsr.s	sub_234E6
@@ -489,7 +493,7 @@ loc_234FC:
 ; ---------------------------------------------------------------------------
 
 loc_2350A:
-		move.w	#bytes_to_word(5,0),anim(a0)	; set anim and clear next_anim/prev_anim
+		move.w	#bytes_to_word(5,0),anim(a0)			; set anim and clear next_anim/prev_anim
 		move.w	objoff_30(a0),y_vel(a1)
 		move.w	objoff_30(a0),x_vel(a1)
 		addq.w	#6,y_pos(a1)
@@ -498,7 +502,7 @@ loc_2350A:
 		btst	#0,status(a0)
 		bne.s	loc_23542
 		bclr	#Status_Facing,status(a1)
-		subi.w	#$C,x_pos(a1)
+		subi.w	#6*2,x_pos(a1)
 		neg.w	x_vel(a1)
 
 loc_23542:
@@ -512,7 +516,7 @@ loc_23542:
 		beq.s	loc_235A2
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0
@@ -551,7 +555,7 @@ Obj_Spring_DownDiag:
 		lea	(Player_1).w,a1
 		moveq	#p1_standing_bit,d6
 		movem.l	d1-d4,-(sp)
-		jsr	(sub_1DD24).l
+		jsr	(sub_1DD24).w
 		cmpi.w	#-2,d4
 		bne.s	loc_235F8
 		bsr.s	sub_23624
@@ -560,7 +564,7 @@ loc_235F8:
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1
 		moveq	#p2_standing_bit,d6
-		jsr	(sub_1DD24).l
+		jsr	(sub_1DD24).w
 		cmpi.w	#-2,d4
 		bne.s	loc_2360E
 		bsr.s	sub_23624
@@ -574,7 +578,7 @@ loc_2360E:
 ; =============== S U B R O U T I N E =======================================
 
 sub_23624:
-		move.w	#bytes_to_word(5,0),anim(a0)	; Set anim and clear next_anim/prev_anim
+		move.w	#bytes_to_word(5,0),anim(a0)			; set anim and clear next_anim/prev_anim
 		move.w	objoff_30(a0),y_vel(a1)
 		neg.w	y_vel(a1)
 		move.w	objoff_30(a0),x_vel(a1)
@@ -584,7 +588,7 @@ sub_23624:
 		btst	#0,status(a0)
 		bne.s	loc_23660
 		bclr	#Status_Facing,status(a1)
-		subi.w	#$C,x_pos(a1)
+		subi.w	#6*2,x_pos(a1)
 		neg.w	x_vel(a1)
 
 loc_23660:
@@ -597,7 +601,7 @@ loc_23660:
 		beq.s	loc_236BA
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)		; id_Walk
+		clr.b	anim(a1)									; id_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0

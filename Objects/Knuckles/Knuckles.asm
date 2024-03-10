@@ -53,10 +53,10 @@ Knuckles_Index: offsetTable
 		offsetTableEntry.w Knuckles_Drown		; C
 ; ---------------------------------------------------------------------------
 
-Knuckles_Init:	; Routine 0
+Knuckles_Init:												; Routine 0
 		addq.b	#2,routine(a0)								; => Knuckles_Control
 		move.w	#bytes_to_word(38/2,18/2),y_radius(a0)			; set y_radius and x_radius	; this sets Knuckles's collision height (2*pixels)
-		move.w	#bytes_to_word(38/2,18/2),default_y_radius(a0)	; set default_y_radius and default_x_radius
+		move.w	y_radius(a0),default_y_radius(a0)				; set default_y_radius and default_x_radius
 		move.l	#Map_Knuckles,mappings(a0)
 		move.w	#$100,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
@@ -82,10 +82,10 @@ Knuckles_Init_Continued:
 		clr.b	flips_remaining(a0)
 		move.b	#4,flip_speed(a0)
 		move.b	#30,air_left(a0)
-		subi.w	#$20,x_pos(a0)
+		subi.w	#32,x_pos(a0)
 		addq.w	#4,y_pos(a0)
 		jsr	(Reset_Player_Position_Array).l
-		addi.w	#$20,x_pos(a0)
+		addi.w	#32,x_pos(a0)
 		subq.w	#4,y_pos(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -176,10 +176,10 @@ loc_165D8:
 ; ---------------------------------------------------------------------------
 
 Knux_Modes: offsetTable
-		offsetTableEntry.w Knux_Stand_Path		; 0
-		offsetTableEntry.w Knux_Stand_Freespace	; 2
-		offsetTableEntry.w Knux_Spin_Path			; 4
-		offsetTableEntry.w Knux_Spin_Freespace		; 6
+		offsetTableEntry.w Knux_MdNormal			; 0
+		offsetTableEntry.w Knux_MdAir				; 2
+		offsetTableEntry.w Knux_MdRoll			; 4
+		offsetTableEntry.w Knux_MdJump			; 6
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -251,7 +251,6 @@ loc_166F6:
 		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
 		move.l	#Obj_AirCountdown,(v_Breathing_bubbles+address).w
-		move.b	#$81,(v_Breathing_bubbles+subtype).w
 		move.w	a0,(v_Breathing_bubbles+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)
 		move.w	#6,Acceleration-Max_speed(a4)
@@ -262,8 +261,8 @@ loc_166F6:
 		asr.w	y_vel(a0)
 		asr.w	y_vel(a0)
 		beq.s	locret_166F4
-		move.w	#bytes_to_word(1,0),anim(a6)	; splash animation, write 1 to anim and clear prev_anim
-		sfx	sfx_Splash,1				; splash sound
+		move.w	#bytes_to_word(1,0),anim(a6)		; splash animation, write 1 to anim and clear prev_anim
+		sfx	sfx_Splash,1							; splash sound
 ; ---------------------------------------------------------------------------
 
 loc_1676E:
@@ -275,7 +274,7 @@ loc_1676E:
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
 		move.w	#$80,Deceleration-Max_speed(a4)
-		cmpi.b	#4,routine(a0)
+		cmpi.b	#id_SonicHurt,routine(a0)
 		beq.s	loc_167C4
 		tst.b	object_control(a0)
 		bne.s	loc_167C4
@@ -295,11 +294,11 @@ loc_167C4:
 		move.w	#-$1000,y_vel(a0)
 
 loc_167EA:
-		sfx	sfx_Splash,1				; splash sound
+		sfx	sfx_Splash,1							; splash sound
 
 ; =============== S U B R O U T I N E =======================================
 
-Knux_Stand_Path:
+Knux_MdNormal:
 		bsr.w	SonicKnux_Spindash
 		bsr.w	Knux_Jump
 		bsr.w	Player_SlopeResist
@@ -309,9 +308,16 @@ Knux_Stand_Path:
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
 		bra.w	Player_SlopeRepel
+
+; ---------------------------------------------------------------------------
+; Start of subroutine Knux_MdAir
+; Called if Knuckles is airborne, but not in a ball (thus, probably not jumping)
 ; ---------------------------------------------------------------------------
 
-Knux_Stand_Freespace:
+; =============== S U B R O U T I N E =======================================
+
+; Knux_Stand_Freespace:
+Knux_MdAir:
 		tst.b	double_jump_flag(a0)
 		bne.s	Knux_Glide_Freespace
 	if RollInAir
@@ -326,6 +332,11 @@ Knux_Stand_Freespace:
 		subi.w	#$28,y_vel(a0)
 
 loc_16872:
+		cmpi.w	#$1000,y_vel(a0)
+		ble.s		.maxy
+		move.w	#$1000,y_vel(a0)
+
+.maxy
 		bsr.w	Player_JumpAngle
 		bra.w	SonicKnux_DoLevelCollision
 ; ---------------------------------------------------------------------------
@@ -365,7 +376,7 @@ Knuckles_Glide:
 		; The player has let go of the jump button, so exit the gliding state
 		; and enter the falling state.
 		move.b	#2,double_jump_flag(a0)
-		move.b	#$21,anim(a0)
+		move.b	#$21,anim(a0)					; put Knuckles in his falling animation
 		bclr	#Status_Facing,status(a0)
 		tst.w	x_vel(a0)
 		bpl.s	.skip1
@@ -375,8 +386,7 @@ Knuckles_Glide:
 		; Divide Knuckles' X velocity by 4.
 		asr.w	x_vel(a0)
 		asr.w	x_vel(a0)
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.w	default_y_radius(a0),y_radius(a0)	; set default_y_radius and default_x_radius
 
 .return
 		rts
@@ -415,8 +425,8 @@ loc_1693E:
 		blo.s		+
 
 		; Create dust clouds.
-		move.b	#6,routine(a6)
-		move.b	#$15,mapping_frame(a6)
+		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
+		move.b	#$15,mapping_frame(a6)			; v_Dust
 +
 		rts
 ; ---------------------------------------------------------------------------
@@ -479,7 +489,7 @@ Knuckles_Gliding_HitWall:
 .checkFloorCommon:
 		move.w	y_pos(a0),d2
 		subi.w	#11,d2
-		jsr	(ChkFloorEdge_Part3).l
+		jsr	(ChkFloorEdge_Part3).w
 
 		tst.w	d1
 		bmi.s	.fail
@@ -493,7 +503,7 @@ Knuckles_Gliding_HitWall:
 		move.w	y_pos(a0),d2
 		addi.w	#11,d2
 		eori.w	#$F,d2
-		jsr	(ChkFloorEdge_ReverseGravity_Part2).l
+		jsr	(ChkFloorEdge_ReverseGravity_Part2).w
 
 		tst.w	d1
 		bmi.s	.fail
@@ -521,9 +531,8 @@ Knuckles_Gliding_HitWall:
 ; loc_16A6E:
 .fail:
 		move.b	#2,double_jump_flag(a0)
-		move.b	#$21,anim(a0)
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.b	#$21,anim(a0)						; put Knuckles in his falling animation
+		move.w	default_y_radius(a0),y_radius(a0)		; set default_y_radius and default_x_radius
 		bset	#Status_InAir,(Gliding_collision_flags).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -569,7 +578,7 @@ Knuckles_Fall_From_Glide:
 
 .skip3:
 		bsr.w	Knux_TouchFloor
-		move.w	#$F,move_lock(a0)
+		move.w	#15,move_lock(a0)
 		move.b	#$23,anim(a0)
 ; locret_16B04:
 .return:
@@ -615,7 +624,7 @@ Knuckles_Sliding:
 
 		bsr.w	Knux_TouchFloor
 
-		move.w	#$F,move_lock(a0)
+		move.w	#15,move_lock(a0)
 		move.b	#$22,anim(a0)
 
 		rts
@@ -653,11 +662,8 @@ Knuckles_Sliding:
 ; loc_16B96:
 .fail:
 		move.b	#2,double_jump_flag(a0)
-		move.b	#$21,anim(a0)
-
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
-
+		move.b	#$21,anim(a0)						; put Knuckles in his falling animation
+		move.w	default_y_radius(a0),y_radius(a0)		; set default_y_radius and default_x_radius
 		bset	#Status_InAir,(Gliding_collision_flags).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -1027,8 +1033,7 @@ Knuckles_LetGoOfWall:
 		move.b	#$CB,mapping_frame(a0)
 		move.b	#7,anim_frame_timer(a0)
 		move.b	#1,anim_frame(a0)
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.w	default_y_radius(a0),y_radius(a0)	; set default_y_radius and default_x_radius
 
 .return
 		rts
@@ -1097,7 +1102,7 @@ GetDistanceFromWall:
 Knuckles_Climb_Ledge:
 		tst.b	anim_frame_timer(a0)
 		bne.s	.return
-		bsr.w	Knuckles_DoLedgeClimbingAnimation
+		bsr.s	Knuckles_DoLedgeClimbingAnimation
 
 		; Have we reached the end of the ledge-climbing animation?
 		cmpi.b	#Knuckles_ClimbLedge_Frames_End-Knuckles_ClimbLedge_Frames,double_jump_property(a0)
@@ -1269,9 +1274,16 @@ Knuckles_Move_Glide:
 ; locret_170C0:
 .doNotModifyBias:
 		rts
+
+; ---------------------------------------------------------------------------
+; Start of subroutine Knux_MdRoll
+; Called if Knuckles is in a ball, but not airborne (thus, probably rolling)
 ; ---------------------------------------------------------------------------
 
-Knux_Spin_Path:
+; =============== S U B R O U T I N E =======================================
+
+; Knux_Spin_Path:
+Knux_MdRoll:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_170CC
 		bsr.w	Knux_Jump
@@ -1283,18 +1295,32 @@ loc_170CC:
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
 		bra.w	Player_SlopeRepel
+
+; ---------------------------------------------------------------------------
+; Start of subroutine Knux_MdJump
+; Called if Knuckles is in a ball and airborne (he could be jumping but not necessarily)
+; Notes: This is identical to Knux_MdAir, at least at this outer level.
+; Why they gave it a separate copy of the code, I don't know.
 ; ---------------------------------------------------------------------------
 
-Knux_Spin_Freespace:
+; =============== S U B R O U T I N E =======================================
+
+; Knux_Spin_Freespace:
+Knux_MdJump:
 		bsr.w	Knux_JumpHeight
 		bsr.w	Knux_ChgJumpDir
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
-		btst	#Status_Underwater,status(a0)
-		beq.s	loc_17138
-		subi.w	#$28,y_vel(a0)
+		btst	#Status_Underwater,status(a0)		; is Knuckles underwater?
+		beq.s	loc_17138					; if not, branch
+		subi.w	#$28,y_vel(a0)				; reduce gravity by $28 ($38-$28=$10)
 
 loc_17138:
+		cmpi.w	#$1000,y_vel(a0)
+		ble.s		.maxy
+		move.w	#$1000,y_vel(a0)
+
+.maxy
 		bsr.w	Player_JumpAngle
 		bra.w	SonicKnux_DoLevelCollision
 
@@ -1634,8 +1660,8 @@ loc_1746A:
 		bclr	#0,status(a0)
 		cmpi.b	#12,air_left(a0)
 		blo.s		locret_174B2
-		move.b	#6,routine(a6)
-		move.b	#$15,mapping_frame(a6)
+		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
+		move.b	#$15,mapping_frame(a6)			; v_Dust
 
 locret_174B2:
 		rts
@@ -1685,8 +1711,8 @@ loc_174F0:
 		bset	#0,status(a0)
 		cmpi.b	#12,air_left(a0)
 		blo.s		locret_17538
-		move.b	#6,routine(a6)
-		move.b	#$15,mapping_frame(a6)
+		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
+		move.b	#$15,mapping_frame(a6)			; v_Dust
 
 locret_17538:
 		rts
@@ -1704,6 +1730,8 @@ Knux_RollSpeed:
 		tst.b	status_secondary(a0)
 		bmi.w	loc_175F8
 		tst.w	move_lock(a0)
+		bne.s	loc_17580
+		tst.w	(HScroll_Shift).w
 		bne.s	loc_17580
 		btst	#button_left,(Ctrl_1_logical).w
 		beq.s	loc_17574
@@ -1747,8 +1775,7 @@ loc_175AA:
 		bne.s	loc_175E6
 		bclr	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.w	default_y_radius(a0),y_radius(a0)	; set default_y_radius and default_x_radius
 		move.b	#id_Wait,anim(a0)
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
@@ -1779,21 +1806,22 @@ loc_17602:
 loc_17604:
 		move.b	angle(a0),d0
 		jsr	(GetSineCosine).w
-		muls.w	ground_vel(a0),d0
-		asr.l	#8,d0
-		move.w	d0,y_vel(a0)
-		muls.w	ground_vel(a0),d1
-		asr.l	#8,d1
-		cmpi.w	#$1000,d1
+		move.w	ground_vel(a0),d2		; devon fix
+		cmpi.w	#$1000,d2
 		ble.s		loc_17628
-		move.w	#$1000,d1
+		move.w	#$1000,d2
 
 loc_17628:
-		cmpi.w	#-$1000,d1
+		cmpi.w	#-$1000,d2
 		bge.s	loc_17632
-		move.w	#-$1000,d1
+		move.w	#-$1000,d2
 
 loc_17632:
+		muls.w	d2,d0
+		asr.l	#8,d0
+		move.w	d0,y_vel(a0)
+		muls.w	d2,d1
+		asr.l	#8,d1
 		move.w	d1,x_vel(a0)
 		bra.w	loc_17382
 
@@ -1956,8 +1984,7 @@ loc_1775C:
 		move.b	#1,jumping(a0)
 		clr.b	stick_to_convex(a0)
 		sfx	sfx_Jump
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.w	default_y_radius(a0),y_radius(a0)			; set default_y_radius and default_x_radius
 		btst	#Status_Roll,status(a0)
 		bne.s	locret_177E0
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
@@ -2236,8 +2263,7 @@ locret_17B16:
 
 Knux_TouchFloor:
 		move.b	y_radius(a0),d0
-		move.b	default_y_radius(a0),y_radius(a0)
-		move.b	default_x_radius(a0),x_radius(a0)
+		move.w	default_y_radius(a0),y_radius(a0)	; set y_radius and x_radius
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_17B6A
 		bclr	#Status_Roll,status(a0)
@@ -2638,13 +2664,13 @@ Knuckles_Load_PLC2:
 		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
 
 loc_18122:
-		lea	(DPLC_Knuckles).l,a2
 		add.w	d0,d0
+		lea	(DPLC_Knuckles).l,a2
 		adda.w	(a2,d0.w),a2
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	locret_18162
-		move.l	#ArtUnc_Knux>>1,d6
+		move.l	#dmaSource(ArtUnc_Knux),d6
 
 loc_1813A:
 		moveq	#0,d1

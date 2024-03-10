@@ -136,8 +136,10 @@ Obj_TitleCard:
 .skiplevel2
 		lea	(PLC2_Sonic).l,a5
 		jsr	(LoadPLC_Raw_KosM).w
-		jsr	(LoadPLC2_KosM).w
-		jsr	(LoadPLC_Animals).l
+		movea.l	(Level_data_addr_RAM.PLC2).w,a5
+		jsr	(LoadPLC_Raw_KosM).w							; load main art
+		movea.l	(Level_data_addr_RAM.PLCAnimals).w,a5
+		jsr	(LoadPLC_Raw_KosM).w							; load animals art
 		move.b	#1,(HUD_RAM.status).w						; load HUD
 		clr.b	(Ctrl_1_locked).w
 		clr.b	(Ctrl_2_locked).w

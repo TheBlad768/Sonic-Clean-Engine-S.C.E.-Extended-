@@ -41,11 +41,11 @@ Ani_Sonic: offsetTable
 		offsetTableEntry.w SonAni_Carry		; 22
 		offsetTableEntry.w SonAni_Carry2		; 23
 
-SonAni_Walk:		dc.b  $FF,   7,   8,   1,   2,   3,   4,   5,   6, $FF
-SonAni_Run:			dc.b  $FF, $21, $22, $23, $24, $FF, $FF, $FF, $FF, $FF
-SonAni_Roll:			dc.b  $FE, $96, $97, $96, $98, $96, $99, $96, $9A, $FF
-SonAni_Roll2:		dc.b  $FE, $96, $97, $96, $98, $96, $99, $96, $9A, $FF
-SonAni_Push:		dc.b  $FD, $B6, $B7, $B8, $B9, $FF, $FF, $FF, $FF, $FF
+SonAni_Walk:		dc.b  $FF,   7,   8,   1,   2,   3,   4,   5,   6, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+SonAni_Run:			dc.b  $FF, $21, $22, $23, $24, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+SonAni_Roll:			dc.b  $FE, $96, $97, $96, $98, $96, $99, $96, $9A, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+SonAni_Roll2:		dc.b  $FE, $96, $97, $96, $98, $96, $99, $96, $9A, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+SonAni_Push:		dc.b  $FD, $B6, $B7, $B8, $B9, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 SonAni_Wait:		dc.b    5, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA
 					dc.b  $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA
 					dc.b  $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA, $BA

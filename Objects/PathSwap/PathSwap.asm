@@ -21,7 +21,7 @@ Obj_PathSwap:
 		move.w	y_pos(a0),d1
 		lea	(Player_1).w,a1
 		cmp.w	y_pos(a1),d1
-		bcc.s	+
+		bhs.s	+
 		move.b	#1,objoff_34(a0)
 +
 		lea	(Player_2).w,a1
@@ -48,7 +48,7 @@ loc_1CD3C:
 		move.w	x_pos(a0),d1
 		lea	(Player_1).w,a1
 		cmp.w	x_pos(a1),d1
-		bcc.s	+
+		bhs.s	+
 		move.b	#1,objoff_34(a0)
 +
 		lea	(Player_2).w,a1
@@ -96,12 +96,12 @@ sub_1CDDA:
 loc_1CE1C:
 		move.w	x_pos(a1),d2
 		sub.w	d1,d2
-		bcc.s	loc_1CE26
+		bhs.s	loc_1CE26
 		neg.w	d2
 
 loc_1CE26:
 		cmpi.w	#$40,d2
-		bcc.s	locret_1CE6A
+		bhs.s	locret_1CE6A
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CE54
 		move.b	#$C,top_solid_bit(a1)
@@ -112,10 +112,10 @@ loc_1CE26:
 		move.b	#$F,lrb_solid_bit(a1)
 
 loc_1CE54:
-		andi.w	#$7FFF,art_tile(a1)
+		andi.w	#drawing_mask,art_tile(a1)
 		btst	#5,d0
 		beq.s	locret_1CE6A
-		ori.w	#$8000,art_tile(a1)
+		ori.w	#high_priority,art_tile(a1)
 
 locret_1CE6A:
 		rts
@@ -143,12 +143,12 @@ loc_1CE6C:
 loc_1CEA8:
 		move.w	x_pos(a1),d2
 		sub.w	d1,d2
-		bcc.s	loc_1CEB2
+		bhs.s	loc_1CEB2
 		neg.w	d2
 
 loc_1CEB2:
 		cmpi.w	#$40,d2
-		bcc.s	locret_1CEF0
+		bhs.s	locret_1CEF0
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CEDE
 		move.b	#$C,top_solid_bit(a1)
@@ -159,10 +159,10 @@ loc_1CEB2:
 		move.b	#$F,lrb_solid_bit(a1)
 
 loc_1CEDE:
-		andi.w	#$7FFF,art_tile(a1)
+		andi.w	#drawing_mask,art_tile(a1)
 		btst	#6,d0
 		beq.s	locret_1CEF0
-		ori.w	#$8000,art_tile(a1)
+		ori.w	#high_priority,art_tile(a1)
 
 locret_1CEF0:
 		rts
@@ -207,12 +207,12 @@ sub_1CF42:
 loc_1CF84:
 		move.w	y_pos(a1),d2
 		sub.w	d1,d2
-		bcc.s	loc_1CF8E
+		bhs.s	loc_1CF8E
 		neg.w	d2
 
 loc_1CF8E:
 		cmpi.w	#$40,d2
-		bcc.s	locret_1CFD2
+		bhs.s	locret_1CFD2
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CFBC
 		move.b	#$C,top_solid_bit(a1)
@@ -223,10 +223,10 @@ loc_1CF8E:
 		move.b	#$F,lrb_solid_bit(a1)
 
 loc_1CFBC:
-		andi.w	#$7FFF,art_tile(a1)
+		andi.w	#drawing_mask,art_tile(a1)
 		btst	#5,d0
 		beq.s	locret_1CFD2
-		ori.w	#$8000,art_tile(a1)
+		ori.w	#high_priority,art_tile(a1)
 
 locret_1CFD2:
 		rts
@@ -254,12 +254,12 @@ loc_1CFD4:
 loc_1D010:
 		move.w	y_pos(a1),d2
 		sub.w	d1,d2
-		bcc.s	loc_1D01A
+		bhs.s	loc_1D01A
 		neg.w	d2
 
 loc_1D01A:
 		cmpi.w	#$40,d2
-		bcc.s	locret_1D058
+		bhs.s	locret_1D058
 		btst	#0,render_flags(a0)
 		bne.s	loc_1D046
 		move.b	#$C,top_solid_bit(a1)
@@ -270,10 +270,10 @@ loc_1D01A:
 		move.b	#$F,lrb_solid_bit(a1)
 
 loc_1D046:
-		andi.w	#$7FFF,art_tile(a1)
+		andi.w	#drawing_mask,art_tile(a1)
 		btst	#6,d0
 		beq.s	locret_1D058
-		ori.w	#$8000,art_tile(a1)
+		ori.w	#high_priority,art_tile(a1)
 
 locret_1D058:
 		rts

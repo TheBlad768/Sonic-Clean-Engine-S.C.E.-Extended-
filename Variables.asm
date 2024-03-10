@@ -196,6 +196,7 @@ DMA_data_thunk:					= *						; Used as a RAM holder for the final DMA command wo
 DMA_trigger_word:					ds.w 1					; Transferred from RAM to avoid crashing the Mega Drive
 f_hbla_pal:							= *
 H_int_flag:							ds.b 1					; Unless this is set H-int will return immediately
+Do_Updates_in_H_int:				ds.b 1					; If this is set Do_Updates will be called from H-int instead of V-int
 WindTunnel_mode:					ds.b 1
 WindTunnel_flag:						ds.b 1
 WindTunnel_flag_P2:					ds.b 1
@@ -203,7 +204,6 @@ Disable_death_plane:					ds.b 1					 ; if set, going below the screen wont kill 
 f_lockctrl:							= *
 Ctrl_1_locked:						ds.b 1
 Ctrl_2_locked:						ds.b 1
-									ds.b 1					; even
 v_framecount:						= *
 Level_frame_counter:					ds.b 1					; The number of frames which have elapsed since the level started
 v_framebyte							ds.b 1
@@ -327,16 +327,39 @@ Object_index_addr:					ds.l 1					; Points to either the object index for levels
 Object_load_addr_RAM:				ds.l 1					; Jump for the object loading manager
 
 Level_data_addr_RAM:				= *
-.AnPal:								ds.l 1
-.Resize:								ds.l 1
-.WaterResize:							ds.l 1
-.AfterBoss:							ds.l 1
-.ScreenInit:							ds.l 1
-.BackgroundInit:						ds.l 1
-.ScreenEvent:							ds.l 1
-.BackgroundEvent:					ds.l 1
-.AnimateTiles:						ds.l 1
-.AniPLC:								ds.l 1
+.AnPal								ds.l 1
+.Resize								ds.l 1
+.WaterResize							ds.l 1
+.AfterBoss							ds.l 1
+.ScreenInit							ds.l 1
+.BackgroundInit						ds.l 1
+.ScreenEvent							ds.l 1
+.BackgroundEvent						ds.l 1
+.AnimateTilesInit						ds.l 1
+.AnimateTiles							ds.l 1
+.AniPLC								ds.l 1
+.Palette								= *
+.8x8data								ds.l 1
+.WaterPalette							= *
+.16x16data							ds.l 1
+.Music								= *
+.128x128data							ds.l 1
+.Solid								ds.l 1
+.Layout								ds.l 1
+.Sprites								ds.l 1
+.Rings								ds.l 1
+.PLC1								ds.l 1
+.PLC2								ds.l 1
+.PLCAnimals							ds.l 1
+.xstart								ds.w 1
+.xend								ds.w 1
+.ystart								ds.w 1
+.yend								ds.w 1
+.WaterHeight							ds.w 1
+.WaterSpal							ds.b 1
+.WaterKpal							ds.b 1
+.Location								ds.l 1
+.Debug								ds.l 1
 Level_data_addr_RAM_end			= *
 
 Kos_decomp_queue_count:				ds.w 1					; The number of pieces of data on the queue. Sign bit set indicates a decompression is in progress
@@ -432,24 +455,25 @@ HUD_RAM:							= *
 DecimalScoreRAM:					ds.l 1
 DecimalScoreRAM2:					ds.l 1
 
+; the following variables are all saved when hitting a star post
 Saved_zone_and_act:					ds.w 1
 Saved_apparent_zone_and_act:			ds.w 1
 Saved_X_pos:						ds.w 1
 Saved_Y_pos:						ds.w 1
 Saved_ring_count:					ds.w 1
 Saved_timer:							ds.l 1
-Saved_mappings:						ds.l 1
 Saved_art_tile:						ds.w 1
 Saved_solid_bits:						ds.w 1					; Copy of Player 1's top_solid_bit and lrb_solid_bit
 Saved_camera_X_pos:					ds.w 1
 Saved_camera_Y_pos:					ds.w 1
 Saved_mean_water_level:				ds.w 1
+Saved_water_full_screen_flag:			ds.b 1
+Saved_extra_life_flags:				ds.b 1
 Saved_camera_max_Y_pos:			ds.w 1
 Saved_dynamic_resize:				ds.l 1
-Saved_water_full_screen_flag:			ds.b 1
+Saved_waterdynamic_resize:			ds.l 1
 Saved_status_secondary:				ds.b 1
 Saved_last_star_post_hit:				ds.b 1
-									ds.b 1					; even
 
 Oscillating_variables:					= *
 Oscillating_Numbers:					= *

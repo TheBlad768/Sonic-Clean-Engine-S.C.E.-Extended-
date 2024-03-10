@@ -18,7 +18,7 @@ Obj_FireShield:
 		; init
 		move.l	#Map_FireShield,mappings(a0)
 		move.l	#DPLC_FireShield,DPLC_Address(a0)				; used by PLCLoad_Shields
-		move.l	#ArtUnc_FireShield>>1,Art_Address(a0)				; used by PLCLoad_Shields
+		move.l	#dmaSource(ArtUnc_FireShield),Art_Address(a0)		; used by PLCLoad_Shields
 		move.b	#4,render_flags(a0)
 		move.w	#$80,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)			; set height and width
@@ -96,12 +96,12 @@ Obj_FireShield:
 Obj_LightningShield:
 
 		; load spark art
-		QueueStaticDMA ArtUnc_Obj_LightningShield_Sparks,tiles_to_bytes(5),tiles_to_bytes(ArtTile_Shield_Sparks)
+		QueueStaticDMA ArtUnc_LightningShield_Sparks,tiles_to_bytes(5),tiles_to_bytes(ArtTile_Shield_Sparks)
 
 		; init
 		move.l	#Map_LightningShield,mappings(a0)
-		move.l	#DPLC_LightningShield,DPLC_Address(a0)			; used by PLCLoad_Shields
-		move.l	#ArtUnc_LightningShield>>1,Art_Address(a0)		; used by PLCLoad_Shields
+		move.l	#DPLC_LightningShield,DPLC_Address(a0)				; used by PLCLoad_Shields
+		move.l	#dmaSource(ArtUnc_LightningShield),Art_Address(a0)	; used by PLCLoad_Shields
 		move.b	#4,render_flags(a0)
 		move.w	#$80,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)			; set height and width
@@ -271,7 +271,7 @@ Obj_BubbleShield:
 		; init
 		move.l	#Map_BubbleShield,mappings(a0)
 		move.l	#DPLC_BubbleShield,DPLC_Address(a0)				; used by PLCLoad_Shields
-		move.l	#ArtUnc_BubbleShield>>1,Art_Address(a0)			; used by PLCLoad_Shields
+		move.l	#dmaSource(ArtUnc_BubbleShield),Art_Address(a0)	; used by PLCLoad_Shields
 		move.b	#4,render_flags(a0)
 		move.w	#$80,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)			; set height and width
@@ -284,7 +284,7 @@ Obj_BubbleShield:
 .nothighpriority
 		move.w	#1,anim(a0)										; clear anim and set prev_anim to 1
 		st	LastLoadedDPLC(a0)									; reset LastLoadedDPLC (used by PLCLoad_Shields)
-		lea	(Player_1).w,a1
+		movea.w	parent(a0),a1
 		jsr	(Player_ResetAirTimer).l
 		move.l	#.main,address(a0)
 
@@ -335,7 +335,7 @@ Obj_InstaShield:
 		; init
 		move.l	#Map_InstaShield,mappings(a0)
 		move.l	#DPLC_InstaShield,DPLC_Address(a0)				; used by PLCLoad_Shields
-		move.l	#ArtUnc_InstaShield>>1,Art_Address(a0)			; used by PLCLoad_Shields
+		move.l	#dmaSource(ArtUnc_InstaShield),Art_Address(a0)	; used by PLCLoad_Shields
 		move.b	#4,render_flags(a0)
 		move.w	#$80,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)			; set height and width
@@ -435,7 +435,11 @@ PLCLoad_Shields:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Invincibility:
+
+		; load invincibility art
 		QueueStaticDMA ArtUnc_Invincibility,tiles_to_bytes($20),tiles_to_bytes(ArtTile_Shield)
+
+		; init
 		moveq	#0,d2
 		lea	off_187DE-6(pc),a2
 		lea	address(a0),a1
@@ -447,7 +451,7 @@ Obj_Invincibility:
 		move.w	#make_art_tile(ArtTile_Shield,0,0),art_tile(a1)
 		move.w	#$80,priority(a1)
 		move.b	#$44,render_flags(a1)								; set screen coordinates and multi-draw flag
-		move.b	#32/2,width_pixels(a1)
+		move.w	#bytes_to_word(32/2,32/2),height_pixels(a1)			; set height and width
 		move.w	#2,mainspr_childsprites(a1)
 		move.w	parent(a0),parent(a1)
 		move.b	d2,objoff_36(a1)
@@ -460,9 +464,9 @@ Obj_Invincibility:
 		move.b	#4,objoff_34(a0)
 
 .main
-		movea.w	parent(a0),a1
+		movea.w	parent(a0),a1										; a1=character
 		btst	#Status_Invincible,status_secondary(a1)					; should the player still have a invincible?
-		beq.w	Delete_Current_Sprite								; if not, delete
+		beq.s	.delete											; if not, delete
 		move.w	x_pos(a1),d0
 		move.w	d0,x_pos(a0)
 		move.w	y_pos(a1),d1
@@ -471,42 +475,46 @@ Obj_Invincibility:
 		lea	byte_189E0(pc),a3
 		moveq	#0,d5
 
-loc_188A0:
+.find
 		move.w	objoff_38(a0),d2
 		move.b	(a3,d2.w),d5
-		bpl.s	loc_188B0
+		bpl.s	.found
 		clr.w	objoff_38(a0)
-		bra.s	loc_188A0
+		bra.s	.find
 ; ---------------------------------------------------------------------------
 
-loc_188B0:
+.found
 		addq.w	#1,objoff_38(a0)
 		lea	word_189A0(pc),a6
 		move.b	objoff_34(a0),d6
 		bsr.w	sub_1898A
-		move.w	d2,(a2)+
-		move.w	d3,(a2)+
-		move.w	d5,(a2)+
+		move.w	d2,(a2)+		; sub2_x_pos
+		move.w	d3,(a2)+		; sub2_y_pos
+		move.w	d5,(a2)+		; sub2_mapframe
 		addi.w	#$20,d6
 		bsr.w	sub_1898A
-		move.w	d2,(a2)+
-		move.w	d3,(a2)+
-		move.w	d5,(a2)+
+		move.w	d2,(a2)+		; sub3_x_pos
+		move.w	d3,(a2)+		; sub3_y_pos
+		move.w	d5,(a2)+		; sub3_mapframe
 		moveq	#$12,d0
 		btst	#Status_Facing,status(a1)
-		beq.s	loc_188E0
+		beq.s	.notflip
 		neg.w	d0
 
-loc_188E0:
+.notflip
 		add.b	d0,objoff_34(a0)
 		jmp	(Draw_Sprite).w
+; ---------------------------------------------------------------------------
+
+.delete
+		jmp	(Delete_Current_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_188E8:
 		movea.w	parent(a0),a1
 		btst	#Status_Invincible,status_secondary(a1)					; should the player still have a invincible?
-		beq.w	Delete_Current_Sprite								; if not, delete
+		beq.s	Obj_Invincibility.delete							; if not, delete
 		lea	(Pos_table_index).w,a5
 		lea	(Pos_table).w,a6
 		moveq	#0,d1
@@ -526,15 +534,15 @@ Obj_188E8:
 		lea	sub2_x_pos(a0),a2
 		movea.l	objoff_30(a0),a3
 
-loc_18936:
+.find
 		move.w	objoff_38(a0),d2
 		move.b	(a3,d2.w),d5
-		bpl.s	loc_18946
+		bpl.s	.found
 		clr.w	objoff_38(a0)
-		bra.s	loc_18936
+		bra.s	.find
 ; ---------------------------------------------------------------------------
 
-loc_18946:
+.found
 		swap	d5
 		add.b	objoff_35(a0),d2
 		move.b	(a3,d2.w),d5
@@ -542,21 +550,21 @@ loc_18946:
 		lea	word_189A0(pc),a6
 		move.b	objoff_34(a0),d6
 		bsr.s	sub_1898A
-		move.w	d2,(a2)+
-		move.w	d3,(a2)+
-		move.w	d5,(a2)+
+		move.w	d2,(a2)+		; sub2_x_pos
+		move.w	d3,(a2)+		; sub2_y_pos
+		move.w	d5,(a2)+		; sub2_mapframe
 		addi.w	#$20,d6
 		swap	d5
 		bsr.s	sub_1898A
-		move.w	d2,(a2)+
-		move.w	d3,(a2)+
-		move.w	d5,(a2)+
+		move.w	d2,(a2)+		; sub3_x_pos
+		move.w	d3,(a2)+		; sub3_y_pos
+		move.w	d5,(a2)+		; sub3_mapframe
 		moveq	#2,d0
 		btst	#Status_Facing,status(a1)
-		beq.s	loc_18982
+		beq.s	.notflip
 		neg.w	d0
 
-loc_18982:
+.notflip
 		add.b	d0,objoff_34(a0)
 		jmp	(Draw_Sprite).w
 
@@ -594,18 +602,19 @@ byte_18A02:
 byte_18A1B:
 		dc.b    7,   6,   5,   4,   3,   2,   1,   2,   3,   4,   5,   6, $FF,   1,   2,   3,   4,   5,   6,   7
 		dc.b    6,   5,   4,   3,   2
+	even
 ; ---------------------------------------------------------------------------
 
-		include "Objects/Shields/Object Data/Map - Invincibility.asm"
 		include "Objects/Shields/Object Data/Anim - Fire Shield.asm"
+		include "Objects/Shields/Object Data/Anim - Lightning Shield.asm"
+		include "Objects/Shields/Object Data/Anim - Bubble Shield.asm"
+		include "Objects/Shields/Object Data/Anim - Insta-Shield.asm"
+		include "Objects/Shields/Object Data/Map - Invincibility.asm"
 		include "Objects/Shields/Object Data/Map - Fire Shield.asm"
 		include "Objects/Shields/Object Data/DPLC - Fire Shield.asm"
-		include "Objects/Shields/Object Data/Anim - Lightning Shield.asm"
 		include "Objects/Shields/Object Data/Map - Lightning Shield.asm"
 		include "Objects/Shields/Object Data/DPLC - Lightning Shield.asm"
-		include "Objects/Shields/Object Data/Anim - Bubble Shield.asm"
 		include "Objects/Shields/Object Data/Map - Bubble Shield.asm"
 		include "Objects/Shields/Object Data/DPLC - Bubble Shield.asm"
-		include "Objects/Shields/Object Data/Anim - Insta-Shield.asm"
 		include "Objects/Shields/Object Data/Map - Insta-Shield.asm"
 		include "Objects/Shields/Object Data/DPLC - Insta-Shield.asm"

@@ -22,7 +22,7 @@ ramaddr function x,(-(x&$80000000)<<1)|x
 id function ptr,((ptr-offset)/ptrsize+idstart)
 
 ; function to convert two separate nibble into a byte
-nibbles_to_byte function nibble1,nibble2,((nibble1)&$F0)|((nibble2)&$F)
+nibbles_to_byte function nibble1,nibble2,(((nibble1)<<4)&$F0)|((nibble2)&$FF)
 
 ; function to convert two separate bytes into a word
 bytes_to_word function byte1,byte2,(((byte1)<<8)&$FF00)|((byte2)&$FF)
@@ -139,11 +139,16 @@ palp macro paladdress,ramaddress,colours
 	endm
 
 ; macro for declaring a "main level load block" (MLLB)
-levartptrs macro art,map16x16,map128x128,palette
-	dc.l palette<<24|art
-	dc.l map16x16
-	dc.l map128x128
+levartptrs macro art,map16x16,map128x128,palette,wpalette,music
+	dc.l (palette)<<24|art
+	dc.l (wpalette)<<24|map16x16
+	dc.l (music)<<24|map128x128
     endm
+
+watpalptrs macro height,spal,kpal
+	dc.w height
+	dc.b spal, kpal
+	endm
 
 ; macro to declare sub-object data
 subObjData	macro mappings,vram,priority,width,height,frame,collision
@@ -333,6 +338,20 @@ ObjectLayoutBoundary macro
 
 RingLayoutBoundary macro
 	dc.w 0, 0, -1, -1
+    endm
+
+; ---------------------------------------------------------------------------
+; function to make a little-endian 16-bit pointer for the Z80 sound driver
+; ---------------------------------------------------------------------------
+
+z80_ptr function x,(x)<<8&$FF00|(x)>>8&$7F|$80
+
+; ---------------------------------------------------------------------------
+; macro to declare a little-endian 16-bit pointer for the Z80 sound driver
+; ---------------------------------------------------------------------------
+
+rom_ptr_z80 macro addr
+	dc.w z80_ptr(addr)
     endm
 
 ; ---------------------------------------------------------------------------

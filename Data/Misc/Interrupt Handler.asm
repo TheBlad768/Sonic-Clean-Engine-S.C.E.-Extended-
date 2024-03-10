@@ -272,6 +272,15 @@ VInt_Level_Cont:
 		jsr	(VInt_DrawLevel).w
 		startZ80
 		enableInts
+		tst.b	(Water_flag).w
+		beq.s	.notwater
+		cmpi.b	#92,(H_int_counter).w				; is H-int occuring on or below line 92?
+		bhs.s	.notwater							; if it is, branch
+		st	(Do_Updates_in_H_int).w
+		jmp	(Set_Kos_Bookmark).w
+; ---------------------------------------------------------------------------
+
+.notwater
 		pea	(Set_Kos_Bookmark).w
 
 ; ---------------------------------------------------------------------------
@@ -299,7 +308,7 @@ Do_Updates:
 HInt:
 		disableInts
 		tst.b	(H_int_flag).w
-		beq.s	HInt_Done
+		beq.w	HInt_Done
 		clr.b	(H_int_flag).w
 		movem.l	a0-a1,-(sp)
 		lea	(VDP_data_port).l,a1
@@ -310,6 +319,13 @@ HInt:
 		move.l	(a0)+,VDP_data_port-VDP_data_port(a1)
 	endr
 		movem.l	(sp)+,a0-a1
+		tst.b	(Do_Updates_in_H_int).w
+		beq.s	HInt_Done
+		clr.b	(Do_Updates_in_H_int).w
+		movem.l	d0-a6,-(sp)							; move all the registers to the stack
+		bsr.w	Do_Updates
+		SMPS_UpdateSoundDriver						; Update SMPS
+		movem.l	(sp)+,d0-a6							; load saved registers from the stack
 
 HInt_Done:
 		rte
