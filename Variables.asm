@@ -251,7 +251,7 @@ Debug_camera_speed:					ds.b 1
 Debug_object:						ds.b 1					; The current position in the debug mode object list
 Level_end_flag:						ds.b 1
 LastAct_end_flag:						ds.b 1
-Debug_mode_flag:					ds.b 1
+									ds.b 1					; even
 Slotted_object_bits:					ds.b 8					; Index of slot array to use
 Signpost_addr:						ds.w 1
 _unkFAAC:							ds.b 1
@@ -318,6 +318,8 @@ Current_music:						ds.w 1
 Palette_fade_timer:					ds.w 1					; The palette gets faded in until this timer expires
 SegaCD_Mode:						ds.b 1
 Respawn_table_keep:					ds.b 1					; If set, respawn table is not reset during level load
+Debug_mode_flag:					ds.b 1
+									ds.b 1					; even
 
 Block_table_addr_ROM:				ds.l 1					; Block table pointer(Block (16x16) definitions, 8 bytes per definition)
 Level_layout_addr_ROM:				ds.l 1					; Level layout pointer

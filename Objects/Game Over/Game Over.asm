@@ -69,6 +69,7 @@ Obj_GameOver:
 .end
 		tst.b	(Time_over_flag).w
 		bne.s	.restart
+		lea	4*3(sp),sp											; exit from object and current screen
 		move.b	#id_ContinueScreen,(Game_mode).w				; load continue screen
 		tst.b	(Continue_count).w
 		bne.s	.draw

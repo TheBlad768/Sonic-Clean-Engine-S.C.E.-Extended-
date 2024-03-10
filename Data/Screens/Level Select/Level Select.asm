@@ -9,6 +9,7 @@ LevelSelect_VRAM:				= 0
 ; Variables
 LevelSelect_ZoneCount:			= ZoneCount
 LevelSelect_ActDEZCount:			= 4	; DEZ
+
 LevelSelect_CharacterCount:		= 7
 LevelSelect_MusicTestCount:		= LevelSelect_CharacterCount+1
 LevelSelect_SoundTestCount:		= LevelSelect_MusicTestCount+1
@@ -36,8 +37,9 @@ vLevelSelect_HCount:				ds.w $10
 ; =============== S U B R O U T I N E =======================================
 
 LevelSelect_Screen:
-		music	mus_Stop
-		jsr	(Clear_Kos_Module_Queue).w
+		music	mus_Stop											; stop music
+		jsr	(Clear_Kos_Module_Queue).w								; clear KosM PLCs
+		ResetDMAQueue												; clear DMA queue
 		jsr	(Pal_FadeToBlack).w
 		disableInts
 		move.l	#VInt,(V_int_addr).w
@@ -47,19 +49,18 @@ LevelSelect_Screen:
 		lea	Level_VDP(pc),a1
 		jsr	(Load_VDP).w
 		jsr	(Clear_Palette).w
-		clr.b	(Water_full_screen_flag).w
-		clr.b	(Water_flag).w
-		clearRAM RAM_start, (RAM_start+$1000)					; clear foreground buffer
+		clearRAM RAM_start, (RAM_start+$1000)						; clear foreground buffer
 		clearRAM Object_RAM, Object_RAM_end
 		clearRAM Lag_frame_count, Lag_frame_count_end
 		clearRAM Camera_RAM, Camera_RAM_end
 		clearRAM Oscillating_variables, Oscillating_variables_end
 		moveq	#0,d0
+		move.b	d0,(Water_full_screen_flag).w
+		move.b	d0,(Water_flag).w
 		move.w	d0,(Current_zone_and_act).w
 		move.w	d0,(Apparent_zone_and_act).w
 		move.b	d0,(Last_star_post_hit).w
-		move.b	d0,(Level_started_flag).w
-		ResetDMAQueue
+		move.b	d0,(Debug_mode_flag).w
 
 		; load main art
 		lea	(ArtKosM_LevelSelectText).l,a1
@@ -77,6 +78,12 @@ LevelSelect_Screen:
 		bsr.w	LevelSelect_LoadMainText
 		move.w	#palette_line_0+LevelSelect_VRAM,d3
 		bsr.w	LevelSelect_LoadCharacter
+		move.w	#palette_line_0+LevelSelect_VRAM,d3
+		bsr.w	LevelSelect_MarkFields_Index.drawmusic
+		move.w	#palette_line_0+LevelSelect_VRAM,d3
+		bsr.w	LevelSelect_MarkFields_Index.drawsound
+		move.w	#palette_line_0+LevelSelect_VRAM,d3
+		bsr.w	LevelSelect_MarkFields_Index.drawsample
 		move.w	#palette_line_1,d3
 		bsr.w	LevelSelect_MarkFields
 
@@ -109,9 +116,16 @@ LevelSelect_Screen:
 		bpl.s	.loop
 
 		; set
-		moveq	#3,d0
-		move.b	d0,(Life_count).w
+		move.b	#3,(Life_count).w
+
+		; clear
+		moveq	#0,d0
+		move.w	d0,(Ring_count).w
+		move.l	d0,(Timer).w
+		move.l	d0,(Score).w
 		move.b	d0,(Continue_count).w
+		move.w	d0,(Current_zone_and_act).w
+		move.w	d0,(Apparent_zone_and_act).w
 		move.l	#5000,(Next_extra_life_score).w
 
 		; load zone and act
@@ -367,7 +381,7 @@ LevelSelect_Player2:
 LevelSelect_Player3:
 		levselstr "TAILS ALONE"
 LevelSelect_Player4:
-		levselstr "KNUCKLES ALONE"
+		levselstr "KNUX ALONE"
 	even
 
 ; ---------------------------------------------------------------------------
@@ -381,10 +395,10 @@ LevelSelect_LoadAct:
 		lea	(vLevelSelect_HCount).w,a0
 		move.w	(vLevelSelect_VCount).w,d0
 		move.w	d0,d1
-		move.b	d0,(sp)
+		move.b	d0,(sp)								; multiply by $100
 		move.w	(sp),d0
 		clr.b	d0
-		swap	d0
+		swap	d0									; $100 to $1000000
 		clr.w	d0
 		add.l	d0,d2
 		move.l	d2,VDP_control_port-VDP_control_port(a5)
@@ -496,13 +510,13 @@ LevelSelect_MarkFields:
 		cmpi.w	#LevelSelect_ZoneCount,d0
 		blo.w	LevelSelect_LoadAct
 		subq.w	#LevelSelect_CharacterCount,d0
-		blo.s		MarkFields_Index.return
+		blo.s		LevelSelect_MarkFields_Index.return
 		add.w	d0,d0
-		move.w	MarkFields_Index(pc,d0.w),d0
-		jmp	MarkFields_Index(pc,d0.w)
+		move.w	LevelSelect_MarkFields_Index(pc,d0.w),d0
+		jmp	LevelSelect_MarkFields_Index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
-MarkFields_Index: offsetTable
+LevelSelect_MarkFields_Index: offsetTable
 		offsetTableEntry.w LevelSelect_LoadCharacter		; 0
 		offsetTableEntry.w .drawmusic					; 2
 		offsetTableEntry.w .drawsound					; 4
@@ -540,7 +554,7 @@ MarkFields_Index: offsetTable
 		andi.w	#$F,d0
 		cmpi.b	#10,d0
 		blo.s		.skipsymbols
-		addq.b	#7,d0
+		addq.b	#6,d0
 
 .skipsymbols
 		addq.b	#1,d0
@@ -580,7 +594,7 @@ LevelSelect_LoadText:
 		lea	(RAM_start).l,a1
 		lea	LevelSelect_Text(pc),a2
 
-	if ~~LevelSelect_VRAM
+	if LevelSelect_VRAM=0
 		moveq	#0,d3
 	else
 		move.w	#LevelSelect_VRAM,d3
@@ -655,7 +669,7 @@ LevelSelect_Text:
 		levselstr "   UNKNOWN LEVEL      - UNKNOWN"
 		levselstr "   UNKNOWN LEVEL      - UNKNOWN"
 		levselstr "   CHARACTER:         -"
-		levselstr "   MUSIC TEST:        - 000"
-		levselstr "   SOUND TEST:        - 000"
-		levselstr "   SAMPLE TEST:       - 000"
+		levselstr "   MUSIC TEST:        -"
+		levselstr "   SOUND TEST:        -"
+		levselstr "   SAMPLE TEST:       -"
 	even
