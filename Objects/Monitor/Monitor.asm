@@ -21,7 +21,7 @@ Obj_Monitor:
 		beq.s	.notbroken										; if not, branch
 
 		; set broken
-		move.b	#$C,mapping_frame(a0)							; use 'broken monitor' frame
+		move.b	#$B,mapping_frame(a0)							; use 'broken monitor' frame
 		move.l	#Sprite_OnScreen_Test,address(a0)
 		jmp	(Sprite_OnScreen_Test).w
 ; ---------------------------------------------------------------------------
@@ -212,14 +212,14 @@ Obj_MonitorSpawnIcon:
 		bset	#0,(a2)												; mark monitor as destroyed
 
 .notremembered
-		move.b	#$B,anim(a0)									; display 'broken' animation
+		move.b	#$A,anim(a0)									; display 'broken' animation
 		move.l	#Obj_MonitorAnimate,address(a0)
 		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_MonitorAnimate:
-		cmpi.b	#$C,mapping_frame(a0)							; is monitor broken?
+		cmpi.b	#$B,mapping_frame(a0)							; is monitor broken?
 		bne.s	.notbroken										; if not, branch
 		move.l	#Obj_Monitor.draw,address(a0)
 
