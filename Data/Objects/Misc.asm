@@ -115,48 +115,50 @@ Set_IndexedVelocity:
 		add.w	d1,d0
 		move.l	Obj_VelocityIndex(pc,d0.w),x_vel(a0)
 		btst	#0,render_flags(a0)
-		beq.s	+
+		beq.s	.return
 		neg.w	x_vel(a0)
-+		rts
+
+.return
+		rts
 ; ---------------------------------------------------------------------------
 
 Obj_VelocityIndex:
 		dc.w -$100, -$100		; 0
 		dc.w $100, -$100		; 4
 		dc.w -$200, -$200	; 8
-		dc.w $200, -$200		; Ñ
+		dc.w $200, -$200		; C
 		dc.w -$300, -$200	; 10
 		dc.w $300, -$200		; 14
 		dc.w -$200, -$200	; 18
-		dc.w 0, -$200		; 1Ñ
+		dc.w 0, -$200		; 1C
 		dc.w -$400, -$300	; 20
 		dc.w $400, -$300		; 24
 		dc.w $300, -$300		; 28
-		dc.w -$400, -$300	; 2Ñ
+		dc.w -$400, -$300	; 2C
 		dc.w $400, -$300		; 30
 		dc.w -$200, -$200	; 34
 		dc.w $200, -$200		; 38
-		dc.w 0, -$100			; 3Ñ
+		dc.w 0, -$100			; 3C
 		dc.w -$40, -$700		; 40
 		dc.w -$80, -$700		; 44
 		dc.w -$180, -$700		; 48
-		dc.w -$100, -$700		; 4Ñ
+		dc.w -$100, -$700		; 4C
 		dc.w -$200, -$700	; 50
 		dc.w -$280, -$700	; 54
 		dc.w -$300, -$700	; 58
-		dc.w 0, -$100			; 5Ñ
+		dc.w 0, -$100			; 5C
 		dc.w -$100, -$100		; 60
 		dc.w $100, -$100		; 64
 		dc.w -$200, -$100		; 68
-		dc.w $200, -$100		; 6Ñ
+		dc.w $200, -$100		; 6C
 		dc.w -$200, -$200	; 70
 		dc.w $200, -$200		; 74
 		dc.w -$300, -$200	; 78
-		dc.w $300, -$200		; 7Ñ
+		dc.w $300, -$200		; 7C
 		dc.w -$300, -$300	; 80
 		dc.w $300, -$300		; 84
 		dc.w -$400, -$300	; 88
-		dc.w $400, -$300		; 8Ñ
+		dc.w $400, -$300		; 8C
 		dc.w -$200, -$300	; 90
 		dc.w $200, -$300		; 94
 
@@ -317,7 +319,7 @@ EnemyDefeat_Score:
 		blo.s		.notreachedlimit
 		moveq	#6,d0
 
-.notreachedlimit:
+.notreachedlimit
 		move.w	d0,objoff_3E(a0)
 		lea	Enemy_Points(pc),a2
 		move.w	(a2,d0.w),d0
@@ -326,11 +328,9 @@ EnemyDefeat_Score:
 		move.w	#1000,d0										; fix bonus to 10000
 		move.w	#10,objoff_3E(a0)
 
-.notreachedlimit2:
-		bsr.w	HUD_AddToScore
-		move.l	#Obj_Explosion,address(a0)
-		clr.b	routine(a0)
-		rts
+.notreachedlimit2
+		move.l	#Obj_Explosion,address(a0)						; change object to explosion
+		bra.w	HUD_AddToScore
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -348,7 +348,6 @@ HurtCharacter_WithoutDamage:
 ; =============== S U B R O U T I N E =======================================
 
 Check_PlayerAttack:
-		lea	(Player_1).w,a1
 		btst	#Status_Invincible,status_secondary(a1)
 		bne.s	loc_85822
 		cmpi.b	#id_SpinDash,anim(a1)
@@ -585,7 +584,7 @@ BossFlash:
 		dc.w Normal_palette_line_1+$1C
 		dc.w Normal_palette_line_1+$1E
 .palcycle
-		dc.w 8, $866, $222
+		dc.w 8, $866, 0
 		dc.w $888, $CCC, $EEE
 
 ; =============== S U B R O U T I N E =======================================
@@ -630,14 +629,14 @@ Check_CameraXBoundary:
 		beq.s	+
 		bmi.s	++
 		move.w	(Camera_X_pos).w,d0
-		addi.w	#$130,d0
+		addi.w	#320-16,d0
 		cmp.w	x_pos(a0),d0
 		bhi.s	+
 		clr.w	x_vel(a0)
 +		rts
 ; ---------------------------------------------------------------------------
 +		move.w	(Camera_X_pos).w,d0
-		addi.w	#$10,d0
+		addi.w	#16,d0
 		cmp.w	x_pos(a0),d0
 		blo.s		+
 		clr.w	x_vel(a0)
@@ -648,15 +647,37 @@ Check_CameraXBoundary:
 Resize_MaxYFromX:
 		move.w	(Camera_X_pos).w,d0
 
--		move.l	(a1)+,d1
+.find
+		move.l	(a1)+,d1
 		cmp.w	d1,d0
-		bhi.s	-
+		bhi.s	.find
 		swap	d1
 		tst.w	d1
-		bpl.s	+
+		bpl.s	.skip
 		andi.w	#$7FFF,d1
 		move.w	d1,(Camera_max_Y_pos).w
-+		move.w	d1,(Camera_target_max_Y_pos).w
+
+.skip
+		move.w	d1,(Camera_target_max_Y_pos).w
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
+WaterResize_MaxYFromX:
+		move.w	(Camera_X_pos).w,d0
+
+.find
+		move.l	(a1)+,d1
+		cmp.w	d1,d0
+		bhi.s	.find
+		swap	d1
+		tst.w	d1
+		bpl.s	.skip
+		andi.w	#$7FFF,d1
+		move.w	d1,(Mean_water_level).w
+
+.skip
+		move.w	d1,(Target_water_level).w
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -775,6 +796,12 @@ Child6_IncLevY:
 Child6_DecLevY:
 		dc.w 1-1
 		dc.l Obj_DecLevStartYGradual
+Child6_DecIncLevX:
+		dc.w 2-1
+		dc.l Obj_DecLevStartXGradual
+		dc.b 0, 0
+		dc.l Obj_IncLevEndXGradual
+		dc.b 0, 0
 Child1_ActLevelSize:
 		dc.w 3-1
 		dc.l Obj_IncLevEndXGradual

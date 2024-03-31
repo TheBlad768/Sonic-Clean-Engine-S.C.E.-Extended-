@@ -11,6 +11,13 @@ DeformBgLayer:
 		tst.b	(Scroll_lock).w
 		bne.s	.events
 		lea	(Player_1).w,a0
+		tst.b	(Scroll_force_positions).w
+		beq.s	.notsforce
+		clr.b	(Scroll_force_positions).w
+		clr.w	(H_scroll_frame_offset).w
+		lea	(Scroll_forced_X_pos-x_pos).w,a0
+
+.notsforce
 		lea	(Camera_X_pos).w,a1
 		lea	(Camera_min_X_pos).w,a2
 		lea	(H_scroll_amount).w,a4

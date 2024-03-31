@@ -48,7 +48,7 @@ loc_1E85C:
 		move.w	x_pos(a0),d1
 		lea	(Player_1).w,a1
 		cmp.w	x_pos(a1),d1
-		bcc.s	loc_1E880
+		bhs.s	loc_1E880
 		move.b	#1,$34(a0)
 
 loc_1E880:
@@ -94,9 +94,9 @@ sub_1E8C6:
 		add.w	d4,d3
 		move.w	y_pos(a1),d4
 		cmp.w	d2,d4
-		bcs.w	locret_1E9B4
+		blo.w	locret_1E9B4
 		cmp.w	d3,d4
-		bcc.w	locret_1E9B4
+		bhs.w	locret_1E9B4
 		btst	#5,subtype(a0)
 		beq.s	loc_1E908
 		btst	#Status_InAir,status(a1)
@@ -135,9 +135,9 @@ loc_1E944:
 		add.w	d4,d3
 		move.w	y_pos(a1),d4
 		cmp.w	d2,d4
-		bcs.s	locret_1E9B4
+		blo.s		locret_1E9B4
 		cmp.w	d3,d4
-		bcc.s	locret_1E9B4
+		bhs.s	locret_1E9B4
 		btst	#5,subtype(a0)
 		beq.s	loc_1E97C
 		btst	#Status_InAir,status(a1)
@@ -215,9 +215,9 @@ sub_1EA14:
 		add.w	d4,d3
 		move.w	x_pos(a1),d4
 		cmp.w	d2,d4
-		bcs.w	locret_1EB30
+		blo.w	locret_1EB30
 		cmp.w	d3,d4
-		bcc.w	locret_1EB30
+		bhs.w	locret_1EB30
 		btst	#5,subtype(a0)
 		beq.s	loc_1EA58
 		btst	#Status_InAir,status(a1)
@@ -263,9 +263,9 @@ loc_1EAB0:
 		add.w	d4,d3
 		move.w	x_pos(a1),d4
 		cmp.w	d2,d4
-		bcs.s	locret_1EB30
+		blo.s		locret_1EB30
 		cmp.w	d3,d4
-		bcc.s	locret_1EB30
+		bhs.s	locret_1EB30
 		btst	#5,subtype(a0)
 		beq.s	loc_1EAE8
 		btst	#Status_InAir,status(a1)

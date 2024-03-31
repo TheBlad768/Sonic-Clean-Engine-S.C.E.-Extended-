@@ -110,7 +110,7 @@ Level_Screen:
 		disableInts
 		jsr	(HUD_DrawInitial).w
 		enableInts
-		jsr	(Get_LevelSizeStart).w
+		jsr	(Get_LevelSizeStart).l
 		jsr	(DeformBgLayer).w
 		jsr	(LoadLevelLoadBlock).w
 		jsr	(LoadLevelLoadBlock2).w
