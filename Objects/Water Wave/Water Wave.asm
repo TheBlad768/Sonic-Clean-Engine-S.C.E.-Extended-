@@ -33,16 +33,15 @@ Obj_WaterWave:
 		addi.w	#$C0,(a2)+
 		move.w	y_pos(a0),(a2)+
 
+		; check
 		tst.b	objoff_32(a0)										; is pause flag set?
 		bne.s	.checkpause									; if yes, branch
 		tst.b	(Ctrl_1_pressed_logical).w							; is Start pressed?
-		bmi.s	.setflag										; if yes, branch
-		tst.b	(Ctrl_2_pressed_logical).w							; is Start pressed?
 		bpl.s	.anim										; if not, branch
 
-.setflag
-		addq.b	#3,mapping_frame(a0)
+		; set flag
 		st	objoff_32(a0)										; set pause flag
+		addq.b	#3,mapping_frame(a0)
 		bra.s	.setframe
 ; ---------------------------------------------------------------------------
 
