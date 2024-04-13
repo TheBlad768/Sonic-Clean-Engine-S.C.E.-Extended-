@@ -251,7 +251,7 @@ SolidObjectFull_Offset:
 sub_1DE36:
 SolidObjectFull_Offset_1P:
 		btst	d6,status(a0)
-		beq.w	loc_1DE8C
+		beq.s	loc_1DE8C
 		btst	#Status_InAir,status(a1)
 		bne.s	loc_1DE58
 		move.w	x_pos(a1),d0
@@ -382,7 +382,7 @@ loc_1DF4E:
 		add.w	d5,d4
 		cmp.w	d4,d3
 		bhs.w	SolidObject_TestClearPush
-		bra.w	SolidObject_ChkBounds
+		bra.s	SolidObject_ChkBounds
 ; ---------------------------------------------------------------------------
 
 SolidObject_OnScreenTest:
@@ -542,7 +542,7 @@ SolidObject_TopBottom:
 		bmi.s	SolidObject_InsideBottom
 
 ; SolidObject_InsideTop:
-		cmpi.w	#$10,d3
+		cmpi.w	#16,d3
 		blo.s		SolidObject_Landed
 		bra.s	SolidObject_TestClearPush
 ; ---------------------------------------------------------------------------
@@ -588,9 +588,10 @@ SolidObject_Squash:
 		bne.s	loc_1E10E
 		mvabs.w	d0,d4
 
-		cmpi.w	#$10,d4
+		cmpi.w	#16,d4
 		blo.w	SolidObject_LeftRight
 		move.w	a0,-(sp)
+		movea.w	a0,a2
 		movea.w	a1,a0
 		jsr	Kill_Character(pc)
 		movea.w	(sp)+,a0
@@ -913,32 +914,34 @@ loc_1E406:
 		move.w	d4,d2
 		bsr.w	MvSonicOnPtfm
 		moveq	#0,d4
+
+locret_1E40E:
 		rts
 
 ; =============== S U B R O U T I N E =======================================
 
 sub_1E410:
 		tst.w	y_vel(a1)
-		bmi.w	locret_1E4D4
+		bmi.s	locret_1E40E
 		move.w	x_pos(a1),d0
 		sub.w	x_pos(a0),d0
 		add.w	d1,d0
-		bmi.w	locret_1E4D4
+		bmi.s	locret_1E40E
 		cmp.w	d2,d0
-		bhs.w	locret_1E4D4
+		bhs.s	locret_1E40E
 		bra.s	loc_1E44C
 ; ---------------------------------------------------------------------------
 
 loc_1E42E:
 		tst.w	y_vel(a1)
-		bmi.w	locret_1E4D4
+		bmi.s	locret_1E40E
 		move.w	x_pos(a1),d0
 		sub.w	x_pos(a0),d0
 		add.w	d1,d0
-		bmi.w	locret_1E4D4
+		bmi.s	locret_1E40E
 		add.w	d1,d1
 		cmp.w	d1,d0
-		bhs.s	locret_1E4D4
+		bhs.s	locret_1E40E
 
 loc_1E44C:
 		tst.b	(Reverse_gravity_flag).w
@@ -953,13 +956,15 @@ loc_1E45A:
 		add.w	d2,d1
 		addq.w	#4,d1
 		sub.w	d1,d0
-		bhi.w	locret_1E4D4
+		bhi.s	locret_1E4D4
 		cmpi.w	#-16,d0
 		blo.s		locret_1E4D4
 		tst.b	object_control(a1)
 		bmi.s	locret_1E4D4
 		cmpi.b	#id_SonicDeath,routine(a1)
 		bhs.s	locret_1E4D4
+		tst.w	(Debug_placement_mode).w
+		bne.s	locret_1E4D4
 		add.w	d0,d2
 		addq.w	#3,d2
 		move.w	d2,y_pos(a1)
@@ -983,7 +988,7 @@ loc_1E4A0:
 		beq.s	locret_1E4D4
 		move.w	a0,-(sp)
 		movea.w	a1,a0
-		jsr	Sonic_ResetOnFloor(pc)
+		jsr	Player_TouchFloor(pc)
 		movea.w	(sp)+,a0
 
 locret_1E4D4:
@@ -1001,7 +1006,7 @@ loc_1E4D6:
 		subq.w	#4,d1
 		sub.w	d0,d1
 		bhi.s	locret_1E4D4
-		cmpi.w	#-$10,d1
+		cmpi.w	#-16,d1
 		blo.s		locret_1E4D4
 		tst.b	object_control(a1)
 		bmi.s	locret_1E4D4
@@ -1039,14 +1044,14 @@ loc_1E534:
 
 SolidObjCheckSloped:
 		tst.w	y_vel(a1)
-		bmi.w	locret_1E5DE
+		bmi.w	CheckPlayerReleaseFromObj.return
 		move.w	x_pos(a1),d0
 		sub.w	x_pos(a0),d0
 		add.w	d1,d0
-		bmi.s	locret_1E5DE
+		bmi.s	CheckPlayerReleaseFromObj.return
 		add.w	d1,d1
 		cmp.w	d1,d0
-		bhs.s	locret_1E5DE
+		bhs.s	CheckPlayerReleaseFromObj.return
 		btst	#0,render_flags(a0)
 		beq.s	+
 		not.w	d0
@@ -1060,33 +1065,39 @@ SolidObjCheckSloped:
 ; =============== S U B R O U T I N E =======================================
 
 CheckPlayerReleaseFromObj:
+
+		; player 1
 		lea	(Player_1).w,a1
-		btst	#Status_OnObj,status(a0)
-		beq.s	++
-		jsr	SonicOnObjHitFloor(pc)
+		btst	#p1_standing_bit,status(a0)
+		beq.s	.p2
+		bsr.w	SonicOnObjHitFloor
 		tst.w	d1
-		beq.s	+
-		bpl.s	++
-+
+		beq.s	.setp1
+		bpl.s	.p2
+
+.setp1
 		lea	(Player_1).w,a1
 		bclr	#Status_OnObj,status(a1)
 		bset	#Status_InAir,status(a1)
-		bclr	#Status_OnObj,status(a0)
-+
+		bclr	#p1_standing_bit,status(a0)
+
+.p2
 		lea	(Player_2).w,a1
-		btst	#4,status(a0)
-		beq.s	++
-		jsr	SonicOnObjHitFloor(pc)
+		btst	#p2_standing_bit,status(a0)
+		beq.s	.end
+		bsr.w	SonicOnObjHitFloor
 		tst.w	d1
-		beq.s	+
-		bpl.s	++
-+
+		beq.s	.setp2
+		bpl.s	.end
+
+.setp2
 		lea	(Player_2).w,a1
-		bclr	#3,status(a1)
-		bset	#1,status(a1)
-		bclr	#4,status(a0)
-+
+		bclr	#Status_OnObj,status(a1)
+		bset	#Status_InAir,status(a1)
+		bclr	#p2_standing_bit,status(a0)
+
+.end
 		moveq	#0,d4
 
-locret_1E5DE:
+.return
 		rts

@@ -2,9 +2,11 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Knuckles:
-		; Load some addresses into registers
-		; This is done to allow some subroutines to be
+
+		; load some addresses into registers
+		; this is done to allow some subroutines to be
 		; shared with Tails/Knuckles.
+
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
 		lea	(v_Dust).w,a6
@@ -162,8 +164,8 @@ loc_165D8:
 		bsr.w	Knuckles_Load_PLC
 
 .touch
-		move.b	object_control(a0),d0
-		andi.b	#$A0,d0
+		moveq	#signextendB($A0),d0
+		and.b	object_control(a0),d0
 		bne.s	.return
 		jmp	TouchResponse(pc)
 ; ---------------------------------------------------------------------------
@@ -185,15 +187,15 @@ Knux_Modes: offsetTable
 
 Knuckles_Display:
 		move.b	invulnerability_timer(a0),d0
-		beq.s	loc_16658
+		beq.s	.draw
 		subq.b	#1,invulnerability_timer(a0)
 		lsr.b	#3,d0
-		bhs.s	loc_1665E
+		bhs.s	Knux_ChkInvin
 
-loc_16658:
+.draw
 		jsr	(Draw_Sprite).w
 
-loc_1665E:
+Knux_ChkInvin:
 		btst	#1,status_secondary(a0)
 		beq.s	loc_1669A
 		tst.b	invincibility_timer(a0)
@@ -1090,13 +1092,13 @@ GetDistanceFromWall:
 
 ;.facingRight:
 		move.w	x_pos(a0),d3
-		bra.w	loc_FAA4
+		bra.w	sub_FAA4
 ; ---------------------------------------------------------------------------
 ; loc_16F62:
 .facingLeft:
 		move.w	x_pos(a0),d3
 		subq.w	#1,d3
-		bra.w	loc_FDC8
+		bra.w	sub_FDC8
 ; ---------------------------------------------------------------------------
 
 Knuckles_Climb_Ledge:
@@ -2261,13 +2263,18 @@ locret_17B16:
 
 ; =============== S U B R O U T I N E =======================================
 
+Knux_TouchFloor_Check_Spindash:
+		tst.b	spin_dash_flag(a0)
+		bne.s	loc_17B6A
+		clr.b	anim(a0)									; id_Walk
+
 Knux_TouchFloor:
 		move.b	y_radius(a0),d0
-		move.w	default_y_radius(a0),y_radius(a0)	; set y_radius and x_radius
+		move.w	default_y_radius(a0),y_radius(a0)			; set y_radius and x_radius
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_17B6A
 		bclr	#Status_Roll,status(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)									; id_Walk
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2379,6 +2386,7 @@ locret_17C80:
 ; ---------------------------------------------------------------------------
 
 loc_17C82:
+		movea.w	a0,a2
 		jmp	Kill_Character(pc)
 ; ---------------------------------------------------------------------------
 

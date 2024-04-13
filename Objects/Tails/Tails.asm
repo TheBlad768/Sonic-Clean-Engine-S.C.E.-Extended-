@@ -2,9 +2,11 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Tails:
-		; Load some addresses into registers
-		; This is done to allow some subroutines to be
+
+		; load some addresses into registers
+		; this is done to allow some subroutines to be
 		; shared with Tails/Knuckles.
+
 		lea	(Max_speed_P2).w,a4
 		lea	(Distance_from_top_P2).w,a5
 		lea	(v_Dust_P2).w,a6
@@ -214,8 +216,8 @@ loc_1388C:
 		bsr.w	Tails_Load_PLC
 
 .touch
-		move.b	object_control(a0),d0
-		andi.b	#$A0,d0
+		moveq	#signextendB($A0),d0
+		and.b	object_control(a0),d0
 		bne.s	.return
 		jmp	TouchResponse(pc)
 ; ---------------------------------------------------------------------------
@@ -236,12 +238,12 @@ Tails_Modes: offsetTable
 
 Tails_Display:
 		move.b	invulnerability_timer(a0),d0
-		beq.s	loc_1390C
+		beq.s	.draw
 		subq.b	#1,invulnerability_timer(a0)
 		lsr.b	#3,d0
 		bhs.s	Tails_ChkInvin
 
-loc_1390C:
+.draw
 		jsr	(Draw_Sprite).w
 
 Tails_ChkInvin:
@@ -345,16 +347,16 @@ locret_13B1E:
 ; ---------------------------------------------------------------------------
 
 Tails_Catch_Up_Flying:
-		move.b	(Ctrl_2_logical).w,d0
-		andi.b	#btnABCS,d0
+		moveq	#signextendB(btnABCS),d0
+		and.b	(Ctrl_2_logical).w,d0
 		bne.s	loc_13B50
 		moveq	#$3F,d0
 		and.w	(Level_frame_counter).w,d0
 		bne.s	locret_13B1E
 		tst.b	object_control(a1)
 		bmi.s	locret_13B1E
-		move.b	status(a1),d0
-		andi.b	#$80,d0
+		moveq	#signextendB($80),d0
+		and.b	status(a1),d0
 		bne.s	locret_13B1E
 
 loc_13B50:
@@ -492,8 +494,8 @@ loc_13CCE:
 
 loc_13CD2:
 		lea	(Stat_table).w,a2
-		move.b	2(a2,d3.w),d2
-		andi.b	#$80,d2
+		moveq	#signextendB($80),d2
+		and.b	2(a2,d3.w),d2
 		bne.s	loc_13D42
 		or.w	d0,d1
 		bne.s	loc_13D42
@@ -2742,17 +2744,15 @@ loc_155F2:
 Tails_TouchFloor_Check_Spindash:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_1565E
-		clr.b	anim(a0)	; id_Walk
-
-; =============== S U B R O U T I N E =======================================
+		clr.b	anim(a0)									; id_Walk
 
 Tails_TouchFloor:
 		move.b	y_radius(a0),d0
-		move.w	default_y_radius(a0),y_radius(a0)	; set y_radius and x_radius
+		move.w	default_y_radius(a0),y_radius(a0)			; set y_radius and x_radius
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_1565E
 		bclr	#Status_Roll,status(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)									; id_Walk
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2878,6 +2878,7 @@ locret_15786:
 ; ---------------------------------------------------------------------------
 
 loc_15788:
+		movea.w	a0,a2
 		jmp	Kill_Character(pc)
 ; ---------------------------------------------------------------------------
 

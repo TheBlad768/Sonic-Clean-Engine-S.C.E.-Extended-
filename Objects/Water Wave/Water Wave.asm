@@ -53,9 +53,13 @@ Obj_WaterWave:
 		subq.b	#3,mapping_frame(a0)
 
 .anim
-		subq.b	#1,anim_frame_timer(a0)
-		bpl.s	.setframe
-		move.b	#9,anim_frame_timer(a0)
+
+		; wait
+		subq.b	#1,anim_frame_timer(a0)						; decrement timer
+		bpl.s	.setframe										; if time remains, branch
+		move.b	#9,anim_frame_timer(a0)						; reset timer to 9 frames
+
+		; next frame
 		addq.b	#1,mapping_frame(a0)
 		cmpi.b	#4,mapping_frame(a0)
 		blo.s		.setframe

@@ -180,7 +180,7 @@ Level_Screen:
 		tst.b	(Restart_level_flag).w
 		bne.w	Level_Screen
 		jsr	(DeformBgLayer).w
-		jsr	(Screen_Events).w
+		jsr	(Screen_Events).l
 		jsr	(Handle_Onscreen_Water_Height).l
 		jsr	(Load_Rings).w
 		jsr	(Animate_Tiles).w

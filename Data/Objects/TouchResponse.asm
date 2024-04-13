@@ -484,7 +484,7 @@ HurtCharacter:
 
 .bounce
 		move.b	#id_SonicHurt,routine(a0)
-		bsr.w	Sonic_ResetOnFloor
+		bsr.w	Player_TouchFloor
 		bset	#Status_InAir,status(a0)
 		move.l	#words_to_long(-$200,-$400),x_vel(a0)		; make Sonic bounce away from the object
 		btst	#Status_Underwater,status(a0)					; is Sonic underwater?
@@ -535,7 +535,7 @@ Kill_Character:
 		clr.b	status_tertiary(a0)
 		move.b	#id_SonicDeath,routine(a0)
 		move.w	d0,-(sp)
-		bsr.w	Sonic_ResetOnFloor
+		bsr.w	Player_TouchFloor
 		move.w	(sp)+,d0
 		bset	#Status_InAir,status(a0)
 		move.w	#-$700,y_vel(a0)

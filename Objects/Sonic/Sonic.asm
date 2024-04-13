@@ -162,8 +162,8 @@ loc_10C26:
 		bsr.w	Sonic_Load_PLC
 
 .touch
-		move.b	object_control(a0),d0
-		andi.b	#$A0,d0
+		moveq	#signextendB($A0),d0
+		and.b	object_control(a0),d0
 		bne.s	.return
 		jmp	TouchResponse(pc)
 ; ---------------------------------------------------------------------------
@@ -185,12 +185,12 @@ Sonic_Modes: offsetTable
 
 Sonic_Display:
 		move.b	invulnerability_timer(a0),d0
-		beq.s	loc_10CA6
+		beq.s	.draw
 		subq.b	#1,invulnerability_timer(a0)
 		lsr.b	#3,d0
 		bhs.s	Sonic_ChkInvin
 
-loc_10CA6:
+.draw
 		jsr	(Draw_Sprite).w
 
 Sonic_ChkInvin:										; checks if invincibility has expired and disables it if it has.
@@ -1820,7 +1820,7 @@ loc_11F7A:
 loc_11F9C:
 		clr.w	y_vel(a0)
 		move.w	x_vel(a0),ground_vel(a0)
-		bra.w	Player_TouchFloor_Check_Spindash
+		bra.w	Player_TouchFloor
 ; ---------------------------------------------------------------------------
 
 loc_11FAE:
@@ -1830,7 +1830,7 @@ loc_11FAE:
 		move.w	#$FC0,y_vel(a0)
 
 loc_11FC2:
-		bsr.w	Player_TouchFloor_Check_Spindash
+		bsr.w	Player_TouchFloor
 		move.w	y_vel(a0),ground_vel(a0)
 		tst.b	d3
 		bpl.s	locret_11FD4
@@ -1928,7 +1928,7 @@ loc_12084:
 		move.b	d3,angle(a0)
 		clr.w	y_vel(a0)
 		move.w	x_vel(a0),ground_vel(a0)
-		bra.w	Player_TouchFloor_Check_Spindash
+		bra.w	Player_TouchFloor
 ; ---------------------------------------------------------------------------
 
 Player_HitCeilingAndWalls:
@@ -1965,7 +1965,7 @@ loc_120D2:
 
 loc_120EA:
 		move.b	d3,angle(a0)
-		bsr.s	Player_TouchFloor_Check_Spindash
+		bsr.s	Player_TouchFloor
 		move.w	y_vel(a0),ground_vel(a0)
 		tst.b	d3
 		bpl.s	locret_12100
@@ -2023,16 +2023,16 @@ loc_12158:
 
 ; =============== S U B R O U T I N E =======================================
 
-Player_TouchFloor_Check_Spindash:
+Player_TouchFloor:
+		cmpi.b	#1,character_id(a0)						; is player Tails?
+		beq.w	Tails_TouchFloor_Check_Spindash			; if yes, branch
+		cmpi.b	#2,character_id(a0)						; is player Knuckles?
+		beq.w	Knux_TouchFloor_Check_Spindash			; if yes, branch
+
+Sonic_TouchFloor_Check_Spindash:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_121D8
-		clr.b	anim(a0)	; id_Walk
-
-Sonic_ResetOnFloor:
-		cmpi.b	#1,character_id(a0)
-		beq.w	Tails_TouchFloor
-		cmpi.b	#2,character_id(a0)
-		beq.w	Knux_TouchFloor
+		clr.b	anim(a0)									; id_Walk
 
 Sonic_TouchFloor:
 		move.b	y_radius(a0),d0
@@ -2040,7 +2040,7 @@ Sonic_TouchFloor:
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_121D8
 		bclr	#Status_Roll,status(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)									; id_Walk
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2071,8 +2071,6 @@ loc_121D8:
 		move.b	d0,scroll_delay_counter(a0)
 		tst.b	double_jump_flag(a0)
 		beq.s	locret_12230
-		tst.b	character_id(a0)
-		bne.s	loc_1222A
 		btst	#Status_Invincible,status_secondary(a0)			; don't bounce when invincible
 		bne.s	loc_1222A
 		btst	#Status_BublShield,status_secondary(a0)

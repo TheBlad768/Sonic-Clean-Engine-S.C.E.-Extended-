@@ -202,7 +202,7 @@ locret_EAE4:
 Test_Ring_Collisions_AttractRing:
 		movea.l	a1,a3								; save ROM address
 		bsr.w	Create_New_Sprite
-		bne.s	loc_EB16
+		bne.s	.notfree
 		move.l	#Obj_Attracted_Ring,address(a1)
 		move.w	(a3),x_pos(a1)						; copy xpos
 		move.w	2(a3),y_pos(a1)						; copy ypos
@@ -211,7 +211,7 @@ Test_Ring_Collisions_AttractRing:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_EB16:
+.notfree
 		movea.l	a3,a1								; return ROM address
 		bra.s	loc_EAC6
 
@@ -224,7 +224,7 @@ Render_Rings:
 		beq.s	locret_EBEC
 		movea.w	(Ring_start_addr_RAM).w,a4
 		lea	CMap_Ring(pc),a1
-		move.w	4(a3),d4
+		move.w	4(a3),d4								; Camera_Y_pos_copy
 		move.w	#$F0,d5
 		move.w	(Screen_Y_wrap_value).w,d3
 
@@ -238,16 +238,16 @@ loc_EBA6:
 		cmp.w	d5,d1
 		bhs.s	loc_EBE6
 		move.w	(a0),d0
-		sub.w	(a3),d0
+		sub.w	(a3),d0								; Camera_X_pos_copy
 		move.b	-1(a4),d6
-		add.w	d6,d6				; 2 bytes
-		addi.w	#$70,d1				; add ypos
-		move.w	d1,(a6)+				; set ypos
-		move.b	#5,(a6)				; set size of the sprite
-		addq.w	#2,a6				; skip link parameter
-		move.w	(a1,d6.w),(a6)+		; VRAM
-		addi.w	#$78,d0				; add xpos
-		move.w	d0,(a6)+				; set xpos
+		add.w	d6,d6								; 2 bytes
+		addi.w	#$70,d1								; add ypos
+		move.w	d1,(a6)+								; set ypos
+		move.b	#5,(a6)								; set size of the sprite
+		addq.w	#2,a6								; skip link parameter
+		move.w	(a1,d6.w),(a6)+						; VRAM
+		addi.w	#$78,d0								; add xpos
+		move.w	d0,(a6)+								; set xpos
 		subq.w	#1,d7
 
 loc_EBE6:
@@ -289,38 +289,38 @@ CMap_Ring_End
 
 AddRings:
 		add.w	d0,(Ring_count).w
-		ori.b	#1,(Update_HUD_ring_count).w	; update ring counter
+		ori.b	#1,(Update_HUD_ring_count).w		; update ring counter
 		rts
 
 ; =============== S U B R O U T I N E =======================================
 
 GiveRing:
 CollectRing:
-		addq.w	#1,(Ring_count).w					; add 1 to rings
+		addq.w	#1,(Ring_count).w						; add 1 to rings
 		move.w	#999,d0
-		cmp.w	(Ring_count).w,d0				; does the player 1 have 999 or less rings?
-		bhs.s	.skip							; if yes, branch
-		move.w	d0,(Ring_count).w				; set max rings
+		cmp.w	(Ring_count).w,d0					; does the player 1 have 999 or less rings?
+		bhs.s	.skip								; if yes, branch
+		move.w	d0,(Ring_count).w					; set max rings
 
 .skip
-		ori.b	#1,(Update_HUD_ring_count).w	; update the rings counter
-		cmpi.w	#100,(Ring_count).w				; does the player 1 have less than 100 rings?
-		blo.s		JmpTo_Play_SFX					; if yes, play the ring sound
-		bset	#1,(Extra_life_flags).w					; test and set the flag for the first extra life
-		beq.s	loc_1A5D8						; if it was clear before, branch
-		cmpi.w	#200,(Ring_count).w				; does the player 1 have less than 200 rings?
-		blo.s		JmpTo_Play_SFX					; if yes, play the ring sound
-		bset	#2,(Extra_life_flags).w					; test and set the flag for the second extra life
-		bne.s	JmpTo_Play_SFX					; if it was set before, play the ring sound
+		ori.b	#1,(Update_HUD_ring_count).w		; update the rings counter
+		cmpi.w	#100,(Ring_count).w					; does the player 1 have less than 100 rings?
+		blo.s		JmpTo_Play_SFX						; if yes, play the ring sound
+		bset	#1,(Extra_life_flags).w						; test and set the flag for the first extra life
+		beq.s	loc_1A5D8							; if it was clear before, branch
+		cmpi.w	#200,(Ring_count).w					; does the player 1 have less than 200 rings?
+		blo.s		JmpTo_Play_SFX						; if yes, play the ring sound
+		bset	#2,(Extra_life_flags).w						; test and set the flag for the second extra life
+		bne.s	JmpTo_Play_SFX						; if it was set before, play the ring sound
 
 loc_1A5D8:
-		addq.b	#1,(Life_count).w					; add 1 to the life count
-		addq.b	#1,(Update_HUD_life_count).w		; add 1 to the displayed life count
-		music	mus_ExtraLife,1					; play the 1up song
+		addq.b	#1,(Life_count).w						; add 1 to the life count
+		addq.b	#1,(Update_HUD_life_count).w			; add 1 to the displayed life count
+		music	mus_ExtraLife,1						; play the 1up song
 ; ---------------------------------------------------------------------------
 
 JmpTo_Play_SFX:
-		sfx	sfx_RingRight,1						; play ring sound
+		sfx	sfx_RingRight,1							; play ring sound
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -331,12 +331,12 @@ Clear_SpriteRingMem:
 		moveq	#((Dynamic_object_RAM_end-Dynamic_object_RAM)/object_size)-1,d1
 
 .findos
-		lea	next_object(a1),a1						; next object slot
+		lea	next_object(a1),a1							; next object slot
 		tst.l	address(a1)
 		beq.s	.nextos
-		move.w	respawn_addr(a1),d0				; get address in respawn table
-		beq.s	.nextos							; if it's zero, it isn't remembered
-		movea.w	d0,a2							; load address into a2
+		move.w	respawn_addr(a1),d0					; get address in respawn table
+		beq.s	.nextos								; if it's zero, it isn't remembered
+		movea.w	d0,a2								; load address into a2
 		bclr	#7,(a2)
 
 .nextos
