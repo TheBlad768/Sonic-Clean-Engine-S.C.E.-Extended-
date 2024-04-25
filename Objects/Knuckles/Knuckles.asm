@@ -1159,11 +1159,7 @@ Knuckles_Move_Glide:
 		cmpi.b	#1,double_jump_flag(a0)
 		bne.w	.doNotKillspeed
 
-		move.w	ground_vel(a0),d0
-		bpl.s	.abs
-		neg.w	d0					; +++
-
-.abs
+		mvabs.w	ground_vel(a0),d0		; fix breakable wall glide
 		cmpi.w	#$400,d0
 		bhs.s	.mediumSpeed
 
