@@ -10,7 +10,7 @@
 PLC1_Sonic: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
+		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_SonicLifeIcon		; life icon
 PLC1_Sonic_end
 
@@ -21,7 +21,7 @@ PLC1_Sonic_end
 PLC1_Tails: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
+		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_TailsLifeIcon			; life icon
 PLC1_Tails_end
 
@@ -32,7 +32,7 @@ PLC1_Tails_end
 PLC1_Knuckles: plrlistheader
 		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
 		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_Hud					; HUD
+		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
 		plreq ArtTile_LifeIcon, ArtKosM_KnucklesLifeIcon		; life icon
 PLC1_Knuckles_end
 

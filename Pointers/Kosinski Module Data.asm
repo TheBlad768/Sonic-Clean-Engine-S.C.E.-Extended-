@@ -4,7 +4,7 @@
 
 ArtKosM_Ring_Sparks:			binclude "Objects/Rings/KosinskiM Art/Sparks.bin"
 	even
-ArtKosM_Hud:					binclude "Objects/HUD/KosinskiM Art/HUD.bin"
+ArtKosM_HUD:					binclude "Objects/HUD/KosinskiM Art/HUD.bin"
 	even
 ArtKosM_SonicLifeIcon:			binclude "Objects/HUD/KosinskiM Art/Sonic Life Icon.bin"
 	even
