@@ -109,7 +109,8 @@ LevelSelect_Screen:
 .loop
 		move.b	#VintID_LevelSelect,(V_int_routine).w
 		jsr	(Wait_VSync).w
-		bsr.w	LevelSelect_Deform
+		lea	LSScroll_Data(pc),a2
+		jsr	(HScroll_Deform).w
 		moveq	#palette_line_0,d3
 		bsr.w	LevelSelect_MarkFields
 		bsr.s	LevelSelect_Controls
@@ -573,22 +574,6 @@ LevelSelect_MainText:		levselstr "SONIC TEST GAME - *** DEBUG MODE ***          
 	even
 
 ; ---------------------------------------------------------------------------
-; Deform
-; ---------------------------------------------------------------------------
-
-; =============== S U B R O U T I N E =======================================
-
-LevelSelect_Deform:
-		lea	(H_scroll_table).w,a3
-		lea	LevelSelectScroll_Data(pc),a2
-		jmp	(HScroll_Deform).w
-; ---------------------------------------------------------------------------
-
-LevelSelectScroll_Data: dScroll_Header
-		dScroll_Data 0, 8, -$100, 8		; plane, start pos, velocity, size
-LevelSelectScroll_Data_end
-
-; ---------------------------------------------------------------------------
 ; Load text
 ; ---------------------------------------------------------------------------
 
@@ -668,3 +653,10 @@ LevelSelect_Text:
 		levselstr "   SOUND TEST:        -"
 		levselstr "   SAMPLE TEST:       -"
 	even
+; ---------------------------------------------------------------------------
+
+		; scroll data
+
+LSScroll_Data: dScroll_Header
+		dScroll_Data 8, 8, -$100, FG									; start pos, size, velocity, plane
+LSScroll_Data_end
