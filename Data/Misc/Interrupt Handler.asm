@@ -23,10 +23,10 @@ VInt:
 		dbf	d0,*										; otherwise, waste a bit of time here
 
 .notpal
-		move.b	(V_int_routine).w,d0
+		moveq	#$7E,d0
+		and.b	(V_int_routine).w,d0
 		clr.b	(V_int_routine).w
 		st	(H_int_flag).w							; allow H Interrupt code to run
-		andi.w	#$3E,d0
 		move.w	VInt_Table(pc,d0.w),d0
 		jsr	VInt_Table(pc,d0.w)
 
@@ -65,10 +65,10 @@ VInt_Lag_Main:
 		addq.b	#1,(Lag_frame_count).w
 
 		; branch if a level is running
-		cmpi.b	#GameModeID_TitleCard|id_LevelScreen,(Game_mode).w
-		beq.s	VInt_Lag_Level
-		cmpi.b	#id_LevelScreen,(Game_mode).w		; is game on a level?
-		beq.s	VInt_Lag_Level
+		moveq	#$7C,d0								; limit Game Mode value to $7C max
+		and.b	(Game_mode).w,d0					; load Game Mode
+		cmpi.b	#id_LevelScreen,d0					; is game on a level?
+		beq.s	VInt_Lag_Level						; if yes, branch
 		bra.s	VInt_Music							; otherwise, return from V-int
 ; ---------------------------------------------------------------------------
 
@@ -102,9 +102,9 @@ VInt_Lag_Water_Cont:
 VInt_Lag_NoWater:
 		move.w	VDP_control_port-VDP_control_port(a5),d0
 		btst	#6,(Graphics_flags).w
-		beq.s	.notpal	; branch if it isn't a PAL system
+		beq.s	.notpal								; branch if it isn't a PAL system
 		move.w	#$700,d0
-		dbf	d0,*		; otherwise, waste a bit of time here
+		dbf	d0,*										; otherwise, waste a bit of time here
 
 .notpal
 		st	(H_int_flag).w
@@ -121,9 +121,9 @@ VInt_Lag_Done:
 
 VInt_Main:
 		bsr.s	Do_ControllerPal
-		tst.w	(Demo_timer).w
+		tst.w	(Demo_timer).w						; is there time left on the demo?
 		beq.s	.return
-		subq.w	#1,(Demo_timer).w
+		subq.w	#1,(Demo_timer).w					; subtract 1 from time left
 
 .return
 		rts
@@ -136,9 +136,9 @@ VInt_Main:
 
 VInt_Menu:
 		bsr.s	Do_ControllerPal
-		tst.w	(Demo_timer).w
+		tst.w	(Demo_timer).w						; is there time left on the demo?
 		beq.s	.kosm
-		subq.w	#1,(Demo_timer).w
+		subq.w	#1,(Demo_timer).w					; subtract 1 from time left
 
 .kosm
 		jmp	(Set_Kos_Bookmark).w
@@ -213,7 +213,7 @@ VInt_LevelSelect:
 VInt_Sega:
 		moveq	#$F,d0
 		and.b	(V_int_run_count+3).w,d0
-		bne.s	.skip	; run the following code once every 16 frames
+		bne.s	.skip								; run the following code once every 16 frames
 		stopZ80
 		stopZ802
 		jsr	(Poll_Controllers).w
@@ -221,9 +221,9 @@ VInt_Sega:
 		startZ80
 
 .skip
-		tst.w	(Demo_timer).w
+		tst.w	(Demo_timer).w						; is there time left on the demo?
 		beq.s	.kosm
-		subq.w	#1,(Demo_timer).w
+		subq.w	#1,(Demo_timer).w					; subtract 1 from time left
 
 .kosm
 		jmp	(Set_Kos_Bookmark).w
@@ -294,7 +294,8 @@ VInt_Level_Cont:
 		dma68kToVDP H_scroll_buffer,vram_hscroll,(224<<2),VRAM
 		dma68kToVDP Sprite_table_buffer,vram_sprites,$280,VRAM
 		jsr	(Process_DMA_Queue).w
-		jsr	(VInt_DrawLevel).w
+		bsr.s	VInt_SpecialFunction
+		jsr	(VInt_DrawLevel.main).w
 		startZ80
 		enableInts
 		tst.b	(Water_flag).w
@@ -317,15 +318,51 @@ VInt_Level_Cont:
 Do_Updates:
 		jsr	(UpdateHUD).w
 		clr.w	(Lag_frame_count).w
-		tst.w	(Demo_timer).w		; is there time left on the demo?
+		tst.w	(Demo_timer).w						; is there time left on the demo?
 		beq.s	.return
-		subq.w	#1,(Demo_timer).w	; subtract 1 from time left
+		subq.w	#1,(Demo_timer).w					; subtract 1 from time left
 
 .return
 		rts
 
 ; ---------------------------------------------------------------------------
-; Horizontal interrupt
+; Special function
+; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
+
+VInt_SpecialFunction:
+		moveq	#0,d0
+		move.b	(Special_V_int_routine).w,d0
+		beq.s	.return												; if zero, branch
+		jmp	.index-2(pc,d0.w)
+; ---------------------------------------------------------------------------
+
+.index
+		bra.s	.vscrollon											; 2 (vertical scrolling on)
+		bra.s	.vscrollcopy											; 4 (vertical scrolling copy)
+; ---------------------------------------------------------------------------
+
+.vscrolloff															; 6 (vertical scrolling off)
+		move.w	#$8B03,VDP_control_port-VDP_control_port(a5)			; command $8B03 - VScroll full, HScroll line-based
+		clr.b	(Special_V_int_routine).w
+
+.return
+		rts
+; ---------------------------------------------------------------------------
+
+.vscrollon
+		move.w	#$8B07,VDP_control_port-VDP_control_port(a5)			; command $8B07 - VScroll cell-based, HScroll line-based
+		addq.b	#2,(Special_V_int_routine).w
+
+.vscrollcopy
+		stopZ80
+		dma68kToVDP V_scroll_buffer,$0000,(320/4),VSRAM
+		startZ80
+		rts
+
+; ---------------------------------------------------------------------------
+; Horizontal interrupt (Water)
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================

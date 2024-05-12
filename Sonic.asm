@@ -77,13 +77,6 @@ Country_Code:	dc.b "JUE             "
 EndOfHeader:
 
 ; ---------------------------------------------------------------------------
-; Security Subroutine
-; ---------------------------------------------------------------------------
-
-		include "Data/Misc/Security Startup 1.asm"
-		include "Data/Misc/Security Startup 2.asm"
-
-; ---------------------------------------------------------------------------
 ; VDP Subroutine
 ; ---------------------------------------------------------------------------
 
@@ -351,9 +344,17 @@ EndOfHeader:
 			include "Objects/Sonic/Debug Mode(Crackers).asm"
 		else
 			include "Objects/Sonic/Debug Mode.asm"
+			include "Pointers/Debug Pointers.asm"
 		endif
 
 	endif
+
+; ---------------------------------------------------------------------------
+; Security Subroutine
+; ---------------------------------------------------------------------------
+
+		include "Data/Misc/Security Startup 1.asm"
+		include "Data/Misc/Security Startup 2.asm"
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load player object data

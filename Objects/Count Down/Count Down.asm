@@ -250,8 +250,8 @@ loc_18218:
 
 AirCountdown_Display:
 		movea.w	parent(a0),a2									; a2=character
-		cmpi.b	#12,air_left(a2)
-		bhi.s	AirCountdown_Delete
+		cmpi.b	#12,air_left(a2)								; check air remaining
+		bhi.s	AirCountdown_Delete							; if higher than 12, branch
 		bsr.s	AirCountdown_ShowNumber
 		lea	Ani_AirCountdown(pc),a1
 		jsr	(Animate_Sprite).w
@@ -290,8 +290,8 @@ AirCountdown_Display2:
 
 AirCountdown_DisplayNumber:
 		movea.w	parent(a0),a2									; a2=character
-		cmpi.b	#12,air_left(a2)
-		bhi.s	AirCountdown_Delete
+		cmpi.b	#12,air_left(a2)								; check air remaining
+		bhi.s	AirCountdown_Delete							; if higher than 12, branch
 		bsr.s	AirCountdown_ShowNumber
 		lea	Ani_AirCountdown(pc),a1
 		jsr	(Animate_Sprite).w
@@ -310,14 +310,15 @@ AirCountdown_ShowNumber:
 		bhs.s	.return
 		move.w	#15,objoff_3C(a0)
 		clr.w	y_vel(a0)
-		move.b	#$80,render_flags(a0)
+		move.w	#$80,d1
+		move.b	d1,render_flags(a0)
 		move.w	x_pos(a0),d0
 		sub.w	(Camera_X_pos).w,d0
-		addi.w	#$80,d0
+		add.w	d1,d0
 		move.w	d0,x_pos(a0)
 		move.w	y_pos(a0),d0
 		sub.w	(Camera_Y_pos).w,d0
-		addi.w	#$80,d0
+		add.w	d1,d0
 		move.w	d0,y_pos(a0)
 		move.l	#AirCountdown_AirLeft,address(a0)
 
@@ -370,7 +371,7 @@ Player_ResetAirTimer:
 		moveq	#signextendB(mus_Invincible),d0				; prepare to play invincibility music
 
 .notinvincible
-		jsr	(SMPS_QueueSound1).w
+		jsr	(Play_Music).w
 
 .end
 		move.b	#30,air_left(a1)								; reset air to full

@@ -2,8 +2,6 @@
 ; Uncompressed player graphics
 ; ===========================================================================
 
-		align $8000
-
 ArtUnc_Sonic:						binclude "Objects/Sonic/Uncompressed Art/Sonic.bin"
 	even
 ArtUnc_Sonic_Extra:					binclude "Objects/Sonic/Uncompressed Art/Sonic Extra.bin"

@@ -272,7 +272,7 @@ Check_SonicEndPose:
 ; =============== S U B R O U T I N E =======================================
 
 Check_TailsEndPose:
-		tst.b	(LastAct_end_flag).w
+		tst.b	(Last_act_end_flag).w
 		beq.s	Check_SonicEndPose.return
 
 		btst	#7,objoff_38(a0)
@@ -673,7 +673,7 @@ EggCapsule_Animals_Load:
 ; =============== S U B R O U T I N E =======================================
 
 Load_EggCapsule:
-		st	(LastAct_end_flag).w
+		st	(Last_act_end_flag).w
 		st	(Level_end_flag).w
 		lea	Child6_EggCapsule(pc),a2
 		jmp	(CreateChild6_Simple).w

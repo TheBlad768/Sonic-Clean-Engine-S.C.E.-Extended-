@@ -56,11 +56,11 @@ LevelSelect_Screen:
 		lea	Level_VDP(pc),a1
 		jsr	(Load_VDP).w
 		jsr	(Clear_Palette).w
-		clearRAM RAM_start, (RAM_start+$1000)						; clear foreground buffer
-		clearRAM Object_RAM, Object_RAM_end
-		clearRAM Lag_frame_count, Lag_frame_count_end
-		clearRAM Camera_RAM, Camera_RAM_end
-		clearRAM Oscillating_variables, Oscillating_variables_end
+		clearRAM RAM_start, (RAM_start+$2000)						; clear foreground buffers
+		clearRAM Object_RAM, Object_RAM_end						; clear the object RAM
+		clearRAM Lag_frame_count, Lag_frame_count_end				; clear variables
+		clearRAM Camera_RAM, Camera_RAM_end						; clear the camera RAM
+		clearRAM Oscillating_variables, Oscillating_variables_end			; clear variables
 		moveq	#0,d0
 		move.b	d0,(Water_full_screen_flag).w
 		move.b	d0,(Water_flag).w
@@ -70,9 +70,7 @@ LevelSelect_Screen:
 		move.b	d0,(Debug_mode_flag).w
 
 		; load main art
-		lea	(ArtKosM_LevelSelectText).l,a1
-		move.w	#tiles_to_bytes(1),d2
-		jsr	(Queue_Kos_Module).w
+		QueueKosModule	ArtKosM_LevelSelectText, 1
 
 		; load main palette
 		lea	(Pal_LevelSelect).l,a1
@@ -122,7 +120,9 @@ LevelSelect_Screen:
 		bpl.s	.loop
 
 		; set
+		move.w	(Player_option).w,(Player_mode).w						; move selected character to active character
 		move.b	#3,(Life_count).w
+		move.l	#5000,(Next_extra_life_score).w
 
 		; clear
 		moveq	#0,d0
@@ -132,14 +132,13 @@ LevelSelect_Screen:
 		move.b	d0,(Continue_count).w
 		move.w	d0,(Current_zone_and_act).w
 		move.w	d0,(Apparent_zone_and_act).w
-		move.l	#5000,(Next_extra_life_score).w
 
 		; load zone and act
 		move.b	#id_LevelScreen,(Game_mode).w						; set screen mode to level
 		move.w	(vLevelSelect_vertical_count).w,d2
-		move.b	d2,(sp)												; multiply by $100
-		move.w	(sp),d2
-		clr.b	d2
+		move.b	d2,-(sp)												; multiply by $100
+		move.w	(sp)+,d2
+		clr.b	d2														; clear garbage data
 		add.w	(vLevelSelect_saved_act).w,d2
 		move.w	d2,(Current_zone_and_act).w
 		move.w	d2,(Apparent_zone_and_act).w
@@ -198,7 +197,7 @@ LevelSelect_Controls:
 		; play sample
 		move.w	d3,d0
 		addi.w	#dac__First,d0										; $80 is reserved for pause
-		jmp	(SMPS_PlayDACSample).w									; play sample
+		jmp	(Play_Sample).w											; play sample
 
 ; ---------------------------------------------------------------------------
 ; Get act
@@ -228,10 +227,10 @@ LevelSelect_Controls:
 
 .getcharacter
 		moveq	#LevelSelect_MaxCharacters-1,d2						; set max count
-		move.w	(Player_mode).w,d3
+		move.w	(Player_option).w,d3
 		lea	(vLevelSelect_control_timer).w,a3
 		bsr.w	LevelSelect_FindLeftRightControls
-		move.w	d3,(Player_mode).w
+		move.w	d3,(Player_option).w
 
 .return2
 		rts
@@ -259,7 +258,7 @@ LevelSelect_Controls:
 		; play music
 		move.w	d3,d0
 		addq.w	#mus__First,d0										; $00 is reserved for silence
-		jmp	(SMPS_QueueSound1).w									; play music
+		jmp	(Play_Music).w											; play music
 ; --------------------------------------------------------------------------
 
 .stop
@@ -284,7 +283,7 @@ LevelSelect_Controls:
 		; play sfx
 		move.w	d3,d0
 		addi.w	#sfx__First,d0										; skip music
-		jmp	(SMPS_QueueSound2).w									; play sfx
+		jmp	(Play_SFX).w												; play sfx
 
 ; ---------------------------------------------------------------------------
 ; Control (up/down)
@@ -491,7 +490,7 @@ LevelSelect_MarkFields:
 
 LevelSelect_LoadCharacter:
 		lea	(vLevelSelect_buffer2+$A30).l,a5
-		move.w	(Player_mode).w,d0
+		move.w	(Player_option).w,d0
 		add.w	d0,d0
 		move.w	LevelSelect_LoadCharacterText(pc,d0.w),d0
 		lea	LevelSelect_LoadCharacterText(pc,d0.w),a0
@@ -524,9 +523,9 @@ LevelSelect_LoadAct:
 		lea	(vLevelSelect_horizontal_count).w,a0
 		move.w	(vLevelSelect_vertical_count).w,d0
 		move.w	d0,d1
-		move.b	d0,(sp)												; multiply by $100
-		move.w	(sp),d0
-		clr.b	d0
+		move.b	d0,-(sp)												; multiply by $100
+		move.w	(sp)+,d0
+		clr.b	d0														; clear garbage data
 		adda.w	d0,a5
 		add.w	d1,d1
 		move.w	(a0,d1.w),d0

@@ -73,6 +73,9 @@ Play_SFX			= SMPS_QueueSound2
 PlaySound_Special	= SMPS_QueueSound2
 Play_Sound_2		= SMPS_QueueSound2
 PlaySound_Unused	= SMPS_QueueSound3
+Play_Sample			= SMPS_PlayDACSample
+
+mus_FadeOut		= mus_Fade
 
 Clone_Driver_RAM	= (-(v_snddriver_ram&$80000000)<<1)|v_snddriver_ram
 

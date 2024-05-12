@@ -14,9 +14,7 @@ TitleCardAct_Index:
 Obj_TitleCard:
 
 		; load general art
-		lea	(ArtKosM_TitleCardRedAct).l,a1
-		move.w	#tiles_to_bytes($500),d2
-		jsr	(Queue_Kos_Module).w
+		QueueKosModule	ArtKosM_TitleCardRedAct, $500
 
 		; load act number art
 		moveq	#0,d0

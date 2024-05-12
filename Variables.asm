@@ -106,7 +106,7 @@ Camera_Y_pos_coarse:				ds.w 1					; rounded down to the nearest chunk boundary 
 Camera_X_pos_coarse_back:			ds.w 1					; Camera_X_pos_coarse - $80
 Camera_Y_pos_coarse_back:			ds.w 1					; Camera_Y_pos_coarse - $80
 Plane_double_update_flag:				ds.b 1					; set when two block are to be updated instead of one (i.e. the camera's scrolled by more than $10 pixels)
-									ds.b 1					; even
+Special_V_int_routine:				ds.b 1
 HScroll_Shift:						= *
 Camera_Hscroll_shift:					ds.w 3
 	if ExtendedCamera
@@ -200,9 +200,6 @@ v_pfade_size:							= *
 Palette_fade_count:					ds.b 1					; the number of colours to fade
 
 Lag_frame_count:						ds.w 1					; more specifically, the number of times V-int routine 0 has run. Reset at the end of a normal frame
-v_vdp_buffer2:						= *
-DMA_data_thunk:					= *						; used as a RAM holder for the final DMA command word. Data will NOT be preserved across V-INTs, so consider this space reserved
-DMA_trigger_word:					ds.w 1					; transferred from RAM to avoid crashing the Mega Drive
 f_hbla_pal:							= *
 H_int_flag:							ds.b 1					; unless this is set H-int will return immediately
 Do_Updates_in_H_int:				ds.b 1					; if this is set Do_Updates will be called from H-int instead of V-int
@@ -259,7 +256,7 @@ Debug_camera_delay:					ds.b 1
 Debug_camera_speed:					ds.b 1
 Debug_object:						ds.b 1					; the current position in the debug mode object list
 Level_end_flag:						ds.b 1
-LastAct_end_flag:						ds.b 1
+Last_act_end_flag:					ds.b 1
 									ds.b 1					; even
 Slotted_object_bits:					ds.b 8					; index of slot array to use
 Signpost_addr:						ds.w 1
@@ -430,6 +427,7 @@ a_act:								= *
 Apparent_act:						ds.b 1
 
 Player_mode:							ds.w 1					; 0 = Sonic and Tails, 1 = Sonic alone, 2 = Tails alone, 3 = Knuckles alone
+Player_option:						ds.w 1
 Life_count:							ds.b 1
 Continue_count:						ds.b 1
 f_timeover:							= *

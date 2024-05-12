@@ -48,8 +48,8 @@ dma68kToVDP macro source,dest,length,type
 	move.l	#(($9600|((((source)>>1)&$FF00)>>8))<<16)|($9500|(((source)>>1)&$FF)),VDP_control_port-VDP_control_port(a5)
 	move.w	#$9700|(((((source)>>1)&$FF0000)>>16)&$7F),VDP_control_port-VDP_control_port(a5)
 	move.w	#((vdpComm(dest,type,DMA)>>16)&$FFFF),VDP_control_port-VDP_control_port(a5)
-	move.w	#(vdpComm(dest,type,DMA)&$FFFF),(DMA_trigger_word).w
-	move.w	(DMA_trigger_word).w,VDP_control_port-VDP_control_port(a5)
+	move.w	#(vdpComm(dest,type,DMA)&$FFFF),-(sp)
+	move.w	(sp)+,VDP_control_port-VDP_control_port(a5)
 	; From '  § 7  DMA TRANSFER' of https://emu-docs.org/Genesis/sega2f.htm:
 	;
 	; "In the case of ROM to VRAM transfers,
@@ -355,10 +355,10 @@ copyRAM2 macro startaddr,endaddr,startaddr2
     endm
 
 ; ---------------------------------------------------------------------------
-; load Kos and KosM
+; load Kosinski and Kosinski Moduled
 ; ---------------------------------------------------------------------------
 
-; load Kos data to RAM
+; load Kosinski data to RAM
 QueueKos macro data,ram,terminate
 	lea	(data).l,a1
     if ((ram)&$8000)==0
@@ -373,7 +373,7 @@ QueueKos macro data,ram,terminate
       endif
     endm
 
-; load KosM art to VRAM
+; load Kosinski Moduled art to VRAM
 QueueKosModule macro art,vram,terminate
 	lea	(art).l,a1
 	move.w	#tiles_to_bytes(vram),d2
@@ -381,6 +381,26 @@ QueueKosModule macro art,vram,terminate
 	jsr	(Queue_Kos_Module).w
       else
 	jmp	(Queue_Kos_Module).w
+      endif
+    endm
+
+; ---------------------------------------------------------------------------
+; load Enigma
+; ---------------------------------------------------------------------------
+
+; load Enigma data to RAM
+EniDecomp macro data,ram,vram,terminate
+	lea	(data).l,a0
+    if ((ram)&$8000)==0
+	lea	(ram).l,a1
+    else
+	lea	(ram).w,a1
+    endif
+	move.w	#make_art_tile vram,d0
+      if ("terminate"="0") || ("terminate"="")
+	jsr	(Eni_Decomp).w
+      else
+	jmp	(Eni_Decomp).w
       endif
     endm
 
@@ -978,9 +998,9 @@ music	macro track, terminate, byte
 	move.w	#(track),d0
     endif
       if ("terminate"="0") || ("terminate"="")
-	jsr	(SMPS_QueueSound1).w
+	jsr	(Play_Music).w
       else
-	jmp	(SMPS_QueueSound1).w
+	jmp	(Play_Music).w
       endif
     endm
 
@@ -991,9 +1011,9 @@ sfx	macro track, terminate, byte
 	move.w	#(track),d0
     endif
       if ("terminate"="0") || ("terminate"="")
-	jsr	(SMPS_QueueSound2).w
+	jsr	(Play_SFX).w
       else
-	jmp	(SMPS_QueueSound2).w
+	jmp	(Play_SFX).w
       endif
     endm
 
@@ -1366,4 +1386,65 @@ levselstr macro str
 	CHARSET '-', 14
 	CHARSET '/', 15
 	CHARSET '.', 16
+	restore
+
+; macro for generating credits strings
+creditstr macro plane, str
+    if plane<>0
+	dc.w plane
+    else
+	fatal "plane error!"
+    endif
+	save
+    if plane&$8000
+	codepage	CREDITSCREEN
+    else
+	codepage	CREDITSCREEN2
+    endif
+	dc.b str
+	restore
+	dc.b 0	; end
+	even
+    endm
+
+; macro for a credits text list header
+creditstr_end macro
+	dc.w 0
+    endm
+
+	; codepage for credits
+	save
+	codepage	CREDITSCREEN
+	CHARSET ' ', 63
+	CHARSET 'A','Z', 1
+	CHARSET 'a','z', 1
+	CHARSET '.', 27
+	CHARSET '(', 28
+	CHARSET ')', 29
+	CHARSET '0','9', 30
+	CHARSET '!', 40
+	restore
+
+	; codepage for credits
+	save
+	codepage	CREDITSCREEN2
+	CHARSET ' ', 63
+	CHARSET 'A','Z', 1
+	CHARSET 'a','z', 1
+	CHARSET '0','9', 27
+	CHARSET ':', 37
+	CHARSET '.', 38
+	CHARSET '!', 39
+	CHARSET '?', 40
+	CHARSET '#', 41
+	CHARSET '%', 42
+	CHARSET '/', 43
+	CHARSET ';', 44
+	CHARSET ',', 45
+	CHARSET '*', 46
+	CHARSET '"', 47
+	CHARSET '$', 48
+	CHARSET '_', 49
+	CHARSET '-', 50
+	CHARSET '=', 51
 	restore

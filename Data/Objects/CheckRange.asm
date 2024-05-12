@@ -4,12 +4,12 @@
 Check_CameraInRange:
 		move.w	(Camera_Y_pos).w,d0
 		cmp.w	(a1)+,d0
-		bcs.s	Check_CameraInRange_Fail
+		blo.s		Check_CameraInRange_Fail
 		cmp.w	(a1)+,d0
 		bhi.s	Check_CameraInRange_Fail
 		move.w	(Camera_X_pos).w,d1
 		cmp.w	(a1)+,d1
-		bcs.s	Check_CameraInRange_Fail
+		blo.s		Check_CameraInRange_Fail
 		cmp.w	(a1)+,d1
 		bhi.s	Check_CameraInRange_Fail
 		bclr	#7,objoff_27(a0)
@@ -52,7 +52,7 @@ Init_BossArena:
 		st	(Boss_flag).w
 
 Init_BossArena2:
-		music	mus_Fade														; fade out music
+		music	mus_FadeOut													; fade out music
 		move.w	#2*60,$2E(a0)
 
 Init_BossArena3:
@@ -75,7 +75,7 @@ Load_BossArena:
 		bpl.s	loc_85CC6
 		move.b	objoff_26(a0),d0
 		move.b	d0,(Current_music+1).w
-		jsr	(SMPS_QueueSound1).w
+		jsr	(Play_Music).w
 		bset	#0,objoff_27(a0)
 
 loc_85CC6:
@@ -134,7 +134,7 @@ loc_85D48:
 		clr.b	objoff_27(a0)
 		clr.w	objoff_1C(a0)
 		clr.b	objoff_26(a0)
-		movea.l	$34(a0),a1
+		movea.l	objoff_34(a0),a1
 		jmp	(a1)
 
 ; =============== S U B R O U T I N E =======================================
@@ -243,10 +243,61 @@ Check_PlayerInRange2:
 		bhi.s	.fail
 
 .done
-		moveq	#0,d0
+		moveq	#1,d0
 		rts
 ; ---------------------------------------------------------------------------
 
 .fail
-		moveq	#-1,d0
+		moveq	#0,d0
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
+Chk_OffScreen:
+		move.w	x_pos(a0),d0														; get object x-position
+		sub.w	(Camera_X_pos).w,d0												; subtract screen x-position
+		bmi.s	.offscreen
+		cmpi.w	#320,d0															; is object on the screen?
+		bge.s	.offscreen														; if not, branch
+		move.w	y_pos(a0),d0														; get object y-position
+		sub.w	(Camera_Y_pos).w,d0												; subtract screen y-position
+		bmi.s	.offscreen
+		cmpi.w	#224,d0															; is object on the screen?
+		bge.s	.offscreen														; if not, branch
+
+		; onscreen
+		moveq	#0,d0															; set flag to 0
+		rts
+; ---------------------------------------------------------------------------
+
+.offscreen
+		moveq	#1,d0															; set flag to 1
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
+Chk_WidthOffScreen:
+		moveq	#0,d1
+		move.b	width_pixels(a0),d1
+		move.w	x_pos(a0),d0														; get object x-position
+		sub.w	(Camera_X_pos).w,d0												; subtract screen x-position
+		add.w	d1,d0															; add object width
+		bmi.s	.offscreen
+		add.w	d1,d1
+		sub.w	d1,d0
+		cmpi.w	#320,d0															; is object on the screen?
+		bge.s	.offscreen														; if not, branch
+		move.w	y_pos(a0),d0														; get object y-position
+		sub.w	(Camera_Y_pos).w,d0												; subtract screen y-position
+		bmi.s	.offscreen
+		cmpi.w	#224,d0															; is object on the screen?
+		bge.s	.offscreen														; if not, branch
+
+		; onscreen
+		moveq	#0,d0															; set flag to 0
+		rts
+; ---------------------------------------------------------------------------
+
+.offscreen
+		moveq	#1,d0															; set flag to 1
 		rts

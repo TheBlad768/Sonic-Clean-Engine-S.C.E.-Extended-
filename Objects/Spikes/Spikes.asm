@@ -1,14 +1,16 @@
 ; ---------------------------------------------------------------------------
-; Object 36 - Spikes
+; Spikes (Object)
 ; ---------------------------------------------------------------------------
 
 byte_23F74:				; width, height
-		dc.b 40/2, 32/2	; 0
-		dc.b 32/2, 40/2	; 1
-		dc.b 8/2, 32/2	; 2
-		dc.b 56/2, 32/2	; 3
-		dc.b 128/2, 32/2	; 4
-		dc.b 32/2, 8/2	; 5
+		dc.b 32/2, 32/2	; 0
+		dc.b 64/2, 32/2	; 1
+		dc.b 96/2, 32/2	; 2
+		dc.b 128/2, 32/2	; 3
+		dc.b 32/2, 32/2	; 4
+		dc.b 32/2, 64/2	; 5
+		dc.b 32/2, 96/2	; 6
+		dc.b 32/2, 128/2	; 7
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -21,18 +23,14 @@ Obj_Spikes:
 		lea	byte_23F74(pc,d0.w),a1
 		move.b	(a1)+,width_pixels(a0)
 		move.b	(a1)+,height_pixels(a0)
-		move.l	#loc_24090,address(a0)		;  face up or down
+		move.l	#loc_24090,address(a0)							;  face up or down
 		move.l	#Map_Spikes,mappings(a0)
 		move.w	#make_art_tile(ArtTile_SpikesSprings+8,0,0),art_tile(a0)
 		lsr.w	d0
 		move.b	d0,mapping_frame(a0)
-		cmpi.b	#5,d0
-		beq.s	.sideways
-		cmpi.b	#1,d0
-		bne.s	loc_23FE8
-
-.sideways
-		move.l	#loc_240E2,address(a0)		; sideways
+		cmpi.b	#4,d0
+		blo.s		loc_23FE8
+		move.l	#loc_240E2,address(a0)							; sideways
 		move.w	#make_art_tile(ArtTile_SpikesSprings,0,0),art_tile(a0)
 
 loc_23FE8:
@@ -57,7 +55,7 @@ loc_24002:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_24090:									;  face up or down
+loc_24090:														;  face up or down
 		bsr.w	sub_242B6
 		moveq	#$B,d1
 		add.b	width_pixels(a0),d1
@@ -68,8 +66,8 @@ loc_24090:									;  face up or down
 		move.w	x_pos(a0),d4
 		jsr	(SolidObjectFull).w
 		moveq	#standing_mask,d6
-		and.b	status(a0),d6					; is Sonic or Tails standing on the object?
-		beq.s	loc_240D8					; if not, branch
+		and.b	status(a0),d6										; is Sonic or Tails standing on the object?
+		beq.s	loc_240D8										; if not, branch
 		move.b	d6,d0
 		andi.b	#p1_standing,d0
 		beq.s	loc_240CA
@@ -83,11 +81,12 @@ loc_240CA:
 		bsr.w	sub_24280
 
 loc_240D8:
-		move.w	objoff_30(a0),d0
+		moveq	#-$80,d0										; round down to nearest $80
+		and.w	objoff_30(a0),d0									; get object position
 		jmp	(Sprite_OnScreen_Test2).w
 ; ---------------------------------------------------------------------------
 
-loc_240E2:									; sideways
+loc_240E2:														; sideways
 		bsr.w	sub_242B6
 		moveq	#$B,d1
 		add.b	width_pixels(a0),d1
@@ -115,12 +114,13 @@ loc_24120:
 		bclr	#p2_pushing_bit,status(a0)
 
 loc_24134:
-		move.w	objoff_30(a0),d0
+		moveq	#-$80,d0										; round down to nearest $80
+		and.w	objoff_30(a0),d0									; get object position
 		jmp	(Sprite_OnScreen_Test2).w
 ; ---------------------------------------------------------------------------
 
 loc_2413E:
-		bsr.s	sub_242B6
+		bsr.w	sub_242B6
 		moveq	#$B,d1
 		add.b	width_pixels(a0),d1
 		moveq	#0,d2
@@ -145,7 +145,8 @@ loc_24176:
 		bsr.s	sub_24280
 
 loc_24184:
-		move.w	objoff_30(a0),d0
+		moveq	#-$80,d0										; round down to nearest $80
+		and.w	objoff_30(a0),d0									; get object position
 		jmp	(Sprite_OnScreen_Test2).w
 ; ---------------------------------------------------------------------------
 
@@ -189,7 +190,7 @@ off_242C4: offsetTable
 		offsetTableEntry.w locret_242CC	; 0
 		offsetTableEntry.w loc_242CE		; 2
 		offsetTableEntry.w loc_242E2		; 4
-		offsetTableEntry.w loc_24356		; 6
+		offsetTableEntry.w loc_24356		; 6 (FBZ)
 ; ---------------------------------------------------------------------------
 
 loc_242CE:

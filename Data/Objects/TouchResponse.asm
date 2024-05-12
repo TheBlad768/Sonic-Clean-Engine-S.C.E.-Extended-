@@ -40,11 +40,11 @@ TouchResponse:
 		subq.b	#3,d5
 		sub.w	d5,d3
 		cmpi.b	#id_Duck,anim(a0)						; is player ducking?
-		bne.s	.Touch_NoDuck							; if not, branch
+		bne.s	.Touch_NotDuck							; if not, branch
 		addi.w	#$C,d3
 		moveq	#$A,d5
 
-.Touch_NoDuck
+.Touch_NotDuck
 		moveq	#$10,d4									; player's collision width
 		add.w	d5,d5
 
@@ -508,7 +508,7 @@ HurtCharacter:
 		moveq	#signextendB(sfx_Death),d0				; load normal damage sound
 
 .sound
-		jsr	(SMPS_QueueSound2).w
+		jsr	(Play_SFX).w
 		moveq	#-1,d0
 		rts
 ; ---------------------------------------------------------------------------
@@ -548,7 +548,7 @@ Kill_Character:
 
 .notp1
 		bset	#7,art_tile(a0)
-		jsr	(SMPS_QueueSound2).w
+		jsr	(Play_SFX).w
 
 .dontdie
 		moveq	#-1,d0

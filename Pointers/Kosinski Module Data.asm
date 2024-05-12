@@ -20,8 +20,6 @@ ArtKosM_RobotnikShip:			binclude "Objects/Robotnik/KosinskiM Art/Robotnik Ship.b
 	even
 ArtKosM_EggRoboHead:			binclude "Objects/Robotnik/KosinskiM Art/Egg Robo Head.bin"
 	even
-ArtKosM_EggRoboBadnik:			binclude "Objects/Robotnik/KosinskiM Art/Egg Robo Badnik.bin"
-	even
 ArtKosM_BossExplosion:			binclude "Objects/Explosion/KosinskiM Art/Boss Explosion.bin"
 	even
 ArtKosM_Explosion:				binclude "Objects/Explosion/KosinskiM Art/Explosion.bin"
@@ -78,16 +76,6 @@ ArtKosM_StarPostStars2:			binclude "Objects/StarPost/KosinskiM Art/StarPost Star
 	even
 ArtKosM_StarPostStars3:			binclude "Objects/StarPost/KosinskiM Art/StarPost Stars 3.bin"
 	even
-ArtKosM_LevelSelectText:			binclude "Data/Screens/Level Select/KosinskiM Art/Text.bin"
-	even
-ArtKosM_ContinueSprites:			binclude "Data/Screens/Continue/KosinskiM Art/Player Sprites.bin"
-	even
-ArtKosM_ContinueIcons:			binclude "Data/Screens/Continue/KosinskiM Art/Player Icons.bin"
-	even
-ArtKosM_ContinueDigits:			binclude "Data/Screens/Continue/KosinskiM Art/Digits.bin"
-	even
-ArtKosM_CreditsText:				binclude "Data/Screens/Continue/KosinskiM Art/Large Text.bin"
-	even
 
 ; ===========================================================================
 ; Kosinski Module compressed title card graphics
@@ -97,7 +85,29 @@ ArtKosM_DEZTitleCard:			binclude "Objects/Title Card/KosinskiM Art/Levels/DEZ - 
 	even
 
 ; ===========================================================================
-; Kosinski Module compressed DEZ graphics
+; Kosinski Module compressed Level Select screen graphics
+; ===========================================================================
+
+ArtKosM_LevelSelectText:			binclude "Data/Screens/Level Select/KosinskiM Art/Text.bin"
+	even
+
+; ===========================================================================
+; Kosinski Module compressed Continue screen graphics
+; ===========================================================================
+
+ArtKosM_ContinueSprites:			binclude "Data/Screens/Continue/KosinskiM Art/Player Sprites.bin"
+	even
+ArtKosM_ContinueIcons:			binclude "Data/Screens/Continue/KosinskiM Art/Player Icons.bin"
+	even
+ArtKosM_ContinueDigits:			binclude "Data/Screens/Continue/KosinskiM Art/Digits.bin"
+	even
+ArtKosM_EggRoboBadnik:			binclude "Data/Screens/Continue/KosinskiM Art/Egg Robo Badnik.bin"
+	even
+ArtKosM_LargeTextCredits:		binclude "Data/Screens/Continue/KosinskiM Art/Large Text.bin"
+	even
+
+; ===========================================================================
+; Kosinski Module compressed levels graphics
 ; ===========================================================================
 
 ArtKosM_Spikebonker:			binclude "Objects/Spikebonker/KosinskiM Art/Spikebonker.bin"

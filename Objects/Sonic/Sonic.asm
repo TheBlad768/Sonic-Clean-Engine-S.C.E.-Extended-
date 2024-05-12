@@ -2,9 +2,11 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Sonic:
-		; Load some addresses into registers
+
+		; load some addresses into registers
 		; This is done to allow some subroutines to be
 		; shared with Tails/Knuckles.
+
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
 		lea	(v_Dust).w,a6
@@ -14,16 +16,17 @@ Obj_Sonic:
 		beq.s	Sonic_Normal
 
 		; debug only code
-		cmpi.b	#1,(Debug_placement_type).w	; Are Sonic in debug object placement mode?
-		beq.s	JmpTo_DebugMode			; If so, skip to debug mode routine
-		; By this point, we're assuming you're in frame cycling mode
+		cmpi.b	#1,(Debug_placement_type).w							; are Sonic in debug object placement mode?
+		beq.s	JmpTo_DebugMode									; if so, skip to debug mode routine
+
+		; by this point, we're assuming you're in frame cycling mode
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	+
-		clr.w	(Debug_placement_mode).w	; Leave debug mode
-+		addq.b	#1,mapping_frame(a0)		; Next frame
-		cmpi.b	#((Map_Sonic_end-Map_Sonic)/2)-1,mapping_frame(a0)	; Have we reached the end of Sonic's frames?
+		clr.w	(Debug_placement_mode).w							; leave debug mode
++		addq.b	#1,mapping_frame(a0)									; next frame
+		cmpi.b	#((Map_Sonic_end-Map_Sonic)/2)-1,mapping_frame(a0)	; have we reached the end of Sonic's frames?
 		blo.s		+
-		clr.b	mapping_frame(a0)	; If so, reset to Sonic's first frame
+		clr.b	mapping_frame(a0)										; if so, reset to Sonic's first frame
 +		bsr.w	Sonic_Load_PLC
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
@@ -210,7 +213,7 @@ Sonic_ChkInvin:										; checks if invincibility has expired and disables it i
 		cmpi.b	#12,air_left(a0)						; don't change music if drowning
 		blo.s		Sonic_RmvInvin
 		move.w	(Current_music).w,d0
-		jsr	(SMPS_QueueSound1).w					; stop playing invincibility theme and resume normal level music
+		jsr	(Play_Music).w							; stop playing invincibility theme and resume normal level music
 
 Sonic_RmvInvin:
 		bclr	#Status_Invincible,status_secondary(a0)

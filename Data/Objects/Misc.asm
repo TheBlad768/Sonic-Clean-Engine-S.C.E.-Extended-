@@ -164,6 +164,30 @@ Obj_VelocityIndex:
 
 ; =============== S U B R O U T I N E =======================================
 
+Release_PlayerFromObject:
+
+		; clear push
+		moveq	#pushing_mask,d0
+		and.b	status(a0),d0										; is Sonic or Tails pushing the object?
+		beq.s	.return											; if not, branch
+		bclr	#p1_pushing_bit,status(a0)
+		beq.s	.notp1
+		lea	(Player_1).w,a1
+		bclr	#Status_Push,status(a1)
+		move.w	#bytes_to_word(id_Walk,id_Run),anim(a1)			; reset player anim
+
+.notp1
+		bclr	#p2_pushing_bit,status(a0)
+		beq.s	.return
+		lea	(Player_2).w,a1
+		bclr	#Status_Push,status(a1)
+		move.w	#bytes_to_word(id_Walk,id_Run),anim(a1)			; reset player anim
+
+.return
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
 Displace_PlayerOffObject:
 		moveq	#standing_mask,d0
 		and.b	status(a0),d0										; is Sonic or Tails standing on the object?
@@ -208,7 +232,7 @@ Go_CheckPlayerRelease:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Song_Fade_Transition:
-		music	mus_Fade										; fade out music
+		music	mus_FadeOut									; fade out music
 		move.l	#Song_Fade_Transition_Wait,address(a0)
 
 Song_Fade_Transition_Return:
@@ -220,13 +244,13 @@ Song_Fade_Transition_Wait:
 		bne.s	Song_Fade_Transition_Return
 		move.b	subtype(a0),d0
 		move.b	d0,(Current_music+1).w
-		jsr	(SMPS_QueueSound1).w								; play music
+		jsr	(Play_Music).w										; play music
 		jmp	(Delete_Current_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Song_Fade_ToLevelMusic:
-		music	mus_Fade										; fade out music
+		music	mus_FadeOut									; fade out music
 		move.l	#Song_Fade_ToLevelMusic_Wait,address(a0)
 
 Song_Fade_ToLevelMusic_Return:
@@ -251,7 +275,7 @@ Restore_LevelMusic:
 		moveq	#signextendB(mus_Invincible),d0					; if invincible, play invincibility music
 
 .play
-		jmp	(SMPS_QueueSound1).w								; play music
+		jmp	(Play_Music).w										; play music
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -504,7 +528,7 @@ StartNewLevel:
 Play_SFX_Continuous:
 		and.b	(V_int_run_count+3).w,d1
 		bne.s	StartNewLevel.return
-		jmp	(SMPS_QueueSound2).w								; play sfx
+		jmp	(Play_SFX).w											; play sfx
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -625,22 +649,55 @@ CopyWordData_1:
 ; =============== S U B R O U T I N E =======================================
 
 Check_CameraXBoundary:
-		tst.w	x_vel(a0)
-		beq.s	+
-		bmi.s	++
 		move.w	(Camera_X_pos).w,d0
+
+.skipcam
+		tst.w	x_vel(a0)
+		beq.s	.return
+		bmi.s	.left
 		addi.w	#320-16,d0
 		cmp.w	x_pos(a0),d0
-		bhi.s	+
+		bhi.s	.return
 		clr.w	x_vel(a0)
-+		rts
+
+.return
+		rts
 ; ---------------------------------------------------------------------------
-+		move.w	(Camera_X_pos).w,d0
+
+.left
 		addi.w	#16,d0
 		cmp.w	x_pos(a0),d0
-		blo.s		+
+		blo.s		.return2
 		clr.w	x_vel(a0)
-+		rts
+
+.return2
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
+Check_CameraXBoundary2:
+		move.w	(Camera_X_pos).w,d0
+
+.skipcam
+		tst.w	x_vel(a0)
+		bmi.s	.left
+		add.w	d2,d0
+		cmp.w	x_pos(a0),d0
+		bls.s		.setflipx
+		rts
+; ---------------------------------------------------------------------------
+
+.left
+		add.w	d1,d0
+		cmp.w	x_pos(a0),d0
+		blo.s		.return
+
+.setflipx
+		bchg	#0,render_flags(a0)
+		neg.w	x_vel(a0)
+
+.return
+		rts
 
 ; =============== S U B R O U T I N E =======================================
 
