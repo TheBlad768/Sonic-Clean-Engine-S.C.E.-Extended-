@@ -55,7 +55,7 @@ TouchResponse:
 
 Touch_Loop:
 		movea.w	(a4)+,a1									; get address of first object's RAM
-		move.b	collision_flags(a1),d0						; get its collision_flags
+		move.b	collision_flags(a1),d0						; get its collision flags
 		bne.s	Touch_Width								; if it actually has collision, branch
 
 Touch_NextObj:
@@ -174,8 +174,8 @@ Touch_Sizes:
 ; ---------------------------------------------------------------------------
 
 Touch_ChkValue:
-		move.b	collision_flags(a1),d1						; get its collision_flags
-		andi.b	#$C0,d1									; get only collision type bits
+		moveq	#signextendB($C0),d1						; get its collision flags
+		and.b	collision_flags(a1),d1						; get only collision type bits
 		beq.w	Touch_Enemy							; if 00, enemy, branch
 		cmpi.b	#$C0,d1
 		beq.w	Touch_Special							; if 11, "special thing for starpole", branch
@@ -232,8 +232,8 @@ Touch_Monitor:
 ; ---------------------------------------------------------------------------
 
 .monitorupsidedown
-		move.w	y_pos(a0),d0								; get player's y_pos
-		addi.w	#16,d0									; add height of monitor from it
+		moveq	#16,d0									; add height of monitor from it
+		add.w	y_pos(a0),d0								; get player's y_pos
 		cmp.w	y_pos(a1),d0
 		bhs.s	.locret									; if new value is higher than monitor's y_pos, return
 
@@ -293,11 +293,11 @@ Touch_Enemy:
 ; ---------------------------------------------------------------------------
 
 .notknuckles
-		cmpi.b	#1,character_id(a0)						; is player Tails
+		cmpi.b	#1,character_id(a0)						; is player Tails?
 		bne.w	Touch_ChkHurt							; if not, branch
-		tst.b	double_jump_flag(a0)							; is Tails flying ("gravity-affected")
+		tst.b	double_jump_flag(a0)							; is Tails flying? ("gravity-affected")
 		beq.w	Touch_ChkHurt							; if not, branch
-		btst	#Status_Underwater,status(a0)					; is Tails underwater
+		btst	#Status_Underwater,status(a0)					; is Tails underwater?
 		bne.w	Touch_ChkHurt							; if not, branch
 		move.w	x_pos(a0),d1
 		move.w	y_pos(a0),d2
@@ -544,10 +544,11 @@ Kill_Character:
 		move.b	#id_Death,anim(a0)
 		cmpa.w	#Player_1,a0								; is this the main character?
 		bne.s	.notp1									; if not, branch
-		move.w	art_tile(a0),(Saved_art_tile).w
+		move.l	priority(a0),(Debug_saved_priority).w		; save priority and art_tile
+		clr.w	priority(a0)
+		bset	#7,art_tile(a0)
 
 .notp1
-		bset	#7,art_tile(a0)
 		jsr	(Play_SFX).w
 
 .dontdie
@@ -557,7 +558,7 @@ Kill_Character:
 
 Touch_Special:
 		moveq	#$3F,d1									; get only collision size (but that doesn't seems to be its use here)
-		and.b	collision_flags(a1),d1						; get collision_flags
+		and.b	collision_flags(a1),d1						; get collision flags
 		cmpi.b	#7,d1
 		beq.s	loc_103FA
 		cmpi.b	#6,d1
@@ -607,8 +608,8 @@ ShieldTouchResponse:
 
 ShieldTouch_Loop:
 		movea.w	(a4)+,a1									; get address of first object's RAM
-		move.b	collision_flags(a1),d0						; get its collision_flags
-		andi.b	#$C0,d0									; get only collision type bits
+		moveq	#signextendB($C0),d0						; get its collision flags
+		and.b	collision_flags(a1),d0						; get only collision type bits
 		cmpi.b	#$80,d0									; is only the high bit set ("harmful")?
 		beq.s	ShieldTouch_Width						; if so, branch
 
@@ -622,7 +623,7 @@ ShieldTouch_Return:
 
 ShieldTouch_Width:
 		moveq	#$3F,d0									; get only collision size
-		and.b	collision_flags(a1),d0						; get collision_flags
+		and.b	collision_flags(a1),d0						; get collision flags
 		beq.s	ShieldTouch_NextObj						; if it doesn't have a size, branch
 		add.w	d0,d0									; turn into index
 		lea	Touch_Sizes(pc),a2

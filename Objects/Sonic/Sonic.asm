@@ -4,7 +4,7 @@
 Obj_Sonic:
 
 		; load some addresses into registers
-		; This is done to allow some subroutines to be
+		; this is done to allow some subroutines to be
 		; shared with Tails/Knuckles.
 
 		lea	(Max_speed).w,a4
@@ -149,7 +149,7 @@ loc_10C26:
 		move.b	(Secondary_Angle).w,tilt(a0)
 		tst.b	(WindTunnel_flag).w
 		beq.s	.anim
-		tst.b	anim(a0)
+		tst.b	anim(a0)							; id_Walk
 		bne.s	.anim
 		move.b	prev_anim(a0),anim(a0)
 
@@ -232,7 +232,7 @@ Sonic_ChkShoes:										; checks if Speed Shoes have expired and disables them 
 		move.w	#$C,Acceleration-Max_speed(a4)		; set Acceleration
 		move.w	#$80,Deceleration-Max_speed(a4)		; set Deceleration
 		bclr	#Status_SpeedShoes,status_secondary(a0)
-		music	mus_Slowdown,1						; run music at normal speed
+		music	mus_Slowdown,1						; slow down tempo
 ; ---------------------------------------------------------------------------
 
 Sonic_ExitChk:
@@ -372,14 +372,14 @@ Sonic_MdNormal:
 Call_Player_AnglePos:
 		tst.b	(Reverse_gravity_flag).w
 		beq.w	Player_AnglePos
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		neg.b	d0
 		subi.b	#$40,d0
 		move.b	d0,angle(a0)
 		bsr.w	Player_AnglePos
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		neg.b	d0
 		subi.b	#$40,d0
 		move.b	d0,angle(a0)
@@ -524,8 +524,8 @@ Sonic_NotRight:
 		tst.w	d1
 		bpl.s	+
 		bset	#Status_Facing,status(a0)
-+		move.b	angle(a0),d0
-		addi.b	#$20,d0
++		moveq	#$20,d0
+		add.b	angle(a0),d0
 		andi.b	#$C0,d0						; is Sonic on a slope?
 		bne.w	loc_112EA					; if yes, branch
 		tst.w	ground_vel(a0)				; is Sonic moving?
@@ -758,8 +758,8 @@ loc_11350:
 		moveq	#$3F,d0
 		and.b	angle(a0),d0
 		beq.s	loc_11370
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		bmi.s	locret_113CE
 
 loc_11370:
@@ -852,8 +852,8 @@ loc_11430:
 
 loc_11438:
 		move.w	d0,ground_vel(a0)
-		move.b	angle(a0),d1
-		addi.b	#$20,d1
+		moveq	#$20,d1
+		add.b	angle(a0),d1
 		andi.b	#$C0,d1
 		bne.s	locret_11480
 		cmpi.w	#$400,d0
@@ -863,10 +863,10 @@ loc_11438:
 		sfx	sfx_Skid
 		move.b	#id_Stop,anim(a0)
 		bclr	#Status_Facing,status(a0)
-		cmpi.b	#12,air_left(a0)
-		blo.s		locret_11480
-		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
-		move.b	#$15,mapping_frame(a6)			; v_Dust
+		cmpi.b	#12,air_left(a0)						; check air remaining
+		blo.s		locret_11480							; if less than 12, branch
+		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
+		move.b	#$15,mapping_frame(a6)				; v_Dust
 
 locret_11480:
 		rts
@@ -903,8 +903,8 @@ loc_114B6:
 
 loc_114BE:
 		move.w	d0,ground_vel(a0)
-		move.b	angle(a0),d1
-		addi.b	#$20,d1
+		moveq	#$20,d1
+		add.b	angle(a0),d1
 		andi.b	#$C0,d1
 		bne.s	locret_11506
 		cmpi.w	#-$400,d0
@@ -914,10 +914,10 @@ loc_114BE:
 		sfx	sfx_Skid
 		move.b	#id_Stop,anim(a0)
 		bset	#Status_Facing,status(a0)
-		cmpi.b	#12,air_left(a0)
-		blo.s		locret_11506
-		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
-		move.b	#$15,mapping_frame(a6)			; v_Dust
+		cmpi.b	#12,air_left(a0)						; check air remaining
+		blo.s		locret_11506							; if less than 12, branch
+		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
+		move.b	#$15,mapping_frame(a6)				; v_Dust
 
 locret_11506:
 		rts
@@ -1156,14 +1156,16 @@ locret_116DC:
 ; =============== S U B R O U T I N E =======================================
 
 Player_LevelBound:
+
+		; check xpos
 		move.l	x_pos(a0),d1
 		move.w	x_vel(a0),d0
 		ext.l	d0
 		asl.l	#8,d0
 		add.l	d0,d1
 		swap	d1
-		move.w	(Camera_min_X_pos).w,d0
-		addi.w	#16,d0
+		moveq	#16,d0
+		add.w	(Camera_min_X_pos).w,d0
 		cmp.w	d1,d0									; has Sonic/Knux touched the left boundary?
 		bhi.s	Player_Boundary_Sides					; if yes, branch
 		move.w	(Camera_max_X_pos).w,d0
@@ -1193,6 +1195,7 @@ loc_11722:
 		blt.s		locret_11720
 
 Player_Boundary_Bottom:
+		movea.w	a0,a2
 		jmp	Kill_Character(pc)
 ; ---------------------------------------------------------------------------
 
@@ -1208,6 +1211,13 @@ Player_Boundary_Sides:
 SonicKnux_Roll:
 		tst.b	status_secondary(a0)
 		bmi.s	locret_1177E
+
+;		tst.w	move_lock(a0)							; Knuckles has problems with spin dash...
+;		bne.s	locret_1177E
+
+		cmpi.b	#id_Slide,anim(a0)						; alt idea...
+		beq.s	locret_1177E
+
 		tst.w	(HScroll_Shift).w
 		bne.s	locret_1177E
 		moveq	#btnLR,d0								; is left/right being pressed?
@@ -1222,8 +1232,10 @@ SonicKnux_Roll:
 loc_1176A:
 		cmpi.w	#$100,d0								; is Sonic moving at $100 speed or faster?
 		bhs.s	loc_11790								; if so, branch
-		btst	#Status_OnObj,status(a0)						; is Sonic/Knux stand on object?
-		bne.s	locret_1177E								; if yes, branch
+
+;		btst	#Status_OnObj,status(a0)						; is Sonic/Knux stand on object?
+;		bne.s	locret_1177E								; if yes, branch
+
 		move.b	#id_Duck,anim(a0)						; enter ducking animation
 
 locret_1177E:
@@ -1437,9 +1449,9 @@ SonicKnux_Spindash:
 		addq.w	#4,sp
 		move.b	#1,spin_dash_flag(a0)
 		clr.w	spin_dash_counter(a0)
-		cmpi.b	#12,air_left(a0)
-		blo.s		loc_11C24
-		move.b	#2,anim(a6)		; v_Dust
+		cmpi.b	#12,air_left(a0)							; check air remaining
+		blo.s		loc_11C24								; if less than 12, branch
+		move.b	#2,anim(a6)								; v_Dust
 
 loc_11C24:
 		bsr.w	Player_LevelBound
@@ -1481,7 +1493,7 @@ loc_11CCE:
 
 loc_11CDC:
 		bset	#Status_Roll,status(a0)
-		clr.b	anim(a6)		; v_Dust
+		clr.w	anim(a6)		; v_Dust
 		sfx	sfx_Dash
 		bra.s	loc_11D5E
 ; ---------------------------------------------------------------------------
@@ -1559,8 +1571,8 @@ loc_11D6C:
 ; =============== S U B R O U T I N E =======================================
 
 Player_SlopeResist:
-		move.b	angle(a0),d0
-		addi.b	#$60,d0
+		moveq	#$60,d0
+		add.b	angle(a0),d0
 		cmpi.b	#$C0,d0
 		bhs.s	locret_11DDA
 		move.b	angle(a0),d0
@@ -1603,8 +1615,8 @@ loc_11DE2:
 ; =============== S U B R O U T I N E =======================================
 
 Player_RollRepel:
-		move.b	angle(a0),d0
-		addi.b	#$60,d0
+		moveq	#$60,d0
+		add.b	angle(a0),d0
 		cmpi.b	#$C0,d0
 		bhs.s	locret_11E28
 		move.b	angle(a0),d0
@@ -1644,8 +1656,8 @@ Player_SlopeRepel:
 		bne.s	locret_11E6E
 		tst.w	move_lock(a0)
 		bne.s	loc_11E86
-		move.b	angle(a0),d0
-		addi.b	#$18,d0
+		moveq	#$18,d0
+		add.b	angle(a0),d0
 		cmpi.b	#$30,d0
 		blo.s		locret_11E6E
 		move.w	ground_vel(a0),d0
@@ -1656,8 +1668,8 @@ loc_11E4E:
 		cmpi.w	#$280,d0
 		bhs.s	locret_11E6E
 		move.w	#30,move_lock(a0)
-		move.b	angle(a0),d0
-		addi.b	#$30,d0
+		moveq	#$30,d0
+		add.b	angle(a0),d0
 		cmpi.b	#$60,d0
 		blo.s		loc_11E70
 		bset	#Status_InAir,status(a0)
@@ -1857,8 +1869,8 @@ sub_11FD6:
 
 sub_11FEE:
 		tst.b	(Reverse_gravity_flag).w
-		beq.w	Sonic_CheckCeiling
-		bsr.w	Sonic_CheckFloor
+		beq.w	Sonic_CheckCeiling2
+		bsr.w	Sonic_CheckFloor2
 		addi.b	#$40,d3
 		neg.b	d3
 		subi.b	#$40,d3
@@ -2052,8 +2064,8 @@ Sonic_TouchFloor:
 
 loc_121C4:
 		move.w	d0,-(sp)
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		bpl.s	loc_121D2
 		neg.w	(sp)
 
@@ -2130,7 +2142,7 @@ Sonic_Hurt:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	+
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 +
@@ -2185,7 +2197,7 @@ loc_12344:
 		move.l	d0,x_vel(a0)
 		move.w	d0,ground_vel(a0)
 		move.b	d0,object_control(a0)
-		move.b	d0,anim(a0)				; id_Walk
+		move.b	d0,anim(a0)								; id_Walk
 		move.b	d0,spin_dash_flag(a0)
 		move.w	#$100,priority(a0)
 		move.b	#id_SonicControl,routine(a0)
@@ -2196,6 +2208,7 @@ locret_12388:
 ; ---------------------------------------------------------------------------
 
 loc_1238A:
+		movea.w	a0,a2
 		jmp	Kill_Character(pc)
 
 ; =============== S U B R O U T I N E =======================================
@@ -2207,7 +2220,7 @@ Sonic_Death:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	+
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 +
@@ -2268,9 +2281,9 @@ loc_12478:
 		clr.b	(Update_HUD_timer).w
 		move.b	#id_SonicRestart,routine(a0)
 		music	mus_GameOver								; play the Game Over song
-		lea	(ArtKosM_GameOver).l,a1
-		move.w	#tiles_to_bytes(ArtTile_Shield),d2
-		jmp	(Queue_Kos_Module).w
+
+		; load game over art
+		QueueKosModule	ArtKosM_GameOver, ArtTile_Shield, 1
 ; ---------------------------------------------------------------------------
 
 loc_12498:
@@ -2313,7 +2326,7 @@ Sonic_Drown:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	+
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 +
@@ -2745,11 +2758,8 @@ Sonic_Load_PLC2:
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	.return
-		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
 		move.l	#dmaSource(ArtUnc_Sonic),d6
-		cmpi.w	#$DA*2,d0								; mapping frame * 2
-		blo.s		.loop
-		move.l	#dmaSource(ArtUnc_Sonic_Extra),d6
+		move.w	#tiles_to_bytes(ArtTile_Player_1),d4			; normal
 
 .loop
 		moveq	#0,d1

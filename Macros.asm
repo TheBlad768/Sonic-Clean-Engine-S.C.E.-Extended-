@@ -69,12 +69,12 @@ dmaFillVRAM macro byte,addr,length
 	move.w	#$8F01,VDP_control_port-VDP_control_port(a5)	; VRAM pointer increment: $0001
 	move.l	#(($9400|((((length)-1)&$FF00)>>8))<<16)|($9300|(((length)-1)&$FF)),VDP_control_port-VDP_control_port(a5)	; DMA length ...
 	move.w	#$9780,VDP_control_port-VDP_control_port(a5)	; VRAM fill
-	move.l	#$40000080|vdpCommDelta(addr),VDP_control_port-VDP_control_port(a5)	; Start at ...
+	move.l	#$40000080|vdpCommDelta(addr),VDP_control_port-VDP_control_port(a5)	; start at ...
 	move.w	#(byte)<<8,(VDP_data_port).l	; fill with byte
 
 .loop:
-	move.w	VDP_control_port-VDP_control_port(a5),d1
-	btst	#1,d1
+	moveq	#2,d1
+	and.w	VDP_control_port-VDP_control_port(a5),d1
 	bne.s	.loop	; busy loop until the VDP is finished filling...
 	move.w	#$8F02,VDP_control_port-VDP_control_port(a5)	; VRAM pointer increment: $0002
     endm
@@ -376,7 +376,11 @@ QueueKos macro data,ram,terminate
 ; load Kosinski Moduled art to VRAM
 QueueKosModule macro art,vram,terminate
 	lea	(art).l,a1
+    if ((vram)<=3)
+	moveq	#tiles_to_bytes(vram),d2
+      else
 	move.w	#tiles_to_bytes(vram),d2
+      endif
       if ("terminate"="0") || ("terminate"="")
 	jsr	(Queue_Kos_Module).w
       else
@@ -410,19 +414,16 @@ EniDecomp macro data,ram,vram,terminate
 ; ---------------------------------------------------------------------------
 
 out_of_xrange	macro exit, xpos
-	if ("xpos"<>"")
-		move.w	xpos,d0							; get object position (if specified as not x_pos)
-	else
-		move.w	x_pos(a0),d0						; get object position
-	endif
-	andi.w	#$FF80,d0							; round down to nearest $80
-	sub.w	(Camera_X_pos_coarse_back).w,d0		; get screen position
-	cmpi.w	#$80+320+$40+$80,d0				; this gives an object $80 pixels of room offscreen before being unloaded (the $40 is there to round up 320 to a multiple of $80)
-	bhi.ATTRIBUTE	exit
+	moveq	#-$80,d0							; round down to nearest $80
+      if ("xpos"<>"")
+		and.w	xpos,d0							; get object position (if specified as not x_pos)
+      else
+		and.w	x_pos(a0),d0						; get object position
+      endif
+	out_of_xrange2.ATTRIBUTE	exit
     endm
 
 out_of_xrange2	macro exit
-	andi.w	#$FF80,d0							; round down to nearest $80
 	sub.w	(Camera_X_pos_coarse_back).w,d0		; get screen position
 	cmpi.w	#$80+320+$40+$80,d0				; this gives an object $80 pixels of room offscreen before being unloaded (the $40 is there to round up 320 to a multiple of $80)
 	bhi.ATTRIBUTE	exit
@@ -434,38 +435,16 @@ out_of_xrange2	macro exit
 ; ---------------------------------------------------------------------------
 
 out_of_yrange	macro exit, ypos
-	if ("ypos"<>"")
-		move.w	ypos,d0							; get object position (if specified as not y_pos)
-	else
-		move.w	y_pos(a0),d0						; get object position
-	endif
-	sub.w	(Camera_Y_pos).w,d0
-	addi.w	#$80,d0
-	cmpi.w	#$80+256+$80,d0
-	bhi.ATTRIBUTE	exit
+	moveq	#-$80,d0							; round down to nearest $80
+      if ("ypos"<>"")
+		and.w	ypos,d0							; get object position (if specified as not y_pos)
+      else
+		and.w	y_pos(a0),d0						; get object position
+      endif
+	out_of_yrange2.ATTRIBUTE	exit
     endm
 
 out_of_yrange2	macro exit
-	sub.w	(Camera_Y_pos).w,d0
-	addi.w	#$80,d0
-	cmpi.w	#$80+256+$80,d0
-	bhi.ATTRIBUTE	exit
-    endm
-
-out_of_yrange3	macro exit, ypos
-	if ("ypos"<>"")
-		move.w	ypos,d0							; get object position (if specified as not y_pos)
-	else
-		move.w	y_pos(a0),d0						; get object position
-	endif
-	andi.w	#$FF80,d0
-	sub.w	(Camera_Y_pos_coarse_back).w,d0
-	cmpi.w	#$80+256+$80,d0
-	bhi.ATTRIBUTE	exit
-    endm
-
-out_of_yrange4	macro exit
-	andi.w	#$FF80,d0
 	sub.w	(Camera_Y_pos_coarse_back).w,d0
 	cmpi.w	#$80+256+$80,d0
 	bhi.ATTRIBUTE	exit
@@ -479,7 +458,6 @@ getobjectRAMslot macro address
       if ("address"=="")
 	fatal "Error! Empty value!"
       endif
-	movea.w	a0,a1												; load current object to a1
 	move.w	#Dynamic_object_RAM_end,d0
 	sub.w	a0,d0
 	lsr.w	#6,d0												; divide by $40... even though SSTs are $4A bytes long in this game

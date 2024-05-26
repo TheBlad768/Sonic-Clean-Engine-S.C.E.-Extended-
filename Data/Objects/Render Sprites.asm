@@ -7,14 +7,16 @@
 Init_SpriteTable:
 		lea	(Sprite_table_buffer).w,a0
 		moveq	#0,d0
+		move.b	d0,(Spritemask_flag).w
 		moveq	#1,d1
 		moveq	#80-1,d7
 
--		move.w	d0,(a0)
+.loop
+		move.w	d0,(a0)
 		move.b	d1,3(a0)
 		addq.w	#1,d1
 		addq.w	#8,a0
-		dbf	d7,-
+		dbf	d7,.loop
 		move.b	d0,-5(a0)
 		clearRAM Sprite_table_input, Sprite_table_input_end
 		rts

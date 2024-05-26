@@ -17,7 +17,7 @@ Obj_HiddenMonitor:
 .main
 		move.w	(Signpost_addr).w,d0							; address is empty?
 		beq.s	.notdraw										; if it is, branch
-		movea.w	d0,a1										; get Signpost address
+		movea.w	d0,a1										; get signpost address
 		btst	#0,objoff_38(a1)
 		beq.s	.notdraw										; if signpost hasn't landed, branch
 
@@ -51,14 +51,8 @@ Obj_HiddenMonitor:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_HiddenMonitor:
-		dc.l Map_Monitor
-		dc.w make_art_tile(ArtTile_Monitors,0,0)
-		dc.w $280
-		dc.b 28/2
-		dc.b 32/2
-		dc.b 0
-		dc.b 0
+ObjDat_HiddenMonitor:	subObjData Map_Monitor, make_art_tile(ArtTile_Monitors,0,0), $280, 28/2, 32/2, 0, 0
+
 HiddenMonitor_Range:
 		dc.w -14, 28		; xpos
 		dc.w -128, 192	; ypos

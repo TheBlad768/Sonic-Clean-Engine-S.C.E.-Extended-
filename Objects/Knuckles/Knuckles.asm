@@ -86,7 +86,7 @@ Knuckles_Init_Continued:
 		move.b	#30,air_left(a0)
 		subi.w	#32,x_pos(a0)
 		addq.w	#4,y_pos(a0)
-		jsr	(Reset_Player_Position_Array).l
+		jsr	Reset_Player_Position_Array(pc)
 		addi.w	#32,x_pos(a0)
 		subq.w	#4,y_pos(a0)
 		rts
@@ -104,7 +104,7 @@ loc_16580:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_165A2
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w									; unlock control
 		btst	#button_C,(Ctrl_1_held).w
 		beq.s	locret_165A0
 		move.w	#2,(Debug_placement_mode).w
@@ -148,7 +148,7 @@ loc_165D8:
 		move.b	(Secondary_Angle).w,tilt(a0)
 		tst.b	(WindTunnel_flag).w
 		beq.s	.anim
-		tst.b	anim(a0)		; id_Walk
+		tst.b	anim(a0)							; id_Walk
 		bne.s	.anim
 		move.b	prev_anim(a0),anim(a0)
 
@@ -195,43 +195,43 @@ Knuckles_Display:
 .draw
 		jsr	(Draw_Sprite).w
 
-Knux_ChkInvin:
-		btst	#1,status_secondary(a0)
-		beq.s	loc_1669A
+Knux_ChkInvin:										; checks if invincibility has expired and disables it if it has.
+		btst	#Status_Invincible,status_secondary(a0)
+		beq.s	Knux_ChkShoes
 		tst.b	invincibility_timer(a0)
-		beq.s	loc_1669A
+		beq.s	Knux_ChkShoes						; if there wasn't any time left, that means we're in Super/Hyper mode
 		moveq	#7,d0
 		and.b	(Level_frame_counter+1).w,d0
-		bne.s	loc_1669A
-		subq.b	#1,invincibility_timer(a0)
-		bne.s	loc_1669A
+		bne.s	Knux_ChkShoes
+		subq.b	#1,invincibility_timer(a0)				; reduce invincibility_timer only on every 8th frame
+		bne.s	Knux_ChkShoes						; if time is still left, branch
 		tst.b	(Level_end_flag).w						; don't change music if level is end
-		bne.s	loc_16694
-		tst.b	(Boss_flag).w
-		bne.s	loc_16694
-		cmpi.b	#12,air_left(a0)
-		blo.s		loc_16694
+		bne.s	Knux_RmvInvin
+		tst.b	(Boss_flag).w								; don't change music if in a boss fight
+		bne.s	Knux_RmvInvin
+		cmpi.b	#12,air_left(a0)						; don't change music if drowning
+		blo.s		Knux_RmvInvin
 		move.w	(Current_music).w,d0
 		jsr	(Play_Music).w							; stop playing invincibility theme and resume normal level music
 
-loc_16694:
-		bclr	#1,status_secondary(a0)
+Knux_RmvInvin:
+		bclr	#Status_Invincible,status_secondary(a0)
 
-loc_1669A:
-		btst	#2,status_secondary(a0)
-		beq.s	locret_166F4
+Knux_ChkShoes:										; checks if Speed Shoes have expired and disables them if they have.
+		btst	#Status_SpeedShoes,status_secondary(a0)	; does Sonic have speed shoes?
+		beq.s	locret_166F4							; if so, branch
 		tst.b	speed_shoes_timer(a0)
 		beq.s	locret_166F4
 		moveq	#7,d0
 		and.b	(Level_frame_counter+1).w,d0
 		bne.s	locret_166F4
-		subq.b	#1,speed_shoes_timer(a0)
+		subq.b	#1,speed_shoes_timer(a0)				; reduce speed_shoes_timer only on every 8th frame
 		bne.s	locret_166F4
-		move.w	#$600,Max_speed-Max_speed(a4)
-		move.w	#$C,Acceleration-Max_speed(a4)
-		move.w	#$80,Deceleration-Max_speed(a4)
-		bclr	#2,status_secondary(a0)
-		music	mus_Slowdown,1						; run music at normal speed
+		move.w	#$600,Max_speed-Max_speed(a4)		; set Max_speed
+		move.w	#$C,Acceleration-Max_speed(a4)		; set Acceleration
+		move.w	#$80,Deceleration-Max_speed(a4)		; set Deceleration
+		bclr	#Status_SpeedShoes,status_secondary(a0)
+		music	mus_Slowdown,1						; slow down tempo
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -403,15 +403,12 @@ Knux_Gliding_HitFloor:
 		tst.w	x_vel(a0)
 		bpl.s	+
 		bset	#Status_Facing,status(a0)
-+
-		move.b	angle(a0),d0
-		addi.b	#$20,d0
++		moveq	#$20,d0
+		add.b	angle(a0),d0
 		andi.b	#$C0,d0
 		beq.s	loc_1693E
-
 		move.w	ground_vel(a0),x_vel(a0)
 		clr.w	y_vel(a0)
-
 		bra.w	Knux_TouchFloor
 ; ---------------------------------------------------------------------------
 
@@ -423,13 +420,14 @@ loc_1693E:
 
 		; The drowning countdown uses the dust clouds' VRAM, so don't create
 		; dust if Knuckles is drowning.
-		cmpi.b	#12,air_left(a0)
-		blo.s		+
+		cmpi.b	#12,air_left(a0)						; check air remaining
+		blo.s		.return								; if less than 12, branch
 
 		; Create dust clouds.
-		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
-		move.b	#$15,mapping_frame(a6)			; v_Dust
-+
+		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
+		move.b	#$15,mapping_frame(a6)				; v_Dust
+
+.return
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -438,27 +436,25 @@ Knuckles_Gliding_HitWall:
 		bmi.w	.fail
 
 		move.b	lrb_solid_bit(a0),d5
-		move.b	double_jump_property(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	double_jump_property(a0),d0
 		bpl.s	.right
 
 ;.left:
 		bset	#Status_Facing,status(a0)
-
 		bsr.w	CheckLeftCeilingDist
 		or.w	d0,d1
 		bne.s	.checkFloorLeft
-
 		addq.w	#1,x_pos(a0)
 		bra.s	.success
+; ---------------------------------------------------------------------------
 
 .right:
 		bclr	#Status_Facing,status(a0)
-
 		bsr.w	CheckRightCeilingDist
 		or.w	d0,d1
 		bne.w	.checkFloorRight
-; loc_169A6:
+
 .success:
 		sfx	sfx_Grab
 		clr.l	x_vel(a0)
@@ -502,8 +498,8 @@ Knuckles_Gliding_HitWall:
 ; ---------------------------------------------------------------------------
 ; loc_16A34:
 .reverseGravity:
-		move.w	y_pos(a0),d2
-		addi.w	#11,d2
+		moveq	#11,d2
+		add.w	y_pos(a0),d2
 		eori.w	#$F,d2
 		jsr	(ChkFloorEdge_ReverseGravity_Part2).w
 
@@ -524,10 +520,8 @@ Knuckles_Gliding_HitWall:
 		ext.w	d0
 		add.w	d0,d3
 		addq.w	#1,d3
-
 		tst.b	(Reverse_gravity_flag).w
 		bne.s	Knuckles_Gliding_HitWall.reverseGravity
-
 		bra.s	.checkFloorCommon
 ; ---------------------------------------------------------------------------
 ; loc_16A6E:
@@ -571,8 +565,8 @@ Knuckles_Fall_From_Glide:
 .skip2:
 		add.w	d0,y_pos(a0)
 		sfx	sfx_GlideLand
-		move.b	angle(a0),d0
-		addi.b	#$20,d0
+		moveq	#$20,d0
+		add.b	angle(a0),d0
 		andi.b	#$C0,d0
 		beq.s	.skip3
 		bra.w	Knux_TouchFloor
@@ -799,8 +793,8 @@ Knuckles_Wall_Climb:
 
 		; Knuckles has reached the floor.
 		sub.w	d1,y_pos(a0)
-		move.b	(Primary_Angle).w,d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	(Primary_Angle).w,d0
 		neg.b	d0
 		subi.b	#$40,d0
 		move.b	d0,angle(a0)
@@ -837,29 +831,29 @@ Knuckles_Wall_Climb:
 		addq.w	#3*2,x_pos(a0)
 
 .skip4:
-		; Get Knuckles' distance from the wall in 'd1'.
-		move.w	y_pos(a0),d2
-		addi.w	#11,d2
+		; get Knuckles' distance from the wall in 'd1'
+		moveq	#11,d2
+		add.w	y_pos(a0),d2
 		bsr.w	GetDistanceFromWall
 
-		; If Knuckles is no longer against the wall (he has climbed off the
-		; bottom of it) then make him let go.
+		; if Knuckles is no longer against the wall (he has climbed off the bottom of it) then make him let go
 		tst.w	d1
 		bne.w	Knuckles_LetGoOfWall
 
-		; Get Knuckles' distance from the floor in 'd1'.
+		; get Knuckles' distance from the floor in 'd1'
 		move.b	top_solid_bit(a0),d5
-		move.w	y_pos(a0),d2
-		addi.w	#9,d2
+		moveq	#9,d2
+		add.w	y_pos(a0),d2
 		move.w	x_pos(a0),d3
 		bsr.w	sub_F828
 
-		; Check if Knuckles has room below him.
+		; check if Knuckles has room below him
 		tst.w	d1
 		bpl.s	.moveDown
 ; loc_16D6E:
 .reachedFloor:
-		; Knuckles has reached the floor.
+
+		; Knuckles has reached the floor
 		add.w	d1,y_pos(a0)
 		move.b	(Primary_Angle).w,angle(a0)
 		clr.l	x_vel(a0)
@@ -872,27 +866,28 @@ Knuckles_Wall_Climb:
 .moveDown:
 		addq.w	#1,y_pos(a0)
 
-		moveq	#-1,d1	; Climbing animation delta: make the animation play backwards.
+		moveq	#-1,d1	; climbing animation delta: make the animation play backwards.
 		bra.s	.finishMoving
 ; ---------------------------------------------------------------------------
 ; loc_16DA8:
 .climbingUp_ReverseGravity:
-		; Get Knuckles' distance from the wall in 'd1'.
-		move.w	y_pos(a0),d2
-		addi.w	#11,d2
+
+		; get Knuckles' distance from the wall in 'd1'
+		moveq	#11,d2
+		add.w	y_pos(a0),d2
 		bsr.w	GetDistanceFromWall
 
-		; If the wall is far away from Knuckles, then we must have reached a
+		; if the wall is far away from Knuckles, then we must have reached a
 		; ledge, so make Knuckles climb up onto it.
 		cmpi.w	#4,d1
 		bge.w	Knuckles_ClimbUp
 
-		; If Knuckles has encountered a small dip in the wall, then make him
+		; if Knuckles has encountered a small dip in the wall, then make him
 		; stop.
 		tst.w	d1
 		bne.w	.notMoving
 
-		; Get Knuckles' distance from the ceiling in 'd1'.
+		; get Knuckles' distance from the ceiling in 'd1'
 		move.b	lrb_solid_bit(a0),d5
 		move.w	y_pos(a0),d2
 		addq.w	#8,d2
@@ -950,8 +945,8 @@ Knuckles_Wall_Climb:
 
 		; Get Knuckles' distance from the floor in 'd1'.
 		move.b	top_solid_bit(a0),d5
-		move.w	y_pos(a0),d2
-		addi.w	#9,d2
+		moveq	#9,d2
+		add.w	y_pos(a0),d2
 		move.w	x_pos(a0),d3
 		bsr.w	sub_F828
 
@@ -1134,10 +1129,9 @@ Knuckles_Set_Gliding_Animation:
 		bclr	#Status_Push,status(a0)
 		bclr	#Status_Facing,status(a0)
 
-		; Update Knuckles' frame, depending on where he's facing.
-		moveq	#0,d0
-		move.b	double_jump_property(a0),d0
-		addi.b	#$10,d0
+		; update Knuckles' frame, depending on where he's facing.
+		moveq	#$10,d0
+		add.b	double_jump_property(a0),d0
 		lsr.w	#5,d0
 		move.b	RawAni_Knuckles_GlideTurn(pc,d0.w),d1
 		move.b	d1,mapping_frame(a0)
@@ -1348,8 +1342,8 @@ loc_17174:
 		tst.w	d1
 		bpl.s	+
 		bset	#Status_Facing,status(a0)
-+		move.b	angle(a0),d0
-		addi.b	#$20,d0
++		moveq	#$20,d0
+		add.b	angle(a0),d0
 		andi.b	#$C0,d0
 		bne.w	loc_1731C
 		tst.w	ground_vel(a0)
@@ -1543,8 +1537,8 @@ loc_17382:
 		moveq	#$3F,d0
 		and.b	angle(a0),d0
 		beq.s	loc_173A2
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		bmi.s	locret_17400
 
 loc_173A2:
@@ -1563,14 +1557,6 @@ loc_173B0:
 		tst.w	d1
 		bpl.s	locret_17400
 		asl.w	#8,d1
-
-;		cmpi.b	#8,(Current_zone).w			; is SOZ zone?
-;		bne.s	loc_173D2					; if not, branch
-;		tst.b	d0
-;		bpl.s	loc_173D2
-;		subq.b	#1,d0
-
-loc_173D2:
 		addi.b	#$20,d0
 		andi.b	#$C0,d0
 		beq.s	loc_17422
@@ -1645,8 +1631,8 @@ loc_17462:
 
 loc_1746A:
 		move.w	d0,ground_vel(a0)
-		move.b	angle(a0),d1
-		addi.b	#$20,d1
+		moveq	#$20,d1
+		add.b	angle(a0),d1
 		andi.b	#$C0,d1
 		bne.s	locret_174B2
 		cmpi.w	#$400,d0
@@ -1656,10 +1642,10 @@ loc_1746A:
 		sfx	sfx_Skid
 		move.b	#id_Stop,anim(a0)
 		bclr	#0,status(a0)
-		cmpi.b	#12,air_left(a0)
-		blo.s		locret_174B2
-		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
-		move.b	#$15,mapping_frame(a6)			; v_Dust
+		cmpi.b	#12,air_left(a0)						; check air remaining
+		blo.s		locret_174B2							; if less than 12, branch
+		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
+		move.b	#$15,mapping_frame(a6)				; v_Dust
 
 locret_174B2:
 		rts
@@ -1696,8 +1682,8 @@ loc_174E8:
 
 loc_174F0:
 		move.w	d0,ground_vel(a0)
-		move.b	angle(a0),d1
-		addi.b	#$20,d1
+		moveq	#$20,d1
+		add.b	angle(a0),d1
 		andi.b	#$C0,d1
 		bne.s	locret_17538
 		cmpi.w	#-$400,d0
@@ -1707,10 +1693,10 @@ loc_174F0:
 		sfx	sfx_Skid
 		move.b	#id_Stop,anim(a0)
 		bset	#0,status(a0)
-		cmpi.b	#12,air_left(a0)
-		blo.s		locret_17538
-		move.l	#DashDust_CheckSkid,address(a6)	; v_Dust
-		move.b	#$15,mapping_frame(a6)			; v_Dust
+		cmpi.b	#12,air_left(a0)						; check air remaining
+		blo.s		locret_17538							; if less than 12, branch
+		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
+		move.b	#$15,mapping_frame(a6)				; v_Dust
 
 locret_17538:
 		rts
@@ -2279,8 +2265,8 @@ Knux_TouchFloor:
 
 loc_17B56:
 		move.w	d0,-(sp)
-		move.b	angle(a0),d0
-		addi.b	#$40,d0
+		moveq	#$40,d0
+		add.b	angle(a0),d0
 		bpl.s	loc_17B64
 		neg.w	(sp)
 
@@ -2315,7 +2301,7 @@ Knuckles_Hurt:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17BD0
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -2393,7 +2379,7 @@ Knuckles_Death:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17CA2
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -2436,7 +2422,7 @@ Knuckles_Drown:
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_17D04
 		move.w	#1,(Debug_placement_mode).w
-		clr.b	(Ctrl_1_locked).w
+		clr.b	(Ctrl_1_locked).w								; unlock control
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -2663,20 +2649,18 @@ Knuckles_Load_PLC:
 
 Knuckles_Load_PLC2:
 		cmp.b	(Player_prev_frame).w,d0
-		beq.s	locret_18162
+		beq.s	.return
 		move.b	d0,(Player_prev_frame).w
-		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
-
-loc_18122:
 		add.w	d0,d0
 		lea	(DPLC_Knuckles).l,a2
 		adda.w	(a2,d0.w),a2
 		move.w	(a2)+,d5
 		subq.w	#1,d5
-		bmi.s	locret_18162
+		bmi.s	.return
 		move.l	#dmaSource(ArtUnc_Knux),d6
+		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
 
-loc_1813A:
+.loop
 		moveq	#0,d1
 		move.w	(a2)+,d1
 		move.w	d1,d3
@@ -2690,7 +2674,7 @@ loc_1813A:
 		add.w	d3,d4
 		add.w	d3,d4
 		jsr	(Add_To_DMA_Queue).w
-		dbf	d5,loc_1813A
+		dbf	d5,.loop
 
-locret_18162:
+.return
 		rts

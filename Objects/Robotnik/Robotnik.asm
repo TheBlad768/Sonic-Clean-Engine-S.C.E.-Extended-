@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Robotnik Head 3
+; Robotnik head 3
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
@@ -77,7 +77,7 @@ Obj_RobotnikHead3_Laugh:
 		jmp	(Animate_RawNoSST).w
 
 ; ---------------------------------------------------------------------------
-; Robotnik Head 4
+; Robotnik head 4
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
@@ -105,7 +105,7 @@ loc_67CFE:
 		jmp	(Delete_Current_Sprite).w
 
 ; ---------------------------------------------------------------------------
-; Robotnik Ship Flame
+; Robotnik ship flame
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
@@ -129,7 +129,7 @@ RobotnikShipFlame_Main:
 ; =============== S U B R O U T I N E =======================================
 
 sub_67B14:
-		move.l	#Map_EggRoboHead,mappings(a0)		; if player is Knuckles, use Egg Robo head
+		move.l	#Map_EggRoboHead,mappings(a0)			; if player is Knuckles, use Egg Robo head
 
 loc_67B1C:
 		move.l	#AniRaw_EggRoboHead,$30(a0)
@@ -138,7 +138,7 @@ loc_67B1C:
 		jmp	(Queue_Kos_Module).w
 
 ; ---------------------------------------------------------------------------
-; Robotnik Ship Pieces
+; Robotnik ship pieces
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
@@ -147,45 +147,20 @@ Obj_RobotnikShipPieces:
 		lea	ObjDat_RobotnikShipPieces(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#Obj_FlickerMove,address(a0)
-		moveq	#0,d0
 		move.b	subtype(a0),d0
-		lsr.w	d0
+		lsr.b	d0											; division by 2
 		move.b	d0,mapping_frame(a0)
-		moveq	#2<<2,d0
+		moveq	#2<<2,d0								; set index velocity
 		jmp	(Set_IndexedVelocity).w
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_RobotnikShip:
-		dc.l Map_RobotnikShip
-		dc.w $52E
-		dc.w $200
-		dc.b 64/2
-		dc.b 64/2
-		dc.b $C
-		dc.b $F
-ObjDat_RobotnikHead:
-		dc.l Map_RobotnikShip
-		dc.w $52E
-		dc.w $280
-		dc.b 32/2
-		dc.b 16/2
-		dc.b 0
-		dc.b 0
-ObjDat2_RoboShipFlame:
-		dc.w $280
-		dc.b 16/2
-		dc.b 8/2
-		dc.b 8
-		dc.b 0
-ObjDat_RobotnikShipPieces:
-		dc.l Map_RobotnikShipPieces
-		dc.w $852E
-		dc.w 0
-		dc.b 64/2
-		dc.b 64/2
-		dc.b 0
-		dc.b 0
+ObjDat_RobotnikShip:			subObjData Map_RobotnikShip, $52E, $200, 64/2, 64/2, $C, $F
+ObjDat_RobotnikShip_Glass:	subObjData Map_RobotnikShip, $52E, $200, 64/2, 64/2, 7, $F
+ObjDat_RobotnikHead:		subObjData Map_RobotnikShip, $52E, $280, 32/2, 16/2, 0, 0
+ObjDat2_RoboShipFlame:		subObjData3 $280, 16/2, 8/2, 8, 0
+ObjDat_RobotnikShipPieces:	subObjData Map_RobotnikShipPieces, $852E, 0, 64/2, 64/2, 0, 0
+
 AniRaw_RobotnikHead:
 		dc.b 5, 0, 1, arfEnd
 AniRaw_RobotnikHead_Laugh:
@@ -209,6 +184,13 @@ Child1_MakeRoboShipFlame:
 Child6_MakeRobotnikShipPieces:
 		dc.w 4-1
 		dc.l Obj_RobotnikShipPieces
+
+AngleLookup_1:	binclude "Objects/Robotnik/Object Data/AngleLookup1.bin"
+	even
+AngleLookup_2:	binclude "Objects/Robotnik/Object Data/AngleLookup2.bin"
+	even
+AngleLookup_3:	binclude "Objects/Robotnik/Object Data/AngleLookup3.bin"
+	even
 ; ---------------------------------------------------------------------------
 
 		include "Objects/Robotnik/Object Data/Map - Robotnik Ship.asm"
