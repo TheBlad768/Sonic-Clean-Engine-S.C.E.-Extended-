@@ -135,6 +135,8 @@ Obj_EndSign:
 .endtime
 		move.l	#.signresults,address(a0)
 		clr.l	x_vel(a0)												; clear velocity
+
+		; set frame
 		move.w	(Player_mode).w,d0									; get current character "mode"
 		move.b	.framearray(pc,d0.w),mapping_frame(a0)
 		bra.s	.draw
