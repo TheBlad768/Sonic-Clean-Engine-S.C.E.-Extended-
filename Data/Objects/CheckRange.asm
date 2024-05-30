@@ -73,7 +73,7 @@ Load_BossArena:
 		bpl.s	loc_85CC6
 		move.b	objoff_26(a0),d0
 		move.b	d0,(Current_music+1).w
-		jsr	(Play_Music).w
+		bsr.w	Play_Music
 		bset	#0,objoff_27(a0)
 
 loc_85CC6:

@@ -100,7 +100,7 @@ Perform_DPLC:
 		lsl.w	#4,d3							; d3 is the total number of words to transfer (maximum 16 tiles per transaction)
 		add.w	d3,d4
 		add.w	d3,d4
-		jsr	(Add_To_DMA_Queue).w			; add to queue
+		bsr.w	Add_To_DMA_Queue			; add to queue
 		dbf	d5,.loop							; keep going
 
 .return
@@ -246,8 +246,8 @@ Song_Fade_Transition_Wait:
 		bne.s	Song_Fade_Transition_Return
 		move.b	subtype(a0),d0
 		move.b	d0,(Current_music+1).w
-		jsr	(Play_Music).w										; play music
-		jmp	(Delete_Current_Sprite).w
+		bsr.w	Play_Music										; play music
+		bra.w	Delete_Current_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -263,7 +263,7 @@ Song_Fade_ToLevelMusic_Wait:
 		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
 		bne.s	Song_Fade_ToLevelMusic_Return
 		bsr.s	Restore_LevelMusic
-		jmp	(Delete_Current_Sprite).w
+		bra.w	Delete_Current_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -277,7 +277,7 @@ Restore_LevelMusic:
 		moveq	#signextendB(mus_Invincible),d0					; if invincible, play invincibility music
 
 .play
-		jmp	(Play_Music).w										; play music
+		bra.w	Play_Music										; play music
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -413,7 +413,7 @@ Check_PlayerAttack:
 		move.w	y_pos(a1),d2
 		sub.w	x_pos(a0),d1
 		sub.w	y_pos(a0),d2
-		jsr	(GetArcTan).w										; get angle between Tails and object
+		bsr.w	GetArcTan										; get angle between Tails and object
 		subi.b	#$20,d0
 		cmpi.b	#$40,d0
 		bhs.s	.fail												; if Tails is between 20-60 degrees off object (directly below), then he is attacking
@@ -510,6 +510,44 @@ Restore_PlayerControl2:
 
 ; =============== S U B R O U T I N E =======================================
 
+Player_Load_PLC:
+		move.w	a0,-(sp)
+		lea	(Player_1).w,a0
+		moveq	#0,d0
+		move.b	character_id(a0),d0
+		add.w	d0,d0
+		add.w	d0,d0
+		movea.l	.index(pc,d0.w),a1
+		jsr	(a1)
+		movea.w	(sp)+,a0
+		rts
+; ---------------------------------------------------------------------------
+
+.index
+		dc.l Sonic_Load_PLC			; 0
+		dc.l Tails_Load_PLC			; 1
+		dc.l Knuckles_Load_PLC		; 2
+
+; =============== S U B R O U T I N E =======================================
+
+Player_Load_PLC2:
+		move.w	a0,-(sp)
+		movea.w	a1,a0
+		tst.l	address(a0)											; is player RAM empty?
+		beq.s	.exit												; if yes, branch
+		moveq	#0,d0
+		move.b	character_id(a0),d0
+		add.w	d0,d0
+		add.w	d0,d0
+		movea.l	Player_Load_PLC.index(pc,d0.w),a1
+		jsr	(a1)
+
+.exit
+		movea.w	(sp)+,a0
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
 StartNewLevel:
 		move.w	d0,(Current_zone_and_act).w
 		move.w	d0,(Apparent_zone_and_act).w
@@ -524,14 +562,14 @@ StartNewLevel:
 Play_SFX_Continuous:
 		and.b	(V_int_run_count+3).w,d1
 		bne.s	StartNewLevel.return
-		jmp	(Play_SFX).w											; play sfx
+		bra.w	Play_SFX										; play sfx
 
 ; =============== S U B R O U T I N E =======================================
 
 Wait_NewDelay:
 		subq.w	#1,objoff_2E(a0)
 		bmi.s	.end
-		jmp	(Draw_Sprite).w
+		bra.w	Draw_Sprite
 ; ---------------------------------------------------------------------------
 
 .end
@@ -545,7 +583,7 @@ Wait_NewDelay:
 Wait_FadeToLevelMusic:
 		subq.w	#1,objoff_2E(a0)
 		bmi.s	.end
-		jmp	(Draw_Sprite).w
+		bra.w	Draw_Sprite
 ; ---------------------------------------------------------------------------
 
 .end
@@ -589,7 +627,7 @@ BossDefeated:
 BossDefeated_NoTime:
 		bclr	#7,render_flags(a0)
 		moveq	#100,d0
-		jmp	(HUD_AddToScore).w
+		bra.w	HUD_AddToScore									; add 1000 to score
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -758,7 +796,7 @@ Change_ActSizes2:
 
 		; create change level size object
 		lea	Child7_ChangeLevSize(pc),a2
-		jmp	(CreateChild7_Normal2).w
+		bra.w	CreateChild7_Normal2
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -777,7 +815,7 @@ Obj_IncLevEndXGradual:
 
 .end
 		move.w	(Camera_stored_max_X_pos).w,(Camera_max_X_pos).w
-		jmp	(Delete_Current_Sprite).w
+		bra.w	Delete_Current_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -796,7 +834,7 @@ Obj_DecLevStartXGradual:
 
 .end
 		move.w	(Camera_stored_min_X_pos).w,(Camera_min_X_pos).w
-		jmp	(Delete_Current_Sprite).w
+		bra.w	Delete_Current_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -815,7 +853,7 @@ Obj_IncLevEndYGradual:
 
 .end
 		move.w	(Camera_stored_max_Y_pos).w,(Camera_max_Y_pos).w
-		jmp	(Delete_Current_Sprite).w
+		bra.w	Delete_Current_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -834,7 +872,7 @@ Obj_DecLevStartYGradual:
 
 .end
 		move.w	(Camera_stored_min_Y_pos).w,(Camera_min_Y_pos).w
-		jmp	(Delete_Current_Sprite).w
+		bra.w	Delete_Current_Sprite
 ; ---------------------------------------------------------------------------
 
 Child6_IncLevX:

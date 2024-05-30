@@ -438,11 +438,11 @@ Animate_ExternalPlayerSprite:
 		bset	#0,render_flags(a1)
 
 loc_84500:
-		jmp	Sonic_Load_PLC2(pc)
+		bra.w	Player_Load_PLC2
 ; ---------------------------------------------------------------------------
 
 loc_84504:
-		jsr	Sonic_Load_PLC2(pc)
+		bsr.w	Player_Load_PLC2
 		movea.l	objoff_34(a0),a1
 		jmp	(a1)
 

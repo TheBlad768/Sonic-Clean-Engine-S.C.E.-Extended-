@@ -185,7 +185,7 @@ loc_EABE:
 
 loc_EAC6:
 		move.w	#bytes_to_word(6,(CMap_Ring_Spark-CMap_Ring)/2),(a4)
-		jsr	(GiveRing).w
+		bsr.w	GiveRing
 		lea	(Ring_consumption_list).w,a3
 
 .find
