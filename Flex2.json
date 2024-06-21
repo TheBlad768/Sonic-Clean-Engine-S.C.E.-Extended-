@@ -14,7 +14,7 @@
                             "length": 1
                         }
                     ],
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "art": {
                         "path": "Objects/Sonic/Uncompressed Art/Sonic.bin",
                         "compression": "Uncompressed",
@@ -32,7 +32,7 @@
                     "uuid": "da472ab9-f363-45e6-8ee3-a83fd70d6d9c"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Tails",
                     "palettes": [
                         {
@@ -57,7 +57,7 @@
                     "uuid": "55b9745b-aae7-4573-aae0-0fff4cffee27"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Tails Extra",
                     "palettes": [
                         {
@@ -82,7 +82,7 @@
                     "uuid": "5baae795-736a-400f-bf4c-ffee27d32c98"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Tails tails",
                     "palettes": [
                         {
@@ -107,7 +107,7 @@
                     "uuid": "745baae7-9573-4ae0-8fff-4cffee27d32c"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Knuckles",
                     "palettes": [
                         {
@@ -140,7 +140,7 @@
             "name": "Shields",
             "children": [
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Fire Shield",
                     "palettes": [
                         {
@@ -165,7 +165,7 @@
                     "uuid": "4b0ca86f-7aa1-4e9d-a6fe-53662e690e3c"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Lightning Shield",
                     "palettes": [
                         {
@@ -190,7 +190,7 @@
                     "uuid": "0ca86f7a-a1ce-4de6-be53-662e690e3c9e"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Bubble Shield",
                     "palettes": [
                         {
@@ -215,7 +215,7 @@
                     "uuid": "a86f7aa1-ce9d-46fe-9366-2e690e3c9e23"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Insta-Shield",
                     "palettes": [
                         {
@@ -240,7 +240,7 @@
                     "uuid": "7aa1ce9d-e6fe-4366-ae69-0e3c9e238fec"
                 },
                 {
-                    "format": "Sonic 3&K Sonic.js",
+                    "format": "Sonic 3&K Player.js",
                     "name": "Invincibility",
                     "palettes": [
                         {
