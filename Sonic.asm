@@ -2,52 +2,89 @@
 ; Sonic Clean Engine (SCE)
 ; ===========================================================================
 
-; Assembly options
-ZoneCount:				= 1	; discrete zones are: DEZ
-GameDebug:				= 1	; if 1, enable debug mode for Sonic
-GameDebugAlt:			= 0	; if 1, enable alt debug mode for Sonic
-Lagometer:				= 1	; if 1, enable debug lagometer
-ExtendedCamera:			= 0	; if 1, enable extended camera
-RollInAir:				= 1	; if 1, enable roll in air for Sonic
-OptimiseStopZ80:			= 2	; if 1, remove stopZ80 and startZ80, if 2, use only for controllers(ignores sound driver)
-ZeroOffsetOptimization:	= 1	; if 1, makes a handful of zero-offset instructions smaller
-AllOptimizations:			= 1	; if 1, enables all optimizations
-EnableSRAM:				= 0	; change to 1 to enable SRAM
-BackupSRAM:			= 0
-AddressSRAM:			= 0	; 0 = odd+even; 2 = even only; 3 = odd only
-; ---------------------------------------------------------------------------
-
-; Assembler code
-		cpu 68000
-		include "MacroSetup.asm"			; include a few basic macros
-		include "Macros.asm"				; include some simplifying macros and functions
-		include "Constants.asm"			; include constants
-		include "Variables.asm"			; include RAM variables
-		include "Sound/Definitions.asm"	; include sound driver macros and functions
-		include "Misc Data/Debugger/ErrorHandler/Debugger.asm"	; include debugger macros and functions
+		; assembler code
+		CPU 68000
+		include "Settings.asm"										; include assembly options
+		include "MacroSetup.asm"									; include a few basic macros
+		include "Macros.asm"										; include some simplifying macros and functions
+		include "Constants.asm"									; include constants
+		include "Variables.asm"									; include RAM variables
+		include "Sound/Definitions.asm"							; include sound driver macros and functions
+		include "Misc Data/Debugger/ErrorHandler/Debugger.asm"		; include debugger macros and functions
 ; ---------------------------------------------------------------------------
 
 StartOfROM:
+
 	if * <> 0
 		fatal "StartOfROM was $\{*} but it should be 0"
 	endif
+
 Vectors:
-		dc.l System_stack, EntryPoint, BusError, AddressError		; 0
-		dc.l IllegalInstr, ZeroDivide, ChkInstr, TrapvInstr			; 4
-		dc.l PrivilegeViol, Trace, Line1010Emu, Line1111Emu		; 8
-		dc.l ErrorExcept, ErrorExcept, ErrorExcept, ErrorExcept	; 12
-		dc.l ErrorExcept, ErrorExcept, ErrorExcept, ErrorExcept	; 16
-		dc.l ErrorExcept, ErrorExcept, ErrorExcept, ErrorExcept	; 20
-		dc.l ErrorExcept, ErrorTrap, ErrorTrap, ErrorTrap			; 24
-		dc.l H_int_jump, ErrorTrap, V_int_jump, ErrorTrap		; 28
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 32
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 36
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 40
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 44
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 48
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 52
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 56
-		dc.l ErrorTrap, ErrorTrap, ErrorTrap, ErrorTrap			; 60
+		dc.l System_stack			; initial stack pointer value
+		dc.l EntryPoint			; start of program
+		dc.l BusError				; bus error
+		dc.l AddressError			; address error (4)
+		dc.l IllegalInstr			; illegal instruction
+		dc.l ZeroDivide			; division by zero
+		dc.l ChkInstr				; chk exception
+		dc.l TrapvInstr			; trapv exception (8)
+		dc.l PrivilegeViol			; privilege violation
+		dc.l Trace				; trace exception
+		dc.l Line1010Emu			; line-a emulator
+		dc.l Line1111Emu			; line-f emulator (12)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved) (16)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved) (20)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved)
+		dc.l ErrorExcept			; unused (reserved) (24)
+		dc.l ErrorExcept			; spurious exception
+		dc.l ErrorTrap			; irq level 1
+		dc.l ErrorTrap			; irq level 2
+		dc.l ErrorTrap			; irq level 3 (28)
+		dc.l H_int_jump			; irq level 4 (horizontal retrace interrupt)
+		dc.l ErrorTrap			; irq level 5
+		dc.l V_int_jump			; irq level 6 (vertical retrace interrupt)
+		dc.l ErrorTrap			; irq level 7 (32)
+		dc.l ErrorTrap			; trap #00 exception
+		dc.l ErrorTrap			; trap #01 exception
+		dc.l ErrorTrap			; trap #02 exception
+		dc.l ErrorTrap			; trap #03 exception (36)
+		dc.l ErrorTrap			; trap #04 exception
+		dc.l ErrorTrap			; trap #05 exception
+		dc.l ErrorTrap			; trap #06 exception
+		dc.l ErrorTrap			; trap #07 exception (40)
+		dc.l ErrorTrap			; trap #08 exception
+		dc.l ErrorTrap			; trap #09 exception
+		dc.l ErrorTrap			; trap #10 exception
+		dc.l ErrorTrap			; trap #11 exception (44)
+		dc.l ErrorTrap			; trap #12 exception
+		dc.l ErrorTrap			; trap #13 exception
+		dc.l ErrorTrap			; trap #14 exception
+		dc.l ErrorTrap			; trap #15 exception (48)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved) (52)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved) (56)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved) (60)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved)
+		dc.l ErrorTrap			; unused (reserved) (64)
+
 Header:			dc.b "SEGA GENESIS    "
 Copyright:		dc.b "(C)SEGA XXXX.XXX"
 Domestic_Name:	dc.b "SONIC THE               HEDGEHOG                "
@@ -55,10 +92,10 @@ Overseas_Name:	dc.b "SONIC THE               HEDGEHOG                "
 Serial_Number:	dc.b "GM MK-0000 -00"
 Checksum:		dc.w 0
 Input:			dc.b "J               "
-RomStartLoc:		dc.l StartOfROM
-RomEndLoc:		dc.l EndOfROM-1
-RamStartLoc:		dc.l (RAM_start&$FFFFFF)
-RamEndLoc:		dc.l (RAM_start&$FFFFFF)+$FFFF
+ROMStartLoc:	dc.l StartOfROM
+ROMEndLoc:		dc.l EndOfROM-1
+RAMStartLoc:	dc.l (RAM_start&$FFFFFF)
+RAMEndLoc:		dc.l (RAM_start&$FFFFFF)+$FFFF
 SRAMSupport:
 	if EnableSRAM=1
 CartRAM_Info:	dc.b "RA"
@@ -73,31 +110,31 @@ CartRAMEndLoc:	dc.l $20202020	; SRAM end ($20xxxx)
 	endif
 Modem_Info:		dc.b "                                                    "
 Country_Code:	dc.b "JUE             "
-EndOfHeader:
+EndOfHeader
 
 ; ---------------------------------------------------------------------------
 ; VDP Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/VDP.asm"
+		include "Data/Main/VDP.asm"
 
 ; ---------------------------------------------------------------------------
 ; Controllers Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Controllers.asm"
+		include "Data/Main/Controllers.asm"
 
 ; ---------------------------------------------------------------------------
 ; DMA Queue Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/DMA Queue.asm"
+		include "Data/Main/DMA Queue.asm"
 
 ; ---------------------------------------------------------------------------
 ; Plane Map To VRAM Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Plane Map To VRAM.asm"
+		include "Data/Main/Plane Map To VRAM.asm"
 
 ; ---------------------------------------------------------------------------
 ; Decompression Subroutine
@@ -117,49 +154,49 @@ EndOfHeader:
 ; Fading Palettes Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Fading Palette.asm"
+		include "Data/Main/Fading Palette.asm"
 
 ; ---------------------------------------------------------------------------
 ; Load Palettes Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Load Palette.asm"
+		include "Data/Main/Load Palette.asm"
 
 ; ---------------------------------------------------------------------------
 ; Wait VSync Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Wait VSync.asm"
+		include "Data/Main/Wait VSync.asm"
 
 ; ---------------------------------------------------------------------------
 ; Pause Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Pause Game.asm"
+		include "Data/Main/Pause Game.asm"
 
 ; ---------------------------------------------------------------------------
 ; Random Number Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Random Number.asm"
+		include "Data/Main/Random Number.asm"
 
 ; ---------------------------------------------------------------------------
 ; Oscillatory Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Oscillatory Routines.asm"
+		include "Data/Main/Oscillatory Routines.asm"
 
 ; ---------------------------------------------------------------------------
 ; HUD Update Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/HUD Update.asm"
+		include "Data/Main/HUD Update.asm"
 
 ; ---------------------------------------------------------------------------
 ; Load Text Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Load Text.asm"
+		include "Data/Main/Load Text.asm"
 
 ; ---------------------------------------------------------------------------
 ; Objects Process Subroutines
@@ -172,7 +209,7 @@ EndOfHeader:
 ; Load Objects Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Load Objects.asm"
+		include "Data/Main/Load Objects.asm"
 
 ; ---------------------------------------------------------------------------
 ; Load HUD Subroutine
@@ -184,31 +221,31 @@ EndOfHeader:
 ; Load Rings Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Load Rings.asm"
+		include "Data/Main/Load Rings.asm"
 
 ; ---------------------------------------------------------------------------
 ; Draw Level Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/DrawLevel.asm"
+		include "Data/Main/DrawLevel.asm"
 
 ; ---------------------------------------------------------------------------
 ; Deform Layer Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/DeformBgLayer.asm"
+		include "Data/Main/DeformBgLayer.asm"
 
 ; ---------------------------------------------------------------------------
 ; Parallax Engine Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Deformation Script.asm"
+		include "Data/Main/Deformation Script.asm"
 
 ; ---------------------------------------------------------------------------
 ; Shake Screen Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Shake Screen.asm"
+		include "Data/Main/Shake Screen.asm"
 
 ; ---------------------------------------------------------------------------
 ; Objects Subroutines
@@ -245,43 +282,43 @@ EndOfHeader:
 ; Animate Palette Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Animate Palette.asm"
+		include "Data/Main/Animate Palette.asm"
 
 ; ---------------------------------------------------------------------------
 ; Animate Level Graphics Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Animate Tiles.asm"
+		include "Data/Main/Animate Tiles.asm"
 
 ; ---------------------------------------------------------------------------
 ; Level Setup Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Level Setup.asm"
+		include "Data/Main/Level Setup.asm"
 
 ; ---------------------------------------------------------------------------
 ; Get Level Size Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/GetLevelSizeStart.asm"
+		include "Data/Main/GetLevelSizeStart.asm"
 
 ; ---------------------------------------------------------------------------
 ; Resize Events Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/DoResizeEvents.asm"
+		include "Data/Main/DoResizeEvents.asm"
 
 ; ---------------------------------------------------------------------------
 ; Handle On screen Water Height Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/HandleOnscreenWaterHeight.asm"
+		include "Data/Main/HandleOnscreenWaterHeight.asm"
 
 ; ---------------------------------------------------------------------------
 ; Interrupt Handler Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Interrupt Handler.asm"
+		include "Data/Main/Interrupt Handler.asm"
 
 ; ---------------------------------------------------------------------------
 ; Touch Response Subroutine
@@ -352,8 +389,18 @@ EndOfHeader:
 ; Security Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Misc/Security Startup 1.asm"
-		include "Data/Misc/Security Startup 2.asm"
+		include "Data/Main/Security Startup 1.asm"
+		include "Data/Main/Security Startup 2.asm"
+
+	if ChecksumCheck
+
+; ---------------------------------------------------------------------------
+; Checksum Subroutine
+; ---------------------------------------------------------------------------
+
+		include "Data/Main/Checksum.asm"
+
+	endif
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load player object data

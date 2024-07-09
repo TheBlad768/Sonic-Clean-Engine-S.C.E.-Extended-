@@ -12,8 +12,8 @@ Debug_Mode:
 		bne.s	.control
 		addq.b	#2,(Debug_placement_routine).w
 		move.l	mappings(a0),(Debug_saved_mappings).w	; save mappings
-		cmpi.b	#id_SonicDeath,routine(a0)
-		bhs.s	.death
+		cmpi.b	#PlayerID_Death,routine(a0)				; is player dead?
+		bhs.s	.death									; if yes, branch
 		move.l	priority(a0),(Debug_saved_priority).w		; save priority and art_tile
 
 .death
@@ -25,48 +25,39 @@ Debug_Mode:
 		moveq	#0,d0
 		move.w	d0,priority(a0)
 		move.b	d0,(Scroll_lock).w
+		move.b	d0,(Deform_lock).w
 		move.b	d0,(WindTunnel_flag).w
+
+		; load player's breathing bubbles
+		lea	(Breathing_bubbles+objoff_30).w,a1
+		cmpi.b	#1,character_id(a0)								; is player Tails?
+		bne.s	.nottails											; if not, branch
+		lea	(Breathing_bubbles_P2+objoff_30).w,a1
+
+.nottails
+		move.w	d0,(a1)											; clear drowning timer
 		bclr	#Status_InAir,status(a0)
 		bclr	#Status_Push,status(a0)
-		cmpi.b	#id_SpecialScreen,(Game_mode).w
-		bne.s	.notspecial
-		move.l	d0,(SStage_scalar_index_0).w				; clear stage angle to "upright" and stage rotation speed
-		bra.s	.control
-; ---------------------------------------------------------------------------
-
-.notspecial
 		bclr	#Status_Underwater,status(a0)
 		beq.s	.control
-		movea.w	a0,a1									; a1=character
-		jsr	(Player_ResetAirTimer).l
+		movea.w	a0,a1
+		jsr	Player_ResetAirTimer(pc)
 
 		; set player speed (a4 warning!)
-		move.w	#$600,Max_speed-Max_speed(a4)			; set max speed
-		move.w	#$C,Acceleration-Max_speed(a4)			; set acceleration
-		move.w	#$80,Deceleration-Max_speed(a4)			; set deceleration
+		move.w	#$600,Max_speed-Max_speed(a4)			; set Max_speed
+		move.w	#$C,Acceleration-Max_speed(a4)			; set Acceleration
+		move.w	#$80,Deceleration-Max_speed(a4)			; set Deceleration
 
 .control
 		pea	(Draw_Sprite).w
 		btst	#button_B,(Ctrl_1_pressed).w					; is button B pressed?
-		beq.w	.movement								; if not, branch
+		beq.s	.movement								; if not, branch
 		clr.w	(Debug_placement_mode).w				; deactivate debug mode
 		disableInts
-		lea	(HUD_DrawZeroRingsSS).w,a1
-		cmpi.b	#id_SpecialScreen,(Game_mode).w
-		beq.s	.special
-		lea	(HUD_DrawInitial).w,a1
+		jsr	(HUD_DrawInitial).w
 		move.b	#1,(Update_HUD_score).w
 		move.b	#$80,(Update_HUD_ring_count).w
-
-.special
-		jsr	(a1)
 		enableInts
-		cmpi.b	#id_SpecialScreen,(Game_mode).w
-		bne.s	.notspecial2
-		clr.w	(SStage_scalar_index_0).w					; set stage angle to "upright"
-		move.w	#$40,(SStage_scalar_index_1).w			; set stage rotation speed
-
-.notspecial2
 		move.l	(Debug_saved_mappings).w,mappings(a0)	; restore mappings
 		move.l	(Debug_saved_priority).w,priority(a0)		; restore priority and art_tile
 		moveq	#0,d0
@@ -81,7 +72,7 @@ Debug_Mode:
 		move.b	d0,jumping(a0)
 		andi.b	#1,status(a0)
 		ori.b	#2,status(a0)
-		move.b	#id_SonicControl,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 		move.w	default_y_radius(a0),y_radius(a0)			; set y_radius and x_radius
 		rts
 ; ---------------------------------------------------------------------------

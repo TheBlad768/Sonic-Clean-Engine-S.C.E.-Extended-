@@ -18,7 +18,7 @@ Obj_DashDust:
 		move.w	#ArtTile_DashDust,art_tile(a0)
 		move.w	#Player_1,parent(a0)
 		move.w	#tiles_to_bytes(ArtTile_DashDust),vram_art(a0)
-		cmpa.w	#v_Dust,a0
+		cmpa.w	#Dust,a0
 		beq.s	.main
 		st	dashdust_tails(a0)										; Tails flag
 		cmpi.w	#2,(Player_mode).w									; is Tails?
@@ -76,7 +76,7 @@ Obj_DashDust:
 		; check
 		cmpi.b	#12,air_left(a2)										; check air remaining
 		blo.s		.reset												; if less than 12, branch
-		cmpi.b	#id_SonicHurt,routine(a2)								; is player falling back from getting hurt?
+		cmpi.b	#PlayerID_Hurt,routine(a2)							; is player falling back from getting hurt?
 		bhs.s	.reset												; if yes, branch
 		tst.b	spin_dash_flag(a2)										; is player charging his spin dash?
 		beq.s	.reset												; if not, branch

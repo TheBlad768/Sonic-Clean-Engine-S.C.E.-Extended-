@@ -1,7 +1,6 @@
 
 ; =============== S U B R O U T I N E =======================================
 
-Find_Sonic:
 Find_SonicObject:
 		lea	(Player_1).w,a1
 

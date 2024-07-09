@@ -9,7 +9,7 @@ Obj_Sonic:
 
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
-		lea	(v_Dust).w,a6
+		lea	(Dust).w,a6
 
 	if GameDebug
 		tst.w	(Debug_placement_mode).w
@@ -44,13 +44,13 @@ Sonic_Normal:
 ; ---------------------------------------------------------------------------
 
 Sonic_Index: offsetTable
-ptr_Sonic_Init:		offsetTableEntry.w Sonic_Init		; 0
-ptr_Sonic_Control:	offsetTableEntry.w Sonic_Control	; 2
-ptr_Sonic_Hurt:		offsetTableEntry.w Sonic_Hurt		; 4
-ptr_Sonic_Death:		offsetTableEntry.w Sonic_Death		; 6
-ptr_Sonic_Restart:	offsetTableEntry.w Sonic_Restart	; 8
-					offsetTableEntry.w loc_12590		; A
-ptr_Sonic_Drown:	offsetTableEntry.w Sonic_Drown	; C
+		ptrTableEntry.w Sonic_Init			; 0
+		ptrTableEntry.w Sonic_Control		; 2
+		ptrTableEntry.w Sonic_Hurt		; 4
+		ptrTableEntry.w Sonic_Death		; 6
+		ptrTableEntry.w Sonic_Restart		; 8
+		ptrTableEntry.w loc_12590			; A
+		ptrTableEntry.w Sonic_Drown		; C
 ; ---------------------------------------------------------------------------
 
 Sonic_Init:													; Routine 0
@@ -251,12 +251,12 @@ Sonic_RecordPos:
 
 		move.w	(Pos_table_index).w,d0
 		lea	(Pos_table).w,a1
-		lea	(a1,d0.w),a1
+		adda.w	d0,a1
 		move.w	x_pos(a0),(a1)+			; write location to pos_table
 		move.w	y_pos(a0),(a1)+
 		addq.b	#4,(Pos_table_byte).w		; increment index as the post-increments did a1
 		lea	(Stat_table).w,a1
-		lea	(a1,d0.w),a1
+		adda.w	d0,a1
 		move.w	(Ctrl_1_logical).w,(a1)+
 		move.b	status(a0),(a1)+
 		move.b	art_tile(a0),(a1)+
@@ -307,8 +307,8 @@ Sonic_InWater:
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		jsr	(Player_ResetAirTimer).l
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles+address).w		; load Sonic's breathing bubbles
-		move.w	a0,(v_Breathing_bubbles+parent).w
+		move.l	#Obj_AirCountdown,(Breathing_bubbles+address).w	; load Sonic's breathing bubbles
+		move.w	a0,(Breathing_bubbles+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)
 		move.w	#6,Acceleration-Max_speed(a4)
 		move.w	#$40,Deceleration-Max_speed(a4)
@@ -332,7 +332,7 @@ Sonic_OutWater:
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
 		move.w	#$80,Deceleration-Max_speed(a4)
-		cmpi.b	#id_SonicHurt,routine(a0)		; is Sonic falling back from getting hurt?
+		cmpi.b	#PlayerID_Hurt,routine(a0)	; is Sonic falling back from getting hurt?
 		beq.s	loc_10EFC					; if yes, branch
 		tst.b	object_control(a0)
 		bne.s	loc_10EFC
@@ -518,7 +518,7 @@ Sonic_NotLeft:
 		bsr.w	sub_11482
 
 Sonic_NotRight:
-		move.w	(HScroll_Shift).w,d1
+		move.w	(Camera_H_scroll_shift).w,d1
 		beq.s	+
 		bclr	#Status_Facing,status(a0)
 		tst.w	d1
@@ -659,7 +659,7 @@ loc_11228:
 ; ---------------------------------------------------------------------------
 
 loc_11276:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_112B0
 		btst	#button_down,(Ctrl_1_logical).w
 		beq.s	loc_112B0
@@ -821,7 +821,7 @@ sub_113F6:
 		bpl.s	loc_11430
 
 loc_113FE:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_11412
 		bset	#Status_Facing,status(a0)
 		bne.s	loc_11412
@@ -865,8 +865,8 @@ loc_11438:
 		bclr	#Status_Facing,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_11480							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_11480:
 		rts
@@ -916,8 +916,8 @@ loc_114BE:
 		bset	#Status_Facing,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_11506							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_11506:
 		rts
@@ -936,7 +936,7 @@ Sonic_RollSpeed:
 		bmi.w	loc_115C6
 		tst.w	move_lock(a0)
 		bne.s	loc_1154E
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_1154E
 		btst	#button_left,(Ctrl_1_logical).w
 		beq.s	loc_11542
@@ -1218,7 +1218,7 @@ SonicKnux_Roll:
 		cmpi.b	#id_Slide,anim(a0)						; alt idea...
 		beq.s	locret_1177E
 
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	locret_1177E
 		moveq	#btnLR,d0								; is left/right being pressed?
 		and.b	(Ctrl_1_logical).w,d0
@@ -1386,7 +1386,7 @@ Sonic_FireShield:
 		bne.s	locret_118FE								; if yes, branch
 		btst	#Status_FireShield,status_secondary(a0)			; does Sonic have a Fire Shield?
 		beq.s	Sonic_LightningShield						; if not, branch
-		move.b	#1,(v_Shield+anim).w
+		move.b	#1,(Shield+anim).w
 		move.b	#1,double_jump_flag(a0)
 		move.w	#$800,d0
 		btst	#Status_Facing,status(a0)						; is Sonic facing left?
@@ -1405,7 +1405,7 @@ loc_11958:
 Sonic_LightningShield:
 		btst	#Status_LtngShield,status_secondary(a0)			; does Sonic have a Lightning Shield?
 		beq.s	Sonic_BubbleShield						; if not, branch
-		move.b	#1,(v_Shield+anim).w
+		move.b	#1,(Shield+anim).w
 		move.b	#1,double_jump_flag(a0)
 		move.w	#-$580,y_vel(a0)							; bounce Sonic up, creating the double jump effect
 		clr.b	jumping(a0)
@@ -1415,7 +1415,7 @@ Sonic_LightningShield:
 Sonic_BubbleShield:
 		btst	#Status_BublShield,status_secondary(a0)			; does Sonic have a Bubble Shield
 		beq.s	Sonic_InstaShield							; if not, branch
-		move.b	#1,(v_Shield+anim).w
+		move.b	#1,(Shield+anim).w
 		move.b	#1,double_jump_flag(a0)
 		clr.w	x_vel(a0)								; halt horizontal speed...
 		clr.w	ground_vel(a0)							; ...both ground and air
@@ -1426,7 +1426,7 @@ Sonic_BubbleShield:
 Sonic_InstaShield:
 		btst	#Status_Shield,status_secondary(a0)			; does Sonic have an S2 shield (The Elementals were already filtered out at this point)?
 		bne.s	locret_11A14								; if yes, branch
-		move.b	#1,(v_Shield+anim).w
+		move.b	#1,(Shield+anim).w
 		move.b	#1,double_jump_flag(a0)
 		sfx	sfx_InstaAttack,1								; play Insta-Shield sound
 ; ---------------------------------------------------------------------------
@@ -1451,7 +1451,7 @@ SonicKnux_Spindash:
 		clr.w	spin_dash_counter(a0)
 		cmpi.b	#12,air_left(a0)							; check air remaining
 		blo.s		loc_11C24								; if less than 12, branch
-		move.b	#2,anim(a6)								; v_Dust
+		move.b	#2,anim(a6)								; Dust
 
 loc_11C24:
 		bsr.w	Player_LevelBound
@@ -1493,7 +1493,7 @@ loc_11CCE:
 
 loc_11CDC:
 		bset	#Status_Roll,status(a0)
-		clr.w	anim(a6)		; v_Dust
+		clr.w	anim(a6)		; Dust
 		sfx	sfx_Dash
 		bra.s	loc_11D5E
 ; ---------------------------------------------------------------------------
@@ -2131,7 +2131,7 @@ BubbleShield_Bounce:
 		beq.s	+
 		neg.w	d0
 +		sub.w	d0,y_pos(a0)
-		move.b	#2,(v_Shield+anim).w
+		move.b	#2,(Shield+anim).w
 		sfx	sfx_BubbleAttack,1
 ; ---------------------------------------------------------------------------
 
@@ -2200,7 +2200,7 @@ loc_12344:
 		move.b	d0,anim(a0)								; id_Walk
 		move.b	d0,spin_dash_flag(a0)
 		move.w	#$100,priority(a0)
-		move.b	#id_SonicControl,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 		move.b	#2*60,invulnerability_timer(a0)
 
 locret_12388:
@@ -2257,16 +2257,16 @@ loc_123FA:
 		bge.s	locret_123F8
 
 loc_12410:
-		cmpi.b	#1,character_id(a0)
-		bne.s	loc_12432
-		cmpi.w	#2,(Player_mode).w
-		beq.s	loc_12432
-		move.b	#2,routine(a0)
+		cmpi.b	#1,character_id(a0)							; is player Tails?
+		bne.s	loc_12432									; if not, branch
+		cmpi.w	#2,(Player_mode).w							; is Tails alone?
+		beq.s	loc_12432									; if yes, branch
+		move.b	#PlayerID_Control,routine(a0)
 		bra.w	sub_13ECA
 ; ---------------------------------------------------------------------------
 
 loc_12432:
-		move.b	#id_SonicRestart,routine(a0)
+		move.b	#PlayerID_Restart,routine(a0)
 		move.w	#1*60,restart_timer(a0)
 		clr.b	(Respawn_table_keep).w
 		addq.b	#1,(Update_HUD_life_count).w
@@ -2279,7 +2279,7 @@ loc_12432:
 
 loc_12478:
 		clr.b	(Update_HUD_timer).w
-		move.b	#id_SonicRestart,routine(a0)
+		move.b	#PlayerID_Restart,routine(a0)
 		music	mus_GameOver								; play the Game Over song
 
 		; load game over art
@@ -2313,7 +2313,7 @@ loc_12590:
 		bne.s	+
 		tst.w	(V_scroll_amount).w
 		bne.s	+
-		move.b	#id_SonicControl,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 +		bsr.s	sub_125E0
 		jmp	(Draw_Sprite).w
 
@@ -2452,7 +2452,7 @@ loc_126DC:
 		neg.w	d2
 
 loc_12700:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_1270A
 		add.w	d2,d2
@@ -2706,7 +2706,7 @@ loc_12A2A:
 		neg.w	d2
 
 loc_12A4C:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(SonAni_Roll2).l,a1
 		cmpi.w	#$600,d2
 		bhs.s	loc_12A5E

@@ -96,10 +96,10 @@ SourceSMPS2ASM set 0
 
 songStart set *
 
-	if MOMPASS==2
-	if SMPS2ASMVer < SourceSMPS2ASM
-	message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
-	endif
+	if MOMPASS==1
+		if SMPS2ASMVer < SourceSMPS2ASM
+			message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+		endif
 	endif
 
 	endm
@@ -117,12 +117,15 @@ smpsHeaderVoice macro loc
 	if songStart<>*
 		fatal "Missing smpsHeaderStartSong"
 	endif
-	if MOMPASS==2
-	if ((loc-songStart >= $8000) || (loc-songStart < -$8000))
-		fatal "Voice bank too far away from song"
+
+.loc	:= loc
+
+	if MOMPASS>1
+		if ((.loc-songStart >= $8000) || (.loc-songStart < -$8000))
+			fatal "Voice bank too far away from song"
+		endif
 	endif
-	endif
-	dc.w	loc-songStart
+	dc.w	.loc-songStart
 	endm
 
 ; Header - Set up Voice Location as S3's Universal Voice Bank
@@ -158,12 +161,15 @@ smpsHeaderTempo macro div,mod
 
 ; Header - Set up DAC Channel
 smpsHeaderDAC macro loc,pitch,vol
-	if MOMPASS==2
-	if ((loc-songStart >= $8000) || (loc-songStart < -$8000))
-		fatal "Track is too far away from its header"
+
+.loc	:= loc
+
+	if MOMPASS>1
+		if ((.loc-songStart >= $8000) || (.loc-songStart < -$8000))
+			fatal "Track is too far away from its header"
+		endif
 	endif
-	endif
-	dc.w	loc-songStart
+	dc.w	.loc-songStart
 	if ("pitch"<>"")
 		dc.b	pitch
 		if ("vol"<>"")
@@ -178,27 +184,33 @@ smpsHeaderDAC macro loc,pitch,vol
 
 ; Header - Set up FM Channel
 smpsHeaderFM macro loc,pitch,vol
-	if MOMPASS==2
-	if ((loc-songStart >= $8000) || (loc-songStart < -$8000))
-		fatal "Track is too far away from its header"
+
+.loc	:= loc
+
+	if MOMPASS>1
+		if ((.loc-songStart >= $8000) || (.loc-songStart < -$8000))
+			fatal "Track is too far away from its header"
+		endif
 	endif
-	endif
-	dc.w	loc-songStart
+	dc.w	.loc-songStart
 	dc.b	pitch,vol
 	endm
 
 ; Header - Set up PSG Channel
 smpsHeaderPSG macro loc,pitch,vol,mod,voice
-	if MOMPASS==2
-	if ((loc-songStart >= $8000) || (loc-songStart < -$8000))
-		fatal "Track is too far away from its header"
+
+.loc	:= loc
+
+	if MOMPASS>1
+		if ((.loc-songStart >= $8000) || (.loc-songStart < -$8000))
+			fatal "Track is too far away from its header"
+		endif
 	endif
-	endif
-	dc.w	loc-songStart
+	dc.w	.loc-songStart
 	PSGPitchConvert pitch
 	dc.b	(vol)<<3
 	if (SourceDriver>=3)
-		if (MOMPASS==2) && (mod <> 0) && (~~SMPS_EnableModulationEnvelopes)
+		if (MOMPASS==1) && (mod <> 0) && (~~SMPS_EnableModulationEnvelopes)
 			warning "PSG track header specifies a frequency modulation envelope (of \{mod}) but support for it is disabled - go set SMPS_EnableModulationEnvelopes to 1"
 		endif
 		dc.b	mod
@@ -235,12 +247,15 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 		fatal "Using channel ID of FM6 ($06) in Sonic 1 or Sonic 2 drivers is unsupported. Change it to another channel."
 	endif
 	dc.b	$80,chanid
-	if MOMPASS==2
-	if ((loc-songStart >= $8000) || (loc-songStart < -$8000))
-		fatal "Track is too far away from its header"
+
+.loc	:= loc
+
+	if MOMPASS>1
+		if ((.loc-songStart >= $8000) || (.loc-songStart < -$8000))
+			fatal "Track is too far away from its header"
+		endif
 	endif
-	endif
-	dc.w	loc-songStart
+	dc.w	.loc-songStart
 	if (chanid&$80)<>0
 		PSGPitchConvert pitch
 	else

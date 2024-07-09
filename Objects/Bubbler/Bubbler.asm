@@ -267,4 +267,5 @@ sub_2FBA8:
 ; ---------------------------------------------------------------------------
 
 		include "Objects/Bubbler/Object Data/Anim - Bubbler.asm"
+		include "Objects/Bubbler/Object Data/Map - Bubbler2.asm"
 		include "Objects/Bubbler/Object Data/Map - Bubbler.asm"

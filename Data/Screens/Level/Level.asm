@@ -17,7 +17,7 @@ Level_VDP:
 
 ; =============== S U B R O U T I N E =======================================
 
-Level_Screen:
+LevelScreen:
 		bset	#GameModeFlag_TitleCard,(Game_mode).w								; set bit 7 is indicate that we're loading the level
 		music	mus_FadeOut													; fade out music
 		jsr	(Clear_Kos_Module_Queue).w											; clear KosM PLCs
@@ -59,10 +59,10 @@ Level_Screen:
 		move.w	(H_int_counter_command).w,VDP_control_port-VDP_control_port(a6)	; warning: don't overwrite a6
 
 		; load player palette
-		moveq	#palid_Sonic,d0
+		moveq	#PalID_Sonic,d0
 		cmpi.w	#3,(Player_mode).w
 		bne.s	.notknux
-		moveq	#palid_Knuckles,d0
+		moveq	#PalID_Knuckles,d0
 
 .notknux
 		move.w	d0,d1
@@ -150,7 +150,7 @@ Level_Screen:
 		move.l	#Load_Rings_Init,(Rings_manager_addr_RAM).w
 		tst.b	(Water_flag).w
 		beq.s	.notwater2
-		move.l	#Obj_WaterWave,(v_WaterWave+address).w
+		move.l	#Obj_WaterWave,(WaterWave+address).w
 
 .notwater2
 		bsr.w	SpawnLevelMainSprites
@@ -178,7 +178,7 @@ Level_Screen:
 		jsr	(Load_Sprites).w
 		jsr	(Process_Sprites).w
 		tst.b	(Restart_level_flag).w
-		bne.w	Level_Screen
+		bne.w	LevelScreen
 		jsr	(DeformBgLayer).w
 		jsr	(Screen_Events).w
 		jsr	(Handle_Onscreen_Water_Height).w
@@ -207,15 +207,15 @@ SpawnLevelMainSprites:
 
 		; Sonic and Tails
 		move.l	#Obj_Sonic,(Player_1+address).w
-		move.l	#Obj_DashDust,(v_Dust+address).w
-		move.l	#Obj_InstaShield,(v_Shield+address).w
-		move.w	#Player_1,(v_Shield+parent).w
+		move.l	#Obj_DashDust,(Dust+address).w
+		move.l	#Obj_InstaShield,(Shield+address).w
+		move.w	#Player_1,(Shield+parent).w
 		move.l	#Obj_Tails,(Player_2+address).w
 		move.w	(Player_1+x_pos).w,(Player_2+x_pos).w
 		move.w	(Player_1+y_pos).w,(Player_2+y_pos).w
 		subi.w	#32,(Player_2+x_pos).w
 		addq.w	#4,(Player_2+y_pos).w
-		move.l	#Obj_DashDust,(v_Dust_P2+address).w
+		move.l	#Obj_DashDust,(Dust_P2+address).w
 		clr.w	(Tails_CPU_routine).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -226,9 +226,9 @@ SpawnLevelMainSprites:
 
 		; Sonic alone
 		move.l	#Obj_Sonic,(Player_1+address).w
-		move.l	#Obj_DashDust,(v_Dust+address).w
-		move.l	#Obj_InstaShield,(v_Shield+address).w
-		move.w	#Player_1,(v_Shield+parent).w
+		move.l	#Obj_DashDust,(Dust+address).w
+		move.l	#Obj_InstaShield,(Shield+address).w
+		move.w	#Player_1,(Shield+parent).w
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -238,7 +238,7 @@ SpawnLevelMainSprites:
 
 		; Tails alone
 		move.l	#Obj_Tails,(Player_1+address).w
-		move.l	#Obj_DashDust,(v_Dust_P2+address).w
+		move.l	#Obj_DashDust,(Dust_P2+address).w
 		addq.w	#4,(Player_1+y_pos).w
 		clr.w	(Tails_CPU_routine).w
 		rts
@@ -248,7 +248,7 @@ SpawnLevelMainSprites:
 
 		; Knuckles alone
 		move.l	#Obj_Knuckles,(Player_1+address).w
-		move.l	#Obj_DashDust,(v_Dust+address).w
+		move.l	#Obj_DashDust,(Dust+address).w
 		rts
 
 ; =============== S U B R O U T I N E =======================================

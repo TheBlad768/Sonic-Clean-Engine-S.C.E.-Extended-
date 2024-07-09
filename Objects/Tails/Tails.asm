@@ -9,7 +9,7 @@ Obj_Tails:
 
 		lea	(Max_speed_P2).w,a4
 		lea	(Distance_from_top_P2).w,a5
-		lea	(v_Dust_P2).w,a6
+		lea	(Dust_P2).w,a6
 
 	if GameDebug
 		cmpi.w	#2,(Player_mode).w
@@ -48,13 +48,13 @@ Tails_Normal:
 ; ---------------------------------------------------------------------------
 
 Tails_Index: offsetTable
-		offsetTableEntry.w Tails_Init		; 0
-		offsetTableEntry.w Tails_Control	; 2
-		offsetTableEntry.w Tails_Hurt		; 4
-		offsetTableEntry.w Tails_Death		; 6
-		offsetTableEntry.w Tails_Restart		; 8
-		offsetTableEntry.w loc_157F4		; A
-		offsetTableEntry.w Tails_Drown		; C
+		ptrTableEntry.w Tails_Init			; 0
+		ptrTableEntry.w Tails_Control		; 2
+		ptrTableEntry.w Tails_Hurt			; 4
+		ptrTableEntry.w Tails_Death		; 6
+		ptrTableEntry.w Tails_Restart		; 8
+		ptrTableEntry.w loc_157F4			; A
+		ptrTableEntry.w Tails_Drown		; C
 ; ---------------------------------------------------------------------------
 
 Tails_Init:													; Routine 0
@@ -106,8 +106,8 @@ Tails_Init_Continued:
 loc_137A4:
 		clr.w	(Tails_CPU_idle_timer).w
 		clr.w	(Tails_CPU_flight_timer).w
-		move.l	#Obj_Tails_Tail,(v_Tails_tails+address).w
-		move.w	a0,(v_Tails_tails+objoff_30).w
+		move.l	#Obj_Tails_Tail,(Tails_tails+address).w
+		move.w	a0,(Tails_tails+objoff_30).w
 		move.b	(Last_star_post_hit).w,(Tails_CPU_star_post_flag).w
 		rts
 ; ---------------------------------------------------------------------------
@@ -499,7 +499,7 @@ loc_13CD2:
 		bne.s	loc_13D42
 		or.w	d0,d1
 		bne.s	loc_13D42
-		cmpi.b	#id_SonicDeath,(Player_1+routine).w
+		cmpi.b	#PlayerID_Death,(Player_1+routine).w
 		bhs.s	loc_13D42
 		move.w	#6,(Tails_CPU_routine).w
 		clr.b	object_control(a0)
@@ -525,7 +525,7 @@ loc_13D42:
 ; ---------------------------------------------------------------------------
 
 loc_13D4A:
-		cmpi.b	#id_SonicDeath,(Player_1+routine).w
+		cmpi.b	#PlayerID_Death,(Player_1+routine).w
 		blo.s		loc_13D78
 		move.w	#4,(Tails_CPU_routine).w
 		clr.b	spin_dash_flag(a0)
@@ -1075,7 +1075,7 @@ loc_143AA:
 Tails_Carry_Sonic:
 		tst.b	(a2)
 		beq.w	loc_14534
-		cmpi.b	#id_SonicHurt,routine(a1)
+		cmpi.b	#PlayerID_Hurt,routine(a1)
 		bhs.w	loc_14466
 		btst	#Status_InAir,status(a1)
 		beq.w	loc_1445A
@@ -1217,7 +1217,7 @@ loc_1456C:
 		bhs.s	locret_1459C
 		tst.b	object_control(a1)
 		bne.s	locret_1459C
-		cmpi.b	#id_SonicHurt,routine(a1)
+		cmpi.b	#PlayerID_Hurt,routine(a1)
 		bhs.s	locret_1459C
 		tst.w	(Debug_placement_mode).w
 		bne.s	locret_1459C
@@ -1276,14 +1276,14 @@ locret_14630:
 ; =============== S U B R O U T I N E =======================================
 
 Tails_Water:
-		tst.b	(Water_flag).w
-		bne.s	loc_1463A
+		tst.b	(Water_flag).w									; does level have water?
+		bne.s	Tails_InWater								; if yes, branch
 
 locret_14638:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_1463A:
+Tails_InWater:
 		move.w	(Water_level).w,d0
 		cmp.w	y_pos(a0),d0
 		bge.s	loc_146BA
@@ -1292,8 +1292,8 @@ loc_1463A:
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles_P2+address).w
-		move.w	a0,(v_Breathing_bubbles_P2+parent).w
+		move.l	#Obj_AirCountdown,(Breathing_bubbles_P2+address).w
+		move.w	a0,(Breathing_bubbles_P2+parent).w
 		move.w	#$300,Max_speed_P2-Max_speed_P2(a4)
 		move.w	#6,Acceleration_P2-Max_speed_P2(a4)
 		move.w	#$40,Deceleration_P2-Max_speed_P2(a4)
@@ -1320,7 +1320,7 @@ loc_146BA:
 		move.w	#$600,Max_speed_P2-Max_speed_P2(a4)
 		move.w	#$C,Acceleration_P2-Max_speed_P2(a4)
 		move.w	#$80,Deceleration_P2-Max_speed_P2(a4)
-		cmpi.b	#id_SonicHurt,routine(a0)
+		cmpi.b	#PlayerID_Hurt,routine(a0)
 		beq.s	loc_14718
 		cmpi.w	#4,(Tails_CPU_routine).w
 		beq.s	loc_1470A
@@ -1630,7 +1630,7 @@ loc_14A0A:
 		bsr.w	sub_14CAC
 
 loc_14A16:
-		move.w	(HScroll_Shift).w,d1
+		move.w	(Camera_H_scroll_shift).w,d1
 		beq.s	+
 		bclr	#Status_Facing,status(a0)
 		tst.w	d1
@@ -1689,7 +1689,7 @@ loc_14A98:
 ; ---------------------------------------------------------------------------
 
 loc_14AA0:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_14ADA
 		btst	#button_down,(Ctrl_2_logical).w
 		beq.s	loc_14ADA
@@ -1853,7 +1853,7 @@ sub_14C20:
 		bpl.s	loc_14C5A
 
 loc_14C28:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_14C3C
 		bset	#0,status(a0)
 		bne.s	loc_14C3C
@@ -1897,8 +1897,8 @@ loc_14C62:
 		bclr	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_14CAA							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_14CAA:
 		rts
@@ -1948,8 +1948,8 @@ loc_14CE8:
 		bset	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_14D30							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_14D30:
 		rts
@@ -1968,7 +1968,7 @@ Tails_RollSpeed:
 		bmi.w	loc_14DF0
 		tst.w	move_lock(a0)
 		bne.s	loc_14D78
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_14D78
 		btst	#button_left,(Ctrl_2_logical).w
 		beq.s	loc_14D6C
@@ -2189,7 +2189,7 @@ Tails_Roll:
 		cmpi.b	#id_Slide,anim(a0)						; alt idea...
 		beq.s	locret_14FA8
 
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	locret_14FA8
 		moveq	#btnLR,d0
 		and.b	(Ctrl_2_logical).w,d0
@@ -2392,7 +2392,7 @@ Tails_Spindash:
 		clr.w	spin_dash_counter(a0)
 		cmpi.b	#12,air_left(a0)							; check air remaining
 		blo.s		loc_15242								; if less than 12, branch
-		move.b	#2,anim(a6)								; v_Dust
+		move.b	#2,anim(a6)								; Dust
 
 loc_15242:
 		bsr.w	Player_LevelBound
@@ -2438,7 +2438,7 @@ loc_152EA:
 
 loc_152F8:
 		bset	#Status_Roll,status(a0)
-		clr.w	anim(a6)		; v_Dust
+		clr.w	anim(a6)		; Dust
 		sfx	sfx_Dash
 		bra.s	loc_1537A
 ; ---------------------------------------------------------------------------
@@ -3100,7 +3100,7 @@ loc_15932:
 		neg.w	d2
 
 loc_15956:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_15960
 		add.w	d2,d2
@@ -3162,7 +3162,7 @@ loc_159C8:
 		neg.w	d2
 
 loc_159EE:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(AniTails03).l,a1
 		cmpi.w	#$600,d2
 		bhs.s	loc_15A00

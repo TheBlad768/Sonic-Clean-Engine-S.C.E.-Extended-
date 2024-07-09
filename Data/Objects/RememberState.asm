@@ -2,22 +2,17 @@
 ; Subroutine to remember whether an object is destroyed/collected
 ; ---------------------------------------------------------------------------
 
-MarkObjGone:
-RememberState:
 Sprite_OnScreen_Test:
 		moveq	#-$80,d0										; round down to nearest $80
 		and.w	x_pos(a0),d0										; get object position
 
 Sprite_OnScreen_Test2:
-		out_of_xrange2.s	Sprite_OnScreen_Test_Collision.offscreen
+		out_of_xrange2.s	Sprite_CheckDeleteTouch3.offscreen
 		bra.w	Draw_Sprite
 
 ; =============== S U B R O U T I N E =======================================
 
-MarkObjGone_Collision:
-RememberState_Collision:
 Sprite_CheckDeleteTouch3:
-Sprite_OnScreen_Test_Collision:
 		moveq	#-$80,d0										; round down to nearest $80
 		and.w	x_pos(a0),d0										; get object position
 
@@ -42,7 +37,7 @@ Delete_Sprite_If_Not_In_Range:
 		and.w	x_pos(a0),d0										; get object position
 
 Delete_Sprite_If_Not_In_Range2:
-		out_of_xrange2.s	Sprite_OnScreen_Test_Collision.offscreen
+		out_of_xrange2.s	Sprite_CheckDeleteTouch3.offscreen
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -193,7 +188,7 @@ Obj_FlickerMove:
 		out_of_xrange.w	Go_Delete_Sprite_3
 		out_of_yrange.w	Go_Delete_Sprite_3
 		move.b	(V_int_run_count+3).w,d0
-		add.b	d7,d0
+		add.b	d7,d0											; d7 - object count (Process_Sprites)
 		andi.b	#1,d0
 		bne.s	Sprite_ChildCheckDeleteY_NoDraw.return
 		bra.w	Draw_Sprite

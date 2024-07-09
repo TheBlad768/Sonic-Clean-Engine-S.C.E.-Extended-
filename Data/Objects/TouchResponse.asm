@@ -184,7 +184,7 @@ Touch_ChkValue:
 
 		; if 01...
 		moveq	#$3F,d0									; get only collision size
-		and.b	collision_flags(a1),d0						; get collision_flags
+		and.b	collision_flags(a1),d0						; get collision flags
 		cmpi.b	#6,d0									; is touch response $46?
 		beq.s	Touch_Monitor							; if yes, branch
 
@@ -316,7 +316,7 @@ Touch_Enemy:
 		neg.w	x_vel(a0)								; bounce player directly off boss
 		neg.w	y_vel(a0)
 		neg.w	ground_vel(a0)
-		move.b	collision_flags(a1),collision_restore_flags(a1)	; save current collision
+		move.b	collision_flags(a1),collision_saved_flags(a1)	; save current collision
 		clr.b	collision_flags(a1)
 		subq.b	#1,boss_hitcount2(a1)
 		bne.s	.bossnotdefeated
@@ -460,7 +460,6 @@ Touch_Hurt:
 
 ; =============== S U B R O U T I N E =======================================
 
-HurtSonic:
 HurtCharacter:
 		move.w	(Ring_count).w,d0
 		cmpa.w	#Player_1,a0
@@ -483,7 +482,7 @@ HurtCharacter:
 		andi.b	#$8E,status_secondary(a0)
 
 .bounce
-		move.b	#id_SonicHurt,routine(a0)
+		move.b	#PlayerID_Hurt,routine(a0)
 		bsr.w	Player_TouchFloor
 		bset	#Status_InAir,status(a0)
 		move.l	#words_to_long(-$200,-$400),x_vel(a0)		; make Sonic bounce away from the object
@@ -522,9 +521,13 @@ HurtCharacter:
 
 		; next
 		bra.s	Kill_Character.main
+
+; ---------------------------------------------------------------------------
+; Killing Sonic/Tails/Knuckles subroutine
 ; ---------------------------------------------------------------------------
 
-KillSonic:
+; =============== S U B R O U T I N E =======================================
+
 Kill_Character:
 		tst.w	(Debug_placement_mode).w				; is debug mode active?
 		bne.s	.dontdie									; if yes, branch
@@ -533,7 +536,7 @@ Kill_Character:
 .main
 		clr.b	status_secondary(a0)
 		clr.b	status_tertiary(a0)
-		move.b	#id_SonicDeath,routine(a0)
+		move.b	#PlayerID_Death,routine(a0)
 		move.w	d0,-(sp)
 		bsr.w	Player_TouchFloor
 		move.w	(sp)+,d0
@@ -546,9 +549,10 @@ Kill_Character:
 		bne.s	.notp1									; if not, branch
 		move.l	priority(a0),(Debug_saved_priority).w		; save priority and art_tile
 		clr.w	priority(a0)
-		bset	#7,art_tile(a0)
+		st	(Deform_lock).w
 
 .notp1
+		bset	#7,art_tile(a0)
 		jsr	(Play_SFX).w
 
 .dontdie
@@ -627,7 +631,7 @@ ShieldTouch_Width:
 		beq.s	ShieldTouch_NextObj						; if it doesn't have a size, branch
 		add.w	d0,d0									; turn into index
 		lea	Touch_Sizes(pc),a2
-		lea	(a2,d0.w),a2									; go to correct entry
+		adda.w	d0,a2									; go to correct entry
 		moveq	#0,d1
 		move.b	(a2)+,d1									; get width value from Touch_Sizes
 		move.w	x_pos(a1),d0								; get object's x_pos

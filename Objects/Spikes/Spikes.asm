@@ -174,7 +174,7 @@ Touch_ChkHurt3:
 		bne.s	.return													; if yes, branch
 		tst.b	invulnerability_timer(a1)										; is character invulnerable?
 		bne.s	.return													; if yes, branch
-		cmpi.b	#id_SonicHurt,routine(a1)									; is the character hurt, dying, etc. ?
+		cmpi.b	#PlayerID_Hurt,routine(a1)									; is the character hurt, dying, etc. ?
 		bhs.s	.return													; if yes, branch
 
 		; hurt player

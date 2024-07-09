@@ -257,7 +257,7 @@ Check_SonicEndPose:
 		bne.s	.return
 		btst	#Status_InAir,status(a1)
 		bne.s	.return
-		cmpi.b	#id_SonicDeath,routine(a1)
+		cmpi.b	#PlayerID_Death,routine(a1)
 		bhs.s	.return
 		move.l	d0,objoff_34(a0)							; set routine
 		jsr	(Set_PlayerEndingPose).w
@@ -281,7 +281,7 @@ Check_TailsEndPose:
 		bne.s	Check_SonicEndPose.return
 		btst	#Status_InAir,status(a1)
 		bne.s	Check_SonicEndPose.return
-		cmpi.b	#id_SonicDeath,routine(a1)
+		cmpi.b	#PlayerID_Death,routine(a1)
 		bhs.s	Check_SonicEndPose.return
 		bset	#7,objoff_38(a0)
 		clr.b	(Ctrl_2_locked).w
@@ -296,7 +296,7 @@ Check_SonicEndPose_MGZ:
 		bpl.s	.return
 
 		lea	(Player_1).w,a1
-		cmpi.b	#id_SonicDeath,routine(a1)
+		cmpi.b	#PlayerID_Death,routine(a1)
 		bhs.s	.return
 		tst.b	render_flags(a1)								; player visible on the screen?
 		bpl.s	.return									; if not, branch

@@ -22,8 +22,8 @@ Obj_AirCountdown:
 		movea.w	parent(a0),a2									; a2=character
 		tst.w	objoff_30(a0)
 		bne.w	loc_1857C
-		cmpi.b	#id_SonicDeath,routine(a2)
-		bhs.w	locret_1857A
+		cmpi.b	#PlayerID_Death,routine(a2)					; has player just died?
+		bhs.w	locret_1857A									; if yes, branch
 		btst	#Status_BublShield,status_secondary(a2)
 		bne.w	locret_1857A
 		btst	#Status_Underwater,status(a2)
@@ -68,7 +68,7 @@ AirCountdown_WarnSound:
 
 AirCountdown_ReduceAir:
 		subq.b	#1,air_left(a2)
-		bhs.s	AirCountdown_MakeItem
+		bhs.w	AirCountdown_MakeItem
 		move.b	#$81,object_control(a2)
 		sfx	sfx_Drown										; play drown sound
 		move.b	#10,objoff_38(a0)
@@ -79,16 +79,22 @@ AirCountdown_ReduceAir:
 		move.w	a0,-(sp)
 		movea.w	a2,a0
 		jsr	(Player_TouchFloor).l
-		move.b	#id_Drown,anim(a0)
-		bset	#Status_InAir,status(a0)
-		bset	#7,art_tile(a0)
-		clr.l	x_vel(a0)
-		clr.w	ground_vel(a0)
-		move.b	#id_SonicDrown,routine(a0)
 		movea.w	(sp)+,a0
+
+		; drown character
+		bset	#Status_InAir,status(a2)
+		clr.l	x_vel(a2)
+		clr.w	ground_vel(a2)
+		move.b	#id_Drown,anim(a2)
+		move.b	#PlayerID_Drown,routine(a2)
 		cmpa.w	#Player_1,a2
-		bne.s	locret_1857A
+		bne.s	.notp1
+		move.l	priority(a2),(Debug_saved_priority).w			; save priority and art_tile
+		clr.w	priority(a2)
 		st	(Deform_lock).w
+
+.notp1
+		bset	#7,art_tile(a2)
 
 locret_1857A:
 		rts
@@ -98,7 +104,7 @@ loc_1857C:
 		move.b	#id_Drown,anim(a2)
 		subq.w	#1,objoff_30(a0)
 		bne.s	loc_18594
-		move.b	#id_SonicDeath,routine(a2)
+		move.b	#PlayerID_Death,routine(a2)
 
 locret_1858E:
 		rts
@@ -341,7 +347,7 @@ AirCountdown_Load_Art:
 		move.w	d1,d0
 		add.w	d1,d1
 		add.w	d0,d1
-		lsl.w	#5,d1
+		lsl.w	#5,d1											; multiply by $20
 		addi.l	#dmaSource(ArtUnc_AirCountDown),d1
 		move.w	#tiles_to_bytes(ArtTile_DashDust),d2			; 1P
 		tst.b	parent+1(a0)
@@ -349,7 +355,7 @@ AirCountdown_Load_Art:
 		move.w	#tiles_to_bytes(ArtTile_DashDust_P2),d2		; 2P
 
 .notp2
-		move.w	#$C0/2,d3
+		moveq	#$C0/2,d3
 		jmp	(Add_To_DMA_Queue).w
 
 ; ----------------------------------------------------------------------------

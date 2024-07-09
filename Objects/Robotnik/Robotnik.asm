@@ -37,9 +37,9 @@ loc_67C76:
 
 Obj_RobotnikHead3Main:
 		movea.w	parent3(a0),a3
-		cmpi.b	#id_SonicHurt,(Player_1+routine).w
+		cmpi.b	#PlayerID_Hurt,(Player_1+routine).w
 		bhs.s	Obj_RobotnikHead3_Laugh
-		cmpi.b	#id_SonicHurt,(Player_2+routine).w
+		cmpi.b	#PlayerID_Hurt,(Player_2+routine).w
 		bhs.s	Obj_RobotnikHead3_Laugh
 		jsr	(Animate_Raw).w
 		btst	#7,status(a3)

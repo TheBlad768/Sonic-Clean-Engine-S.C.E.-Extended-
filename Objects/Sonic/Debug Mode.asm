@@ -9,8 +9,8 @@ Debug_Mode:
 		bne.w	.action
 		addq.b	#2,(Debug_placement_routine).w
 		move.l	mappings(a0),(Debug_saved_mappings).w	; save mappings
-		cmpi.b	#id_SonicDeath,routine(a0)
-		bhs.s	.death
+		cmpi.b	#PlayerID_Death,routine(a0)				; is player dead?
+		bhs.s	.death									; if yes, branch
 		move.l	priority(a0),(Debug_saved_priority).w		; save priority and art_tile
 
 .death
@@ -22,7 +22,7 @@ Debug_Mode:
 		bclr	#Status_Underwater,status(a0)
 		beq.s	.select
 		movea.w	a0,a1									; a1=character
-		jsr	(Player_ResetAirTimer).l
+		jsr	Player_ResetAirTimer(pc)
 
 		; set player speed (a4 warning!)
 		move.w	#$600,Max_speed-Max_speed(a4)			; set max speed
@@ -36,7 +36,17 @@ Debug_Mode:
 		move.b	d0,mapping_frame(a0)
 		move.b	d0,spin_dash_flag(a0)
 		move.b	d0,(Scroll_lock).w
+		move.b	d0,(Deform_lock).w
 		move.b	d0,(WindTunnel_flag).w
+
+		; load player's breathing bubbles
+		lea	(Breathing_bubbles+objoff_30).w,a1
+		cmpi.b	#1,character_id(a0)								; is player Tails?
+		bne.s	.nottails											; if not, branch
+		lea	(Breathing_bubbles_P2+objoff_30).w,a1
+
+.nottails
+		move.w	d0,(a1)											; clear drowning timer
 		movea.l	(Level_data_addr_RAM.Debug).w,a2
 		move.w	(a2)+,d6
 		cmp.b	(Debug_object).w,d6						; have you gone past the last item?
@@ -203,6 +213,6 @@ Debug_Mode:
 		move.b	d0,jumping(a0)
 		andi.b	#1,status(a0)
 		ori.b	#2,status(a0)
-		move.b	#id_SonicControl,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 		move.w	default_y_radius(a0),y_radius(a0)			; set y_radius and x_radius
 		rts

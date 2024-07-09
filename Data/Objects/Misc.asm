@@ -1,7 +1,6 @@
 
 ; =============== S U B R O U T I N E =======================================
 
-LoadObjects_Data:
 SetUp_ObjAttributes:
 		move.l	(a1)+,mappings(a0)			; mapping offset
 
@@ -9,7 +8,6 @@ SetUp_ObjAttributes2:
 		move.w	(a1)+,art_tile(a0)				; VRAM offset
 
 SetUp_ObjAttributes3:
-LoadObjects_ExtraData:
 		move.w	(a1)+,priority(a0)				; priority
 		move.b	(a1)+,width_pixels(a0)			; width
 		move.b	(a1)+,height_pixels(a0)		; height
@@ -281,21 +279,15 @@ Restore_LevelMusic:
 
 ; =============== S U B R O U T I N E =======================================
 
-StackLoad_Routine:
-		movea.l	(sp)+,a1
-
-Load_Routine:
-		andi.w	#$FE,d0
-		adda.w	(a1,d0.w),a1
-		jmp	(a1)
-
-; =============== S U B R O U T I N E =======================================
-
 HurtCharacter_Directly2:
-		tst.b	invulnerability_timer(a1)
-		bne.s	HurtCharacter_Directly.return
-		btst	#Status_Invincible,status_secondary(a1)
-		bne.s	HurtCharacter_Directly.return
+		tst.b	object_control(a1)
+		bmi.s	HurtCharacter_Directly.return
+		btst	#Status_Invincible,status_secondary(a1)					; is character invincible?
+		bne.s	HurtCharacter_Directly.return						; if yes, branch
+		tst.b	invulnerability_timer(a1)								; is character invulnerable?
+		bne.s	HurtCharacter_Directly.return						; if yes, branch
+		cmpi.b	#PlayerID_Hurt,routine(a1)							; is the character hurt, dying, etc. ?
+		bhs.s	HurtCharacter_Directly.return						; if yes, branch
 
 HurtCharacter_Directly:
 		tst.w	(Debug_placement_mode).w
@@ -362,14 +354,26 @@ EnemyDefeat_Score:
 
 HurtCharacter_WithoutDamage:
 		lea	(Player_1).w,a1
-		move.b	#id_SonicHurt,routine(a1)							; hit animation
+		move.b	#PlayerID_Hurt,routine(a1)							; hit animation
 		bclr	#Status_OnObj,status(a1)
 		bclr	#Status_Push,status(a1)								; player is not standing on/pushing an object
 		bset	#Status_InAir,status(a1)
 		move.l	#words_to_long(-$200,-$300),x_vel(a1)				; set speed of player
 		clr.w	ground_vel(a1)									; zero out inertia
 		move.b	#id_Hurt,anim(a1)								; set falling animation
-		sfx	sfx_Death,1
+		sfx	sfx_Death,1											; play death sound
+
+; =============== S U B R O U T I N E =======================================
+
+LaunchCharacter:
+		move.w	d0,y_vel(a1)										; set y velocity
+		bset	#Status_InAir,status(a1)								; set character airborne flag
+		bclr	#Status_OnObj,status(a1)								; clear character on object flag
+		clr.b	jumping(a1)											; clear character jumping flag
+		clr.b	spin_dash_flag(a1)									; clear spin dash flag
+		move.b	#id_Spring,anim(a1)								; change Sonic's animation to "spring" ($10)
+		move.b	#PlayerID_Control,routine(a1)						; set character to airborne state
+		sfx	sfx_Spring,1											; play spring sound
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -438,7 +442,7 @@ Check_PlayerCollision:
 		rts
 ; ---------------------------------------------------------------------------
 
-.players	dc.w Player_1, Player_1, Player_2, Player_2
+.players	dc.w Player_1&$FFFF, Player_1&$FFFF, Player_2&$FFFF, Player_2&$FFFF
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -448,8 +452,8 @@ Load_LevelResults:
 		bne.s	.return
 		btst	#Status_InAir,status(a1)
 		bne.s	.return
-		cmpi.b	#id_SonicDeath,routine(a1)
-		bhs.s	.return
+		cmpi.b	#PlayerID_Death,routine(a1)						; is player dead?
+		bhs.s	.return											; if yes, branch
 		bsr.s	Set_PlayerEndingPose
 		clr.b	(TitleCard_end_flag).w
 		bsr.w	Create_New_Sprite
@@ -638,9 +642,9 @@ BossFlash:
 ; ---------------------------------------------------------------------------
 
 .palram
-		dc.w Normal_palette_line_1+$C
-		dc.w Normal_palette_line_1+$1C
-		dc.w Normal_palette_line_1+$1E
+		dc.w (Normal_palette_line_1+$C)&$FFFF
+		dc.w (Normal_palette_line_1+$1C)&$FFFF
+		dc.w (Normal_palette_line_1+$1E)&$FFFF
 .palcycle
 		dc.w 8, $866, 0
 		dc.w $888, $CCC, $EEE
@@ -957,18 +961,20 @@ Reset_ObjectsPosition4:
 ; =============== S U B R O U T I N E =======================================
 
 Offset_ObjectsDuringTransition:
+
+		; all objects in this range
 		lea	(Dynamic_object_RAM+next_object).w,a1
 		moveq	#((Dynamic_object_RAM_end-Dynamic_object_RAM)/object_size)-1,d2
 
 .check
-		tst.l	address(a1)
-		beq.s	.nextobj
-		btst	#2,render_flags(a1)
-		beq.s	.nextobj
+		tst.l	address(a1)											; is this object slot occupied?
+		beq.s	.nextobj											; if not, branch
+		btst	#2,render_flags(a1)									; is this object using screen coordinates?
+		beq.s	.nextobj											; if not, branch
 		sub.w	d0,x_pos(a1)
 		sub.w	d1,y_pos(a1)
 
 .nextobj
-		lea	next_object(a1),a1
+		lea	next_object(a1),a1										; next slot
 		dbf	d2,.check
 		rts

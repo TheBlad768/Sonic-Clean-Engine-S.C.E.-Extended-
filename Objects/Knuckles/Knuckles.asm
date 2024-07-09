@@ -9,7 +9,7 @@ Obj_Knuckles:
 
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
-		lea	(v_Dust).w,a6
+		lea	(Dust).w,a6
 
 	if GameDebug
 		tst.w	(Debug_placement_mode).w
@@ -46,13 +46,13 @@ Knuckles_Normal:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Index: offsetTable
-		offsetTableEntry.w Knuckles_Init		; 0
-		offsetTableEntry.w Knuckles_Control		; 2
-		offsetTableEntry.w Knuckles_Hurt		; 4
-		offsetTableEntry.w Knuckles_Death		; 6
-		offsetTableEntry.w Knuckles_Restart		; 8
-		offsetTableEntry.w loc_17CCE			; A
-		offsetTableEntry.w Knuckles_Drown		; C
+		ptrTableEntry.w Knuckles_Init			; 0
+		ptrTableEntry.w Knuckles_Control		; 2
+		ptrTableEntry.w Knuckles_Hurt			; 4
+		ptrTableEntry.w Knuckles_Death		; 6
+		ptrTableEntry.w Knuckles_Restart		; 8
+		ptrTableEntry.w loc_17CCE				; A
+		ptrTableEntry.w Knuckles_Drown		; C
 ; ---------------------------------------------------------------------------
 
 Knuckles_Init:												; Routine 0
@@ -236,14 +236,14 @@ Knux_ChkShoes:										; checks if Speed Shoes have expired and disables them i
 ; =============== S U B R O U T I N E =======================================
 
 Knuckles_Water:
-		tst.b	(Water_flag).w
-		bne.s	loc_166F6
+		tst.b	(Water_flag).w									; does level have water?
+		bne.s	Knuckles_InWater								; if yes, branch
 
 locret_166F4:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_166F6:
+Knuckles_InWater:
 		move.w	(Water_level).w,d0
 		cmp.w	y_pos(a0),d0
 		bge.s	loc_1676E
@@ -252,8 +252,8 @@ loc_166F6:
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer
-		move.l	#Obj_AirCountdown,(v_Breathing_bubbles+address).w
-		move.w	a0,(v_Breathing_bubbles+parent).w
+		move.l	#Obj_AirCountdown,(Breathing_bubbles+address).w
+		move.w	a0,(Breathing_bubbles+parent).w
 		move.w	#$300,Max_speed-Max_speed(a4)
 		move.w	#6,Acceleration-Max_speed(a4)
 		move.w	#$40,Deceleration-Max_speed(a4)
@@ -276,7 +276,7 @@ loc_1676E:
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
 		move.w	#$80,Deceleration-Max_speed(a4)
-		cmpi.b	#id_SonicHurt,routine(a0)
+		cmpi.b	#PlayerID_Hurt,routine(a0)
 		beq.s	loc_167C4
 		tst.b	object_control(a0)
 		bne.s	loc_167C4
@@ -424,8 +424,8 @@ loc_1693E:
 		blo.s		.return								; if less than 12, branch
 
 		; Create dust clouds.
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 .return
 		rts
@@ -1336,7 +1336,7 @@ loc_17168:
 		bsr.w	sub_174B4
 
 loc_17174:
-		move.w	(HScroll_Shift).w,d1
+		move.w	(Camera_H_scroll_shift).w,d1
 		beq.s	+
 		bclr	#Status_Facing,status(a0)
 		tst.w	d1
@@ -1438,7 +1438,7 @@ loc_1728C:
 ; ---------------------------------------------------------------------------
 
 loc_172A8:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_172E2
 		btst	#button_down,(Ctrl_1_logical).w
 		beq.s	loc_172E2
@@ -1600,7 +1600,7 @@ sub_17428:
 		bpl.s	loc_17462
 
 loc_17430:
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_17444
 		bset	#0,status(a0)
 		bne.s	loc_17444
@@ -1644,8 +1644,8 @@ loc_1746A:
 		bclr	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_174B2							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_174B2:
 		rts
@@ -1695,8 +1695,8 @@ loc_174F0:
 		bset	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_17538							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; v_Dust
-		move.b	#$15,mapping_frame(a6)				; v_Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust
+		move.b	#$15,mapping_frame(a6)				; Dust
 
 locret_17538:
 		rts
@@ -1715,7 +1715,7 @@ Knux_RollSpeed:
 		bmi.w	loc_175F8
 		tst.w	move_lock(a0)
 		bne.s	loc_17580
-		tst.w	(HScroll_Shift).w
+		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_17580
 		btst	#button_left,(Ctrl_1_logical).w
 		beq.s	loc_17574
@@ -2551,7 +2551,7 @@ loc_17E00:
 		neg.w	d2
 
 loc_17E24:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_17E2E
 		add.w	d2,d2
@@ -2605,7 +2605,7 @@ loc_17E84:
 		neg.w	d2
 
 loc_17EA6:
-		add.w	(HScroll_Shift).w,d2
+		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(AniKnux03).l,a1
 		cmpi.w	#$600,d2
 		bhs.s	loc_17EB8

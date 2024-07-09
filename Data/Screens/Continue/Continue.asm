@@ -10,8 +10,8 @@ Continue_Offset:					= *
 ; RAM
 	phase ramaddr(Palette_cycle_counters)
 
-vContinue_countdown:			ds.w 1
-vContinue_routine:			ds.b 1
+Continue_countdown:			ds.w 1
+Continue_routine:				ds.b 1
 
 	dephase
 	!org	Continue_Offset
@@ -31,7 +31,7 @@ Continue_VDP:
 
 ; =============== S U B R O U T I N E =======================================
 
-Continue_Screen:
+ContinueScreen:
 		music	mus_Stop													; stop music
 		jsr	(Clear_Kos_Module_Queue).w										; clear KosM PLCs
 		ResetDMAQueue														; clear DMA queue
@@ -47,8 +47,8 @@ Continue_Screen:
 		moveq	#0,d0
 		move.b	d0,(Water_full_screen_flag).w
 		move.b	d0,(Water_flag).w
-		move.w	d0,(vContinue_countdown).w
-		move.b	d0,(vContinue_routine).w
+		move.w	d0,(Continue_countdown).w
+		move.b	d0,(Continue_routine).w
 
 		; load main art
 		lea	PLC_Continue(pc),a5
@@ -108,7 +108,7 @@ Continue_Screen:
 		jsr	(Create_New_Sprite).w
 		bne.s	.notfree
 		move.l	#Obj_Continue_Countdown,address(a1)
-		move.w	a1,(vContinue_countdown).w									; save parent
+		move.w	a1,(Continue_countdown).w									; save parent
 
 		; create stars object
 		jsr	(Create_New_Sprite4).w
@@ -134,18 +134,18 @@ Continue_Screen:
 		jsr	(Process_Sprites).w
 		jsr	(Render_Sprites).w
 		jsr	(Process_Kos_Module_Queue).w
-		move.b	(vContinue_routine).w,d0										; load Continue routine
+		move.b	(Continue_routine).w,d0										; load Continue routine
 		beq.s	.loop
 		subq.b	#1,d0
 		beq.s	.back
 
 		; exit to Sega screen
-		move.b	#id_LevelSelectScreen,(Game_mode).w							; load Sega screen
+		move.b	#GameModeID_LevelSelectScreen,(Game_mode).w				; load Sega screen
 		rts
 ; ---------------------------------------------------------------------------
 
 .back
-		move.b	#id_LevelScreen,(Game_mode).w								; load Level screen
+		move.b	#GameModeID_LevelScreen,(Game_mode).w						; load Level screen
 
 		; set
 		move.b	#3,(Life_count).w
@@ -188,7 +188,7 @@ Obj_Continue_Countdown:
 ; ---------------------------------------------------------------------------
 
 .end
-		move.b	#2,(vContinue_routine).w
+		move.b	#2,(Continue_routine).w
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -260,7 +260,7 @@ Obj_Continue_SonicWTails:
 		move.l	#.main,address(a0)
 
 .main
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		btst	#3,objoff_38(a1)													; is Start was pressed?
 		bne.s	.pstart														; if yes, branch
 
@@ -368,7 +368,7 @@ Obj_Continue_SonicAlone:
 		move.l	#.main,address(a0)
 
 .main
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		btst	#2,objoff_38(a1)													; Knuckles run to the middle of the screen?
 		bne.s	.setrun														; if yes, branch
 		lea	AniRaw_5CBC5(pc),a1
@@ -405,7 +405,7 @@ Obj_Continue_SonicAlone:
 ; ---------------------------------------------------------------------------
 
 .stoprun
-		move.b	#1,(vContinue_routine).w										; set screen routine
+		move.b	#1,(Continue_routine).w										; set screen routine
 		move.l	#.draw,address(a0)
 		bra.s	.draw
 
@@ -425,7 +425,7 @@ Obj_Continue_TailsWSonic:
 		move.l	#.waitstart,address(a0)
 
 .waitstart
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		btst	#3,objoff_38(a1)													; is Start was pressed?
 		bne.s	.pstart														; if yes, branch
 
@@ -445,12 +445,11 @@ Obj_Continue_TailsWSonic:
 		addq.w	#4,y_pos(a0)													; fix pos
 
 		; create tails
-		lea	(v_Tails_tails).w,a1
-		move.l	#Obj_Tails_Tail,address(a1)
-		move.w	a0,objoff_30(a1)
+		move.l	#Obj_Tails_Tail,(Tails_tails+address).w
+		move.w	a0,(Tails_tails+objoff_30).w
 
 		; create fix for tails
-		move.l	#Obj_Continue_Tails_tails_Fix,(v_Dust+address).w
+		move.l	#Obj_Continue_Tails_tails_Fix,(Dust+address).w
 
 .main
 		move.l	#.wait,address(a0)
@@ -489,7 +488,7 @@ Obj_Continue_TailsWSonic:
 		addq.w	#6,x_pos(a0)
 		cmpi.w	#$80+(320+32),x_pos(a0)
 		blo.s		.anim
-		move.b	#1,(vContinue_routine).w										; set screen routine
+		move.b	#1,(Continue_routine).w										; set screen routine
 		bra.s	.anim
 
 ; ---------------------------------------------------------------------------
@@ -499,7 +498,7 @@ Obj_Continue_TailsWSonic:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Tails_tails_Fix:
-		bclr	#2,(v_Tails_tails+render_flags).w
+		bclr	#2,(Tails_tails+render_flags).w
 		jmp	(Delete_Current_Sprite).w
 
 ; ---------------------------------------------------------------------------
@@ -532,7 +531,7 @@ Obj_Continue_Knuckles:
 
 .waitstart
 		move.w	#$2F,objoff_2E(a0)											; set wait
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		btst	#3,objoff_38(a1)													; is Start was pressed?
 		beq.s	.wait														; if not, branch
 		move.l	#.wait,address(a0)
@@ -566,7 +565,7 @@ Obj_Continue_Knuckles:
 ; ---------------------------------------------------------------------------
 
 .waitstart2
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		btst	#3,objoff_38(a1)													; is Start was pressed?
 		bne.s	.pstart														; if yes, branch
 
@@ -582,7 +581,7 @@ Obj_Continue_Knuckles:
 		move.w	x_pos(a0),d0
 		addq.w	#6,d0
 		move.w	d0,x_pos(a0)
-		movea.w	(vContinue_countdown).w,a1
+		movea.w	(Continue_countdown).w,a1
 		cmpi.w	#$80+(320/2),d0
 		blo.s		.checkpos
 		bset	#2,objoff_38(a1)													; set Knuckles in the middle of the screen flag
@@ -599,7 +598,7 @@ Obj_Continue_Knuckles:
 		move.l	#.draw,address(a0)
 		cmpi.w	#3,(Player_mode).w											; is Knuckles?
 		bne.s	.draw														; if not, branch
-		move.b	#1,(vContinue_routine).w										; set screen routine
+		move.b	#1,(Continue_routine).w										; set screen routine
 		bra.s	.draw
 
 ; ---------------------------------------------------------------------------
