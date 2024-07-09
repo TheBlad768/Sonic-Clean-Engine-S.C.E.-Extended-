@@ -8,6 +8,8 @@ ArtKosM_HUD:					binclude "Objects/HUD/KosinskiM Art/HUD.kosm"
 	even
 ArtKosM_SonicLifeIcon:			binclude "Objects/HUD/KosinskiM Art/Sonic Life Icon.kosm"
 	even
+ArtKosM_MilesLifeIcon:			binclude "Objects/HUD/KosinskiM Art/Miles Life Icon.kosm"
+	even
 ArtKosM_TailsLifeIcon:			binclude "Objects/HUD/KosinskiM Art/Tails Life Icon.kosm"
 	even
 ArtKosM_KnucklesLifeIcon:		binclude "Objects/HUD/KosinskiM Art/Knuckles Life Icon.kosm"
@@ -55,6 +57,8 @@ ArtKosM_Rabbit:					binclude "Objects/Animals/KosinskiM Art/Rabbit.kosm"
 ArtKosM_ResultsGeneral:			binclude "Objects/Results/KosinskiM Art/Results General.kosm"
 	even
 ArtKosM_ResultsSONIC:			binclude "Objects/Results/KosinskiM Art/Results SONIC.kosm"
+	even
+ArtKosM_ResultsMILES:			binclude "Objects/Results/KosinskiM Art/Results MILES.kosm"
 	even
 ArtKosM_ResultsTAILS:			binclude "Objects/Results/KosinskiM Art/Results TAILS.kosm"
 	even

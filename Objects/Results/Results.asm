@@ -33,6 +33,15 @@ Obj_LevelResults:
 		add.w	d0,d0
 		lea	PlayerResults_Index(pc),a1									; select character name to use based on character of course
 		movea.l	(a1,d0.w),a1
+
+		; check Miles
+		cmpi.w	#2*4,d0
+		bne.s	.notMiles
+		tst.b	(Graphics_flags).w										; check console region
+		bmi.s	.notMiles
+		lea	(ArtKosM_ResultsMILES).l,a1
+
+.notMiles
 		move.w	#tiles_to_bytes($548),d2
 		jsr	(Queue_Kos_Module).w
 
@@ -210,7 +219,10 @@ Obj_LevResultsCharName:
 ; ---------------------------------------------------------------------------
 
 .loc_2DD62
-		addq.b	#2,mapping_frame(a0)								; Tails frame
+		addq.b	#1,mapping_frame(a0)									; Miles frame
+		tst.b	(Graphics_flags).w										; check console region
+		bpl.s	.loc_2DD7E
+		addq.b	#1,mapping_frame(a0)									; Tails frame
 		moveq	#8,d0
 		add.w	d0,x_pos(a0)
 		add.w	d0,objoff_46(a0)

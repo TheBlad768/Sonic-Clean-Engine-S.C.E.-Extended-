@@ -81,6 +81,15 @@ LevelScreen:
 		add.w	d0,d0
 		lea	PLC_PlayerIndex(pc),a5
 		movea.l	(a5,d0.w),a5
+
+		; check Miles
+		cmpi.w	#1*4,d0
+		bne.s	.notMiles
+		tst.b	(Graphics_flags).w													; check console region
+		bmi.s	.notMiles
+		lea	(PLC1_Miles).l,a5
+
+.notMiles
 		jsr	(LoadPLC_Raw_KosM).w												; load HUD and ring art
 		jsr	(CheckLevelForWater).l
 		clearRAM Water_palette_line_2, Normal_palette

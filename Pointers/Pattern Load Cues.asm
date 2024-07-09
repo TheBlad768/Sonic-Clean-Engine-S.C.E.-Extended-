@@ -15,6 +15,17 @@ PLC1_Sonic: plrlistheader
 PLC1_Sonic_end
 
 ; ===========================================================================
+; Pattern load cues - Miles
+; ===========================================================================
+
+PLC1_Miles: plrlistheader
+		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost			; StarPost
+		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks			; Rings
+		plreq ArtTile_HUD, ArtKosM_HUD							; HUD
+		plreq ArtTile_LifeIcon, ArtKosM_MilesLifeIcon				; Life Icon
+PLC1_Miles_end
+
+; ===========================================================================
 ; Pattern load cues - Tails
 ; ===========================================================================
 
