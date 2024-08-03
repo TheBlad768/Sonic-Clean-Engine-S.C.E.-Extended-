@@ -5,6 +5,8 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_HiddenMonitor:
+
+		; mapping
 		lea	ObjDat_HiddenMonitor(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#.main,address(a0)
@@ -36,14 +38,13 @@ Obj_HiddenMonitor:
 
 .bounceup
 		bclr	#0,objoff_38(a1)									; if signpost has landed and is in range
-		move.l	#Obj_Monitor,address(a0)						; make this object a monitor
-		move.b	#2,routine(a0)
+		move.l	#Obj_Monitor.main,address(a0)				; make this object a monitor
 		move.b	#4,objoff_3C(a0)
 		move.w	#-$500,y_vel(a0)
 		sfx	sfx_BubbleAttack									; play sfx
 		bclr	#0,render_flags(a0)
 		beq.s	.draw
-		bset	#7,art_tile(a0)
+		bset	#high_priority_bit,art_tile(a0)
 		clr.b	status(a0)
 
 .draw
@@ -51,7 +52,7 @@ Obj_HiddenMonitor:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_HiddenMonitor:	subObjData Map_Monitor, make_art_tile(ArtTile_Monitors,0,0), $280, 28/2, 32/2, 0, 0
+ObjDat_HiddenMonitor:	subObjData Map_Monitor, ArtTile_Monitors, 0, 0, $280, 28/2, 32/2, 0, 0
 
 HiddenMonitor_Range:
 		dc.w -14, 28		; xpos

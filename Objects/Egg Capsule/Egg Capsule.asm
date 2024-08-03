@@ -22,16 +22,16 @@ Obj_EggCapsule:
 
 		; load art
 		lea	PLC_EggCapsule(pc),a5
-		jsr	(LoadPLC_Raw_KosM).w
+		jsr	(LoadPLC_Raw_KosPlusM).w
 
 		; mapping
 		lea	ObjDat_EggCapsule(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#.main,address(a0)
 
+		; check
 		btst	#1,render_flags(a0)					; is egg capsule flipped?
 		bne.s	.flipy							; if yes, branch
-
 		move.l	#.normal,objoff_34(a0)
 
 		; create object
@@ -257,8 +257,8 @@ Check_SonicEndPose:
 		bne.s	.return
 		btst	#Status_InAir,status(a1)
 		bne.s	.return
-		cmpi.b	#PlayerID_Death,routine(a1)
-		bhs.s	.return
+		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
+		bhs.s	.return									; if yes, branch
 		move.l	d0,objoff_34(a0)							; set routine
 		jsr	(Set_PlayerEndingPose).w
 		jsr	(Create_New_Sprite).w
@@ -273,7 +273,6 @@ Check_SonicEndPose:
 Check_TailsEndPose:
 		tst.b	(Last_act_end_flag).w
 		beq.s	Check_SonicEndPose.return
-
 		btst	#7,objoff_38(a0)
 		bne.s	Check_SonicEndPose.return
 		lea	(Player_2).w,a1
@@ -281,8 +280,8 @@ Check_TailsEndPose:
 		bne.s	Check_SonicEndPose.return
 		btst	#Status_InAir,status(a1)
 		bne.s	Check_SonicEndPose.return
-		cmpi.b	#PlayerID_Death,routine(a1)
-		bhs.s	Check_SonicEndPose.return
+		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
+		bhs.s	Check_SonicEndPose.return				; if yes, branch
 		bset	#7,objoff_38(a0)
 		clr.b	(Ctrl_2_locked).w
 		jmp	(Set_PlayerEndingPose).w
@@ -296,11 +295,11 @@ Check_SonicEndPose_MGZ:
 		bpl.s	.return
 
 		lea	(Player_1).w,a1
-		cmpi.b	#PlayerID_Death,routine(a1)
-		bhs.s	.return
+		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
+		bhs.s	.return									; if yes, branch
 		tst.b	render_flags(a1)								; player visible on the screen?
 		bpl.s	.return									; if not, branch
-		cmpi.b	#1,character_id(a1)						; is Tails?
+		cmpi.b	#PlayerID_Tails,character_id(a1)			; is Tails?
 		beq.s	.lresults									; if yes, branch
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	.return
@@ -322,6 +321,8 @@ Check_SonicEndPose_MGZ:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_EggCapsule_Button:
+
+		; mapping
 		lea	ObjDat_EggCapsule_Button(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
@@ -365,6 +366,8 @@ Obj_EggCapsule_Button:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_EggCapsule_FlippedButton:
+
+		; mapping
 		lea	ObjDat_EggCapsule_Button(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		bset	#1,render_flags(a0)							; set flipy flag
@@ -380,9 +383,9 @@ Obj_EggCapsule_FlippedButton:
 		movea.w	d0,a1									; get Sonic address
 		tst.w	y_vel(a1)
 		bpl.s	.notp1
-		cmpi.b	#id_Roll,anim(a1)							; is player in his rolling animation?
+		cmpi.b	#AniIDSonAni_Roll,anim(a1)				; is player in his rolling animation?
 		beq.s	.press									; if so, branch
-		cmpi.b	#1,objoff_38(a1)							; is Tails?
+		cmpi.b	#PlayerID_Tails,character_id(a1)			; is Tails?
 		beq.s	.press									; if yes, branch
 
 .notp1
@@ -422,6 +425,8 @@ Obj_EggCapsule_FlippedButton:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_EggCapsule_Pieces:
+
+		; mapping
 		lea	ObjDat_EggCapsule_Pieces(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#Obj_FlickerMove,address(a0)
@@ -450,6 +455,8 @@ Obj_EggCapsule_Pieces:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_EggCapsule_Propeller:
+
+		; mapping
 		lea	ObjDat3_EggCapsule_Propeller(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
@@ -476,6 +483,8 @@ ecapa_yvel				= objoff_3E	; .w
 ; =============== S U B R O U T I N E =======================================
 
 Obj_EggCapsule_Animals:
+
+		; mapping
 		lea	ObjDat_EggCapsule_Animals(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.normal,address(a0)
@@ -505,7 +514,7 @@ Obj_EggCapsule_Animals:
 		move.w	objoff_3E(a0),y_vel(a0)
 		jsr	(Find_SonicTails).w
 		move.w	#-$200,d1
-		tst.b	(Level_end_flag).w
+		tst.b	(Level_results_flag).w
 		beq.s	.setxvel
 		tst.w	d0
 		beq.s	.setxvel
@@ -553,7 +562,7 @@ Obj_EggCapsule_Animals_Flipped:
 		bsr.s	EggCapsule_Animals_Move
 		jsr	(MoveSprite2).w
 		jsr	(Change_FlipXWithVelocity2).w
-		tst.b	(Level_end_flag).w
+		tst.b	(Level_results_flag).w
 		bne.s	Obj_EggCapsule_Animals.anim
 		move.l	#.back,address(a0)
 		bset	#0,render_flags(a0)							; left side
@@ -613,10 +622,10 @@ EggCapsule_Animals_Yvel:
 		dc.w -$280
 		dc.w -$200
 EggCapsule_Animals_VRAM:
-		dc.w $8580
-		dc.w $8592
-		dc.w $842E
-		dc.w $8440
+		dc.w make_art_tile($580,0,1)
+		dc.w make_art_tile($592,0,1)
+		dc.w make_art_tile($42E,0,1)
+		dc.w make_art_tile($440,0,1)
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -670,16 +679,16 @@ EggCapsule_Animals_Load:
 
 Load_EggCapsule:
 		st	(Last_act_end_flag).w
-		st	(Level_end_flag).w
+		st	(Level_results_flag).w
 		lea	Child6_EggCapsule(pc),a2
 		jmp	(CreateChild6_Simple).w
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_EggCapsule:				subObjData Map_EggCapsule, $843E, $200, 64/2, 64/2, 0, 0
+ObjDat_EggCapsule:				subObjData Map_EggCapsule, $494, 0, 1, $200, 64/2, 64/2, 0, 0
 ObjDat_EggCapsule_Button:		subObjData3 $200, 32/2, 16/2, 5, 0
 ObjDat3_EggCapsule_Propeller:		subObjData3 $200, 40/2, 8/2, 6, 0
-ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $843E, $180, 24/2, 24/2, 0, 0
+ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $494, 0, 1, $180, 24/2, 24/2, 0, 0
 ObjDat_EggCapsule_Animals:		subObjData3 $280, 16/2, 24/2, 2, 0
 
 Child6_EggCapsule:
@@ -750,8 +759,8 @@ Child1_EggCapsule_Animals:
 
 
 PLC_EggCapsule: plrlistheader
-		plreq $43E, ArtKosM_EggCapsule
-		plreq $5A0, ArtKosM_Explosion
+		plreq $494, ArtKosPM_EggCapsule
+		plreq $5A0, ArtKosPM_Explosion
 PLC_EggCapsule_end
 ; ---------------------------------------------------------------------------
 

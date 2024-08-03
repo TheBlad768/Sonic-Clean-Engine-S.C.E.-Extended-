@@ -1,4 +1,7 @@
-; Knuckles mappings
+; ---------------------------------------------------------------------------
+; Knuckles Mappings
+; ---------------------------------------------------------------------------
+
 Map_Knuckles:
 		dc.w word_14AACC-Map_Knuckles; 0
 		dc.w word_14AACE-Map_Knuckles; 1
@@ -251,6 +254,7 @@ Map_Knuckles:
 		dc.w word_14BCCE-Map_Knuckles; 248
 		dc.w word_14BCE2-Map_Knuckles; 249
 		dc.w word_14BCFC-Map_Knuckles; 250
+Map_Knuckles_end
 word_14AACC:	dc.w 0			; DATA XREF: ROM:0014A8D6o
 word_14AACE:	dc.w 4			; DATA XREF: ROM:0014A8D6o
 		dc.b  $EC,   8,	  0,   0, $FF, $F3

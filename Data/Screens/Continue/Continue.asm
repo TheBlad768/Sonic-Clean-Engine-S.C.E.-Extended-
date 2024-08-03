@@ -17,23 +17,23 @@ Continue_routine:				ds.b 1
 	!org	Continue_Offset
 
 Continue_VDP:
-		dc.w $8004					; disable HInt, HV counter, 8-colour mode
-		dc.w $8200+(vram_fg>>10)	; set foreground nametable address
-		dc.w $8300+(vram_bg>>10)	; set window nametable address
-		dc.w $8400+(vram_bg>>13)	; set background nametable address
-		dc.w $8700+(0<<4)			; set background colour (line 3; colour 0)
-		dc.w $8B00					; full-screen horizontal and vertical scrolling
-		dc.w $8C81					; set 40cell screen size, no interlacing, no s/h
-		dc.w $9001					; 64x32 cell nametable area
-		dc.w $9100					; set window H position at default
-		dc.w $9200					; set window V position at default
-		dc.w 0						; end
+		dc.w $8004															; disable HInt, HV counter, 8-colour mode
+		dc.w $8200+(VRAM_Plane_A_Name_Table>>10)							; set foreground nametable address
+		dc.w $8300+(VRAM_Plane_B_Name_Table>>10)							; set window nametable address
+		dc.w $8400+(VRAM_Plane_B_Name_Table>>13)							; set background nametable address
+		dc.w $8700+(0<<4)													; set background colour (line 3; colour 0)
+		dc.w $8B00															; full-screen horizontal and vertical scrolling
+		dc.w $8C81															; set 40cell screen size, no interlacing, no s/h
+		dc.w $9001															; 64x32 cell nametable area
+		dc.w $9100															; set window H position at default
+		dc.w $9200															; set window V position at default
+		dc.w 0																; end marker
 
 ; =============== S U B R O U T I N E =======================================
 
 ContinueScreen:
 		music	mus_Stop													; stop music
-		jsr	(Clear_Kos_Module_Queue).w										; clear KosM PLCs
+		jsr	(Clear_KosPlus_Module_Queue).w									; clear KosPlusM PLCs
 		ResetDMAQueue														; clear DMA queue
 		jsr	(Pal_FadeToBlack).w
 		disableInts
@@ -44,7 +44,8 @@ ContinueScreen:
 		lea	Continue_VDP(pc),a1
 		jsr	(Load_VDP).w
 		clearRAM Object_RAM, Object_RAM_end								; clear the object RAM
-		moveq	#0,d0
+
+		; clear
 		move.b	d0,(Water_full_screen_flag).w
 		move.b	d0,(Water_flag).w
 		move.w	d0,(Continue_countdown).w
@@ -52,15 +53,15 @@ ContinueScreen:
 
 		; load main art
 		lea	PLC_Continue(pc),a5
-		jsr	(LoadPLC_Raw_KosM).w
+		jsr	(LoadPLC_Raw_KosPlusM).w
 
 .waitplc
 		move.b	#VintID_Fade,(V_int_routine).w
-		jsr	(Process_Kos_Queue).w
+		jsr	(Process_KosPlus_Queue).w
 		jsr	(Wait_VSync).w
-		jsr	(Process_Kos_Module_Queue).w
-		tst.w	(Kos_modules_left).w
-		bne.s	.waitplc
+		jsr	(Process_KosPlus_Module_Queue).w
+		tst.w	(KosPlus_modules_left).w
+		bne.s	.waitplc														; wait for KosPlusM queue to clear
 
 		; set
 		move.w	#(11*60)-1,(Demo_timer).w										; set to wait
@@ -89,9 +90,9 @@ ContinueScreen:
 
 		; check players
 		move.w	(Player_mode).w,d0
-		cmpi.w	#3,d0														; is Knuckles?
+		cmpi.w	#PlayerModeID_Knuckles,d0									; is Knuckles?
 		beq.s	.main														; if yes, branch
-		cmpi.w	#1,d0														; is Sonic alone?
+		cmpi.w	#PlayerModeID_Sonic,d0										; is Sonic alone?
 		bne.s	.notsa														; if not, branch
 		move.l	#Obj_Continue_SonicAlone,(Player_1+address).w					; create Sonic alone
 		bra.s	.main
@@ -129,11 +130,11 @@ ContinueScreen:
 
 .loop
 		move.b	#VintID_Menu,(V_int_routine).w
-		jsr	(Process_Kos_Queue).w
+		jsr	(Process_KosPlus_Queue).w
 		jsr	(Wait_VSync).w
 		jsr	(Process_Sprites).w
 		jsr	(Render_Sprites).w
-		jsr	(Process_Kos_Module_Queue).w
+		jsr	(Process_KosPlus_Module_Queue).w
 		move.b	(Continue_routine).w,d0										; load Continue routine
 		beq.s	.loop
 		subq.b	#1,d0
@@ -252,7 +253,7 @@ Continue_LoadNumbers:
 
 Obj_Continue_SonicWTails:
 		move.l	#Map_ContinueSprites,mappings(a0)
-		move.w	#$8C,art_tile(a0)
+		move.w	#make_art_tile($8C,0,0),art_tile(a0)
 		move.w	#$280,priority(a0)
 		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)					; set height and width
 		move.w	#$80+((320/2)-8),x_pos(a0)
@@ -278,7 +279,7 @@ Obj_Continue_SonicWTails:
 .pstart
 		move.l	#.rotation,address(a0)
 		move.l	#Map_Sonic,mappings(a0)
-		move.w	#ArtTile_Player_1,art_tile(a0)
+		move.w	#make_art_tile(ArtTile_Player_1,0,0),art_tile(a0)
 		clr.b	(Player_prev_frame).w
 		move.b	#$5A,mapping_frame(a0)
 		move.b	#6,anim_frame_timer(a0)
@@ -360,7 +361,7 @@ Obj_Continue_SonicWTails:
 
 Obj_Continue_SonicAlone:
 		move.l	#Map_Sonic,mappings(a0)
-		move.w	#ArtTile_Player_1,art_tile(a0)
+		move.w	#make_art_tile(ArtTile_Player_1,0,0),art_tile(a0)
 		move.w	#$280,priority(a0)
 		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)					; set height and width
 		move.w	#$80+(320/2),x_pos(a0)
@@ -417,7 +418,7 @@ Obj_Continue_SonicAlone:
 
 Obj_Continue_TailsWSonic:
 		move.l	#Map_ContinueSprites,mappings(a0)
-		move.w	#$8C,art_tile(a0)
+		move.w	#make_art_tile($8C,0,0),art_tile(a0)
 		move.w	#$200,priority(a0)
 		move.w	#bytes_to_word(40/2,32/2),height_pixels(a0)						; set height and width
 		move.w	#$80+((320/2)+12),x_pos(a0)
@@ -454,7 +455,7 @@ Obj_Continue_TailsWSonic:
 .main
 		move.l	#.wait,address(a0)
 		move.l	#Map_Tails,mappings(a0)
-		move.w	#ArtTile_Player_2,art_tile(a0)
+		move.w	#make_art_tile(ArtTile_Player_2,0,0),art_tile(a0)
 		move.w	#$280,priority(a0)
 		clr.b	(Player_prev_frame_P2).w
 		move.w	#bytes_to_word(5,0),anim(a0)									; set anim and prev_anim
@@ -508,7 +509,7 @@ Obj_Continue_Tails_tails_Fix:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Knuckles:
-		cmpi.w	#3,(Player_mode).w											; is Knuckles?
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w						; is Knuckles?
 		beq.s	.setknux														; if yes, branch
 
 		; for Sonic and Tails
@@ -522,7 +523,7 @@ Obj_Continue_Knuckles:
 
 .setknux
 		move.l	#Map_ContinueSprites,mappings(a0)
-		move.w	#$608C,art_tile(a0)
+		move.w	#make_art_tile($8C,3,0),art_tile(a0)
 		move.w	#$200,priority(a0)
 		move.w	#bytes_to_word(48/2,32/2),height_pixels(a0)						; set height and width
 		move.w	#$80+((320/2)-4),x_pos(a0)
@@ -555,7 +556,7 @@ Obj_Continue_Knuckles:
 .main
 		move.l	#.waitstart2,address(a0)
 		move.l	#Map_Knuckles,mappings(a0)
-		move.w	#make_art_tile(ArtTile_CutsceneKnux,3,0),art_tile(a0)
+		move.w	#make_art_tile(ArtTile_CutsceneKnuckles,3,0),art_tile(a0)
 		move.w	#$80,priority(a0)
 		move.b	#7,mapping_frame(a0)
 		move.w	#bytes_to_word(96/2,64/2),height_pixels(a0)						; set height and width
@@ -596,7 +597,7 @@ Obj_Continue_Knuckles:
 
 .stoprun
 		move.l	#.draw,address(a0)
-		cmpi.w	#3,(Player_mode).w											; is Knuckles?
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w						; is Knuckles?
 		bne.s	.draw														; if not, branch
 		move.b	#1,(Continue_routine).w										; set screen routine
 		bra.s	.draw
@@ -619,8 +620,8 @@ Knuckles_Load_PLC_Continue:
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	.return
-		move.w	#tiles_to_bytes(ArtTile_CutsceneKnux),d4
-		move.l	#dmaSource(ArtUnc_Knux),d6
+		move.w	#tiles_to_bytes(ArtTile_CutsceneKnuckles),d4
+		move.l	#dmaSource(ArtUnc_Knuckles),d6
 
 .loop
 		moveq	#0,d1
@@ -660,7 +661,7 @@ Obj_Continue_EggRobo:
 		jsr	(CreateChild1_Normal).w
 
 		; load egg robo badnik art
-		QueueKosModule	ArtKosM_EggRoboBadnik, $500, 1
+		QueueKosPlusModule	ArtKosPM_EggRoboBadnik, $500, 1
 ; ---------------------------------------------------------------------------
 
 .main
@@ -769,7 +770,7 @@ Refresh_ChildPositionAdjusted_Continue:
 
 Obj_Continue_Stars:
 		move.l	#Map_ContinueSprites,mappings(a0)
-		move.w	#$208C,art_tile(a0)
+		move.w	#make_art_tile($8C,1,0),art_tile(a0)
 		move.w	#$380,priority(a0)
 		move.b	#7,mapping_frame(a0)
 		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)						; set height and width
@@ -816,7 +817,7 @@ Continue_LoadIcons:
 
 Obj_Continue_Tails_tails_Icons:
 		move.l	#Map_ContinueIcons,mappings(a0)
-		move.w	#$D9,art_tile(a0)
+		move.w	#make_art_tile($D9,0,0),art_tile(a0)
 		move.w	#$280,priority(a0)
 		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)						; set height and width
 		move.l	#.main,address(a0)
@@ -834,10 +835,10 @@ Obj_Continue_Tails_tails_Icons:
 
 Obj_Continue_Icons:
 		move.l	#Map_ContinueIcons,mappings(a0)
-		move.w	#$D9,art_tile(a0)												; for Sonic and Tails
-		cmpi.w	#3,(Player_mode).w
+		move.w	#make_art_tile($D9,0,0),art_tile(a0)							; for Sonic and Tails
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
 		bne.s	.notknux
-		ori.w	#$6000,art_tile(a0)											; for Knuckles
+		ori.w	#palette_line_3,art_tile(a0)									; for Knuckles
 
 .notknux
 		move.w	#$380,priority(a0)
@@ -882,7 +883,7 @@ Continue_Icons_GetPos:
 
 Continue_Icons_LoadAnim:
 		move.w	(Player_mode).w,d4
-		cmpi.w	#2,d4														; is Tails?
+		cmpi.w	#PlayerModeID_Tails,d4										; is Tails?
 		bne.s	.nottails														; if not, branch
 
 		; create tails tails icons
@@ -931,7 +932,7 @@ Credits_LoadText:
 		swap	d3
 
 .normal
-		addi.w	#vram_fg,d1
+		addi.w	#VRAM_Plane_A_Name_Table,d1
 		lsl.l	#2,d1
 		lsr.w	#2,d1
 		ori.w	#vdpComm($0000,VRAM,WRITE)>>16,d1
@@ -1073,7 +1074,7 @@ Credits_DrawLargeText:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_919A6:		subObjData Map_EggRobo, $8500, $280, 40/2, 48/2, 1, 6
+ObjDat_919A6:		subObjData Map_EggRoboBadnik, $500, 0, 1, $280, 40/2, 48/2, 1, 6
 ObjDat3_919BE:		subObjData3 $280, 24/2, 32/2, 6, 0
 ObjDat3_919C4:		subObjData3 $280, 32/2, 24/2, 2, 0
 ObjDat3_919CA:		subObjData3 $280, 64/2, 8/2, 7, 0
@@ -1099,12 +1100,13 @@ Credits_TextCONTINUE:
 		creditstr_end
 
 PLC_Continue: plrlistheader
-		plreq 1, ArtKosM_ContinueDigits
-		plreq $8C, ArtKosM_ContinueSprites
-		plreq $D9, ArtKosM_ContinueIcons
-		plreq $347, ArtKosM_LargeTextCredits
+		plreq 1, ArtKosPM_ContinueDigits
+		plreq $8C, ArtKosPM_ContinueSprites
+		plreq $D9, ArtKosPM_ContinueIcons
+		plreq $347, ArtKosPM_LargeTextCredits
 PLC_Continue_end
 ; ---------------------------------------------------------------------------
 
 		include "Data/Screens/Continue/Object Data/Map - Player Sprites.asm"
 		include "Data/Screens/Continue/Object Data/Map - Player Icons.asm"
+		include "Data/Screens/Continue/Object Data/Map - Egg Robo Badnik.asm"

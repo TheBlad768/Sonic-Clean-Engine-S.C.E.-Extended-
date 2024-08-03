@@ -1,10 +1,14 @@
+; ---------------------------------------------------------------------------
+; Sprite mappings - SCORE, TIME, RINGS
+; ---------------------------------------------------------------------------
+
 Map_HUD:
-		dc.w word_DBC2-Map_HUD	; 0 ; Normal
-		dc.w word_DC00-Map_HUD	; 1 ; Hide Rings
-		dc.w word_DC32-Map_HUD	; 2 ; Hide Time
-		dc.w word_DC6A-Map_HUD	; 3 ; Hide Rings and Time
-		dc.w word_DC96-Map_HUD	; 4 ; Draw Rings only(Bonus Stage)
-		dc.w word_DCB6-Map_HUD	; 5 ; Hide Rings(Bonus Stage)
+		dc.w word_DBC2-Map_HUD	; 0 ; normal
+		dc.w word_DC00-Map_HUD	; 1 ; hide rings
+		dc.w word_DC32-Map_HUD	; 2 ; hide time
+		dc.w word_DC6A-Map_HUD	; 3 ; hide rings and time
+		dc.w word_DC96-Map_HUD	; 4 ; draw rings only (Bonus Stage)
+		dc.w word_DCB6-Map_HUD	; 5 ; hide rings (Bonus Stage)
 word_DBC2:
 		dc.w $B
 		dc.b $80, $D,$20,  0,  0,  0
@@ -63,3 +67,4 @@ word_DCB6:
 		dc.b $80,  9,$20,$36,  0,$30
 		dc.b $40,  5,  1, $10,  0,  0
 		dc.b $40, $D,$21, $14,  0,$10
+	even

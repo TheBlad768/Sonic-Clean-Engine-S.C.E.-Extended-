@@ -6,11 +6,9 @@
 
 Obj_EndSignControl:
 		move.l	#Obj_Wait,address(a0)
-		st	(Level_end_flag).w										; end of level is in effect
-		clr.b	(TitleCard_end_flag).w
-		clr.b	(Results_end_flag).w
-		move.w	#(2*60)-1,$2E(a0)
-		move.l	#Obj_EndSignControlDoSign,$34(a0)
+		st	(Level_results_flag).w										; end of level is in effect
+		move.w	#(2*60)-1,objoff_2E(a0)
+		move.l	#Obj_EndSignControlDoSign,objoff_34(a0)
 
 .return
 		rts
@@ -23,12 +21,14 @@ Obj_EndSignControlDoSign:
 		jsr	(CreateChild6_Simple).w
 
 AfterBoss_Cleanup:
-		movea.l	(Level_data_addr_RAM.AfterBoss).w,a1
+		move.l	(Level_data_addr_RAM.AfterBoss).w,d0
+		beq.s	Obj_EndSignControl.return
+		movea.l	d0,a1
 		jmp	(a1)
 ; ---------------------------------------------------------------------------
 
 Obj_EndSignControlAwaitStart:
-		tst.b	(Level_end_flag).w
+		tst.b	(Level_results_flag).w
 		bne.s	Obj_EndSignControl.return
 		move.l	#Obj_EndSignControlDoStart,address(a0)
 
@@ -40,7 +40,7 @@ Obj_EndSignControlAwaitStart:
 ; ---------------------------------------------------------------------------
 
 Obj_EndSignControlDoStart:
-		tst.b	(TitleCard_end_flag).w										; wait for title card to finish
+		tst.b	(End_of_level_flag).w										; wait for title card to finish
 		beq.s	Obj_EndSignControl.return
 		jsr	(Change_ActSizes).w										; set level size
 		jmp	(Delete_Current_Sprite).w
@@ -75,18 +75,23 @@ Obj_EndSign:
 .nothighpriority
 		move.w	a0,(Signpost_addr).w									; put RAM address here for use by hidden monitor object
 		move.w	#bytes_to_word(60/2,48/2),y_radius(a0)				; set y_radius and x_radius
-		move.l	#AniRaw_EndSigns1,$30(a0)
-		cmpi.w	#3,(Player_mode).w
+		move.l	#AniRaw_EndSigns1,d0
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
 		blo.s		.notknux
-		move.l	#AniRaw_EndSigns2,$30(a0)
+		move.l	#AniRaw_EndSigns2,d0
 
 .notknux
+		move.l	d0,objoff_30(a0)
+
+		; create stub
+		lea	Child1_EndSignStub(pc),a2									; make the little stub at the bottom of the signpost
+		jsr	(CreateChild1_Normal).w
+
+		; set
 		move.w	(Camera_Y_pos).w,d0
 		subi.w	#32,d0
 		move.w	d0,y_pos(a0)											; place vertical position at top of screen
 		sfx	sfx_Signpost
-		lea	Child1_EndSignStub(pc),a2									; make the little stub at the bottom of the signpost
-		jsr	(CreateChild1_Normal).w
 
 .signfall
 		bsr.w	EndSign_CheckPlayerHit
@@ -99,8 +104,8 @@ Obj_EndSign:
 		jsr	(CreateChild6_Simple).w
 
 .skip
-		addi.w	#12,y_vel(a0)
-		jsr	(MoveSprite2).w											; move downward
+		moveq	#$C,d1
+		jsr	(MoveSprite_CustomGravity).w								; move downward
 		bsr.w	EndSign_CheckWall
 		jsr	(Animate_Raw).w
 		moveq	#80,d0
@@ -115,7 +120,7 @@ Obj_EndSign:
 		add.w	d1,y_pos(a0)
 		move.l	#.signlanded,address(a0)
 		bset	#0,objoff_38(a0)
-		move.w	#(1*60)+4,$2E(a0)
+		move.w	#(1*60)+4,objoff_2E(a0)
 
 .draw
 		lea	PLCPtr_EndSigns(pc),a2
@@ -127,7 +132,7 @@ Obj_EndSign:
 		btst	#0,objoff_38(a0)
 		beq.s	.hmon
 		jsr	(Animate_Raw).w
-		subq.w	#1,$2E(a0)											; keep animating while landing for X amount of frames
+		subq.w	#1,objoff_2E(a0)										; keep animating while landing for X amount of frames
 		bmi.s	.endtime
 		bra.s	.draw
 ; ---------------------------------------------------------------------------
@@ -182,7 +187,7 @@ Obj_EndSign:
 
 		; load second main plc
 		lea	(PLC2_Sonic).l,a5
-		jsr	(LoadPLC_Raw_KosM).w
+		jsr	(LoadPLC_Raw_KosPlusM).w
 
 		; exit from dplc slot
 		jsr	(Remove_From_TrackingSlot).w
@@ -198,6 +203,8 @@ Obj_EndSign:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_SignpostSparkle:
+
+		; mapping
 		lea	ObjDat_SignpostSparkle(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		btst	#high_priority_bit,(Player_1+art_tile).w
@@ -212,8 +219,8 @@ Obj_SignpostSparkle:
 		add.w	d0,y_pos(a0)											; random vertical position
 		move.w	x_pos(a0),objoff_3A(a0)
 		move.w	#$1000,x_vel(a0)
-		move.w	#32,$2E(a0)
-		move.l	#Go_Delete_Sprite,$34(a0)
+		move.w	#32,objoff_2E(a0)
+		move.l	#Go_Delete_Sprite,objoff_34(a0)
 
 .main
 		move.w	#$400,d0											; right
@@ -243,6 +250,8 @@ Obj_SignpostSparkle:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_SignpostStub:
+
+		; mapping
 		lea	ObjDat_SignpostStub(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		bset	#rbStatic,render_flags(a0)									; set flag to "static mappings flag"
@@ -278,7 +287,7 @@ EndSign_CheckPlayerHit:
 
 .checkhit
 		movea.w	d0,a1												; this can be done up to twice depending on who hit the signpost
-		cmpi.b	#id_Roll,anim(a1)
+		cmpi.b	#AniIDSonAni_Roll,anim(a1)
 		bne.s	.return												; only go on if player is currently jumping
 		tst.w	y_vel(a1)
 		bpl.s	.return												; and if he's actually moving upwards
@@ -351,9 +360,9 @@ EndSign_CheckWall:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjSlot_EndSigns:		subObjSlotData 0, $494, $18, 0, Map_EndSigns, $300, 48/2, 32/2, 0, 0
-ObjDat_SignpostStub:		subObjData Map_SignpostStub, $482, $300, 8/2, 16/2, 0, 0
-ObjDat_SignpostSparkle:	subObjData Map_Ring, make_art_tile(ArtTile_Ring,1,0), $280, 16/2, 16/2, 4, 0
+ObjSlot_EndSigns:		subObjSlotData 0, $494, 0, 0, $18, 0, Map_EndSigns, $300, 48/2, 32/2, 0, 0
+ObjDat_SignpostStub:		subObjData Map_SignpostStub, $482, 0, 0, $300, 8/2, 16/2, 0, 0
+ObjDat_SignpostSparkle:	subObjData Map_Ring, ArtTile_Ring, 1, 0, $280, 16/2, 16/2, 4, 0
 PLCPtr_EndSigns:		dc.l dmaSource(ArtUnc_EndSigns), DPLC_EndSigns
 
 Child6_EndSign:

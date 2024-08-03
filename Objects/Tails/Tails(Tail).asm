@@ -5,16 +5,16 @@ Obj_Tails_Tail:
 
 		; init
 		move.l	#Map_Tails_Tail,mappings(a0)
-		move.w	#ArtTile_Player_2_Tail,art_tile(a0)
+		move.w	#make_art_tile(ArtTile_Player_2_Tail,0,0),art_tile(a0)
 		move.b	#4,render_flags(a0)
 		move.w	#$100,priority(a0)
-		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
+		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)				; set height and width
 		move.l	#.main,address(a0)
 
 .main
 
 		; here, several SSTs are inheritied from the parent, normally Tails
-		movea.w	objoff_30(a0),a2								; is parent in S2
+		movea.w	objoff_30(a0),a2										; is parent in S2
 		move.b	angle(a2),angle(a0)
 		move.b	status(a2),status(a0)
 		move.w	x_pos(a2),x_pos(a0)
@@ -41,19 +41,19 @@ loc_16106:
 		moveq	#4,d0
 
 loc_1612C:
-		cmp.b	objoff_34(a0),d0								; has the input parent anim changed since last check?
-		beq.s	loc_1613C									; if not, branch and skip setting a matching Tails' Tails anim
-		move.b	d0,objoff_34(a0)								; store d0 for the above comparision
-		move.b	Obj_Tails_Tail_AniSelection(pc,d0.w),anim(a0)	; load anim relative to parent's
+		cmp.b	objoff_34(a0),d0									; has the input parent anim changed since last check?
+		beq.s	loc_1613C										; if not, branch and skip setting a matching Tails' Tails anim
+		move.b	d0,objoff_34(a0)									; store d0 for the above comparision
+		move.b	Obj_Tails_Tail_AniSelection(pc,d0.w),anim(a0)		; load anim relative to parent's
 
 loc_1613C:
 		lea	(AniTails_Tail).l,a1
 		bsr.w	Animate_Tails_Part2
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_1615A
-		cmpi.b	#3,anim(a0)									; is this the Directional animation?
-		beq.s	loc_1615A									; if so, skip the mirroring
-		eori.b	#2,render_flags(a0)							; reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
+		cmpi.b	#3,anim(a0)										; is this the Directional animation?
+		beq.s	loc_1615A										; if so, skip the mirroring
+		eori.b	#2,render_flags(a0)								; reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
 
 loc_1615A:
 		bsr.w	Tails_Tail_Load_PLC

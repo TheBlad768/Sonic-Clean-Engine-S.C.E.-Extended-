@@ -5,16 +5,16 @@
 ; =============== S U B R O U T I N E =======================================
 
 TitleCardAct_Index:
-		dc.l ArtKosM_TitleCardNum1		; 0
-		dc.l ArtKosM_TitleCardNum2		; 1
-		dc.l ArtKosM_TitleCardNum3		; 2
-		dc.l ArtKosM_TitleCardNum4		; 3
+		dc.l ArtKosPM_TitleCardNum1		; 0
+		dc.l ArtKosPM_TitleCardNum2		; 1
+		dc.l ArtKosPM_TitleCardNum3		; 2
+		dc.l ArtKosPM_TitleCardNum4		; 3
 ; ---------------------------------------------------------------------------
 
 Obj_TitleCard:
 
 		; load general art
-		QueueKosModule	ArtKosM_TitleCardRedAct, $500
+		QueueKosPlusModule	ArtKosPM_TitleCardRedAct, $500
 
 		; load act number art
 		moveq	#0,d0
@@ -23,7 +23,7 @@ Obj_TitleCard:
 		add.w	d0,d0
 		movea.l	TitleCardAct_Index(pc,d0.w),a1
 		move.w	#tiles_to_bytes($53D),d2
-		jsr	(Queue_Kos_Module).w
+		jsr	(Queue_KosPlus_Module).w
 
 		; load zone name art
 		moveq	#0,d0
@@ -32,7 +32,7 @@ Obj_TitleCard:
 		add.w	d0,d0
 		movea.l	.levelgfx(pc,d0.w),a1
 		move.w	#tiles_to_bytes($54D),d2
-		jsr	(Queue_Kos_Module).w
+		jsr	(Queue_KosPlus_Module).w
 
 		; next
 		move.w	#1*60+30,objoff_2E(a0)									; set wait value
@@ -42,18 +42,18 @@ Obj_TitleCard:
 		rts
 
 ; ---------------------------------------------------------------------------
-; The letters for the name of the zone.
-; Exception: ENOZ/ZONE. These letters are already in VRAM.
+; The letters for the name of the zone
+; Exception: ENOZ/ZONE. These letters are already in VRAM
 ; ---------------------------------------------------------------------------
 
 .levelgfx
-		dc.l ArtKosM_DEZTitleCard	; DEZ
+		dc.l ArtKosPM_DEZTitleCard	; DEZ
 
 		zonewarning .levelgfx,4
 ; ---------------------------------------------------------------------------
 
 .create
-		tst.w	(Kos_modules_left).w
+		tst.w	(KosPlus_modules_left).w
 		bne.s	.return													; don't load the objects until the art has been loaded
 		jsr	(Create_New_Sprite3).w
 		bne.s	.return
@@ -72,7 +72,7 @@ Obj_TitleCard:
 		move.b	d2,objoff_28(a1)
 		move.b	#rfMulti,render_flags(a1)
 		move.l	#Map_TitleCard,mappings(a1)
-		move.w	#$500,art_tile(a1)
+		move.w	#make_art_tile($500,0,0),art_tile(a1)
 		move.w	a0,parent2(a1)
 		jsr	(Create_New_Sprite4).w
 		dbne	d1,.loop
@@ -127,21 +127,31 @@ Obj_TitleCard:
 ; ---------------------------------------------------------------------------
 
 .branch2
+		tst.b	objoff_44(a0)
+		bne.s	.delete
 		tst.w	objoff_3E(a0)
 		beq.s	.skiplevel2
-		st	(TitleCard_end_flag).w											; if in-level, set end of title card flag
+		st	(End_of_level_flag).w											; if in-level, set end of title card flag
+		bra.s	.skiplevel3
+; ---------------------------------------------------------------------------
 
 .skiplevel2
+
+		; load second main plc
 		lea	(PLC2_Sonic).l,a5
-		jsr	(LoadPLC_Raw_KosM).w
+		jsr	(LoadPLC_Raw_KosPlusM).w
 		movea.l	(Level_data_addr_RAM.PLC2).w,a5
-		jsr	(LoadPLC_Raw_KosM).w										; load main art
+		jsr	(LoadPLC_Raw_KosPlusM).w									; load main art
+
+.skiplevel3
 		movea.l	(Level_data_addr_RAM.PLCAnimals).w,a5
-		jsr	(LoadPLC_Raw_KosM).w										; load animals art
-		move.b	#1,(HUD_RAM.status).w									; load HUD
+		jsr	(LoadPLC_Raw_KosPlusM).w									; load animals art
+		moveq	#1,d0
+		move.b	d0,(HUD_RAM.status).w									; load HUD
+		move.b	d0,(Update_HUD_timer).w									; update time counter
 		clr.w	(Ctrl_1_locked).w											; unlock control 1 and control 2
 
-		; delete
+.delete
 		jmp	(Delete_Current_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================

@@ -92,7 +92,7 @@ Obj_BossExpControl1:
 		beq.s	loc_83EC2
 
 loc_83E7E:
-		move.w	#2,$2E(a0)
+		move.w	#2,objoff_2E(a0)
 
 sub_83E84:
 		lea	Child6_MakeBossExplosion1(pc),a2
@@ -131,11 +131,11 @@ loc_83EC2:
 Obj_NormalExpControl:
 		subq.b	#1,objoff_39(a0)						; same as above, but uses regular explosions (no animals of course)
 		beq.s	loc_83EC2
-		move.w	#2,$2E(a0)
+		move.w	#2,objoff_2E(a0)
 		lea	Child6_MakeNormalExplosion(pc),a2
 		jsr	(CreateChild6_Simple).w
 		bne.s	locret_83EC0
-		bset	#7,art_tile(a1)
+		bset	#high_priority_bit,art_tile(a1)
 		bra.s	loc_83E90
 
 ; =============== S U B R O U T I N E =======================================
@@ -143,7 +143,7 @@ Obj_NormalExpControl:
 Obj_BossExpControl2:
 		subq.b	#1,objoff_39(a0)
 		beq.s	loc_83EC2
-		move.w	#2,$2E(a0)
+		move.w	#2,objoff_2E(a0)
 		lea	Child6_MakeBossExplosion2(pc),a2
 		jsr	(CreateChild6_Simple).w
 		bne.s	locret_83EC0
@@ -154,7 +154,7 @@ Obj_BossExpControl2:
 Obj_BossExpControlOff:
 		subq.b	#1,objoff_39(a0)
 		beq.s	loc_83EC2
-		move.w	#2,$2E(a0)
+		move.w	#2,objoff_2E(a0)
 		lea	Child6_MakeBossExplosionOff(pc),a2
 		jsr	(CreateChild6_Simple).w
 		bne.s	locret_83EC0
@@ -163,7 +163,7 @@ Obj_BossExpControlOff:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_BossExplosionSpecial:
-		move.w	#2,$2E(a0)
+		move.w	#2,objoff_2E(a0)
 		move.w	(Camera_X_pos).w,d0
 		addi.w	#320/2,d0
 		move.w	d0,x_pos(a0)
@@ -212,8 +212,8 @@ Obj_BossExplosionOffsetAnim:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_BossExplosion1:	subObjData Map_BossExplosion, $8500, 0, 24/2, 24/2, 0, 0
-ObjDat_BossExplosion2:	subObjData Map_BossExplosion, $84D2, 0, 24/2, 24/2, 0, 0
+ObjDat_BossExplosion1:	subObjData Map_BossExplosion, $500, 0, 1, 0, 24/2, 24/2, 0, 0
+ObjDat_BossExplosion2:	subObjData Map_BossExplosion, $4D2, 0, 1, 0, 24/2, 24/2, 0, 0
 
 Child6_MakeBossExplosion1:
 		dc.w 1-1
@@ -230,9 +230,10 @@ Child6_CreateBossExplosion:
 Child6_MakeNormalExplosion:
 		dc.w 1-1
 		dc.l Obj_Explosion.skipanimal
-ChildObjDat_ExplosionSpecial:
+Child6_ExplosionSpecial:
 		dc.w 1-1
 		dc.l Obj_BossExplosionSpecial
+
 AniRaw_BossExplosion:
 		dc.b	0, 0			; frame, wait
 		dc.b	0, 1

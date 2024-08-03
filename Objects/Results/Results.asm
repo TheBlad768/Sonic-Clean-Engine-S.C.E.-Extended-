@@ -5,17 +5,17 @@
 ; =============== S U B R O U T I N E =======================================
 
 PlayerResults_Index:
-		dc.l ArtKosM_ResultsSONIC		; 0
-		dc.l ArtKosM_ResultsSONIC		; 1
-		dc.l ArtKosM_ResultsTAILS			; 2
-		dc.l ArtKosM_ResultsKNUCKLES	; 3
+		dc.l ArtKosPM_ResultsSONIC		; 0
+		dc.l ArtKosPM_ResultsSONIC		; 1
+		dc.l ArtKosPM_ResultsTAILS		; 2
+		dc.l ArtKosPM_ResultsKNUCKLES	; 3
 ; ---------------------------------------------------------------------------
 
 Obj_LevelResults:
 		music	mus_FadeOut										; fade out music
 
 		; load general art
-		QueueKosModule	ArtKosM_ResultsGeneral, $500
+		QueueKosPlusModule	ArtKosPM_ResultsGeneral, $500
 
 		; load act number art
 		moveq	#0,d0
@@ -25,7 +25,7 @@ Obj_LevelResults:
 		add.w	d0,d0
 		movea.l	(a1,d0.w),a1
 		move.w	#tiles_to_bytes($566),d2
-		jsr	(Queue_Kos_Module).w
+		jsr	(Queue_KosPlus_Module).w
 
 		; load character name art
 		move.w	(Player_mode).w,d0
@@ -35,15 +35,15 @@ Obj_LevelResults:
 		movea.l	(a1,d0.w),a1
 
 		; check Miles
-		cmpi.w	#2*4,d0
+		cmpi.w	#PlayerModeID_Tails*4,d0
 		bne.s	.notMiles
 		tst.b	(Graphics_flags).w										; check console region
 		bmi.s	.notMiles
-		lea	(ArtKosM_ResultsMILES).l,a1
+		lea	(ArtKosPM_ResultsMILES).l,a1
 
 .notMiles
 		move.w	#tiles_to_bytes($548),d2
-		jsr	(Queue_Kos_Module).w
+		jsr	(Queue_KosPlus_Module).w
 
 		; calc time
 		moveq	#0,d0
@@ -91,7 +91,7 @@ Obj_LevelResults:
 ; ---------------------------------------------------------------------------
 
 .create
-		tst.w	(Kos_modules_left).w
+		tst.w	(KosPlus_modules_left).w
 		bne.s	.return												; don't load the objects until the art has been loaded
 		jsr	(Create_New_Sprite3).w
 		bne.s	.return
@@ -110,7 +110,7 @@ Obj_LevelResults:
 		move.b	d2,objoff_28(a1)
 		move.b	#rfMulti,render_flags(a1)
 		move.l	#Map_Results,mappings(a1)
-		move.w	#$500,art_tile(a1)
+		move.w	#make_art_tile($500,0,0),art_tile(a1)
 		move.w	a0,parent2(a1)
 		jsr	(Create_New_Sprite4).w
 		dbne	d1,.loop
@@ -188,7 +188,7 @@ Obj_LevelResults:
 ; ---------------------------------------------------------------------------
 
 .endr
-		clr.b	(Level_end_flag).w
+		clr.b	(Level_results_flag).w
 		tst.b	(Last_act_end_flag).w
 		bne.s	.skiptc
 		clr.b	(Last_star_post_hit).w
@@ -199,17 +199,16 @@ Obj_LevelResults:
 ; ---------------------------------------------------------------------------
 
 .skiptc
-		clr.b	(TitleCard_end_flag).w										; stop level results flag and set title card finished flag
-		st	(Results_end_flag).w
+		st	(End_of_level_flag).w										; stop level results flag and set title card finished flag
 		jmp	(Delete_Current_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_LevResultsCharName:
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		beq.s	.loc_2DD62
-		cmpi.w	#3,(Player_mode).w
-		bne.s	.loc_2DD7E
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
+		blo.s		.loc_2DD7E
 		addq.b	#3,mapping_frame(a0)								; Knuckles frame
 		moveq	#48,d0
 		sub.w	d0,x_pos(a0)

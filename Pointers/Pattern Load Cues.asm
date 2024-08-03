@@ -8,10 +8,10 @@
 ; ===========================================================================
 
 PLC1_Sonic: plrlistheader
-		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
-		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
-		plreq ArtTile_LifeIcon, ArtKosM_SonicLifeIcon		; life icon
+		plreq ArtTile_StarPost, ArtKosPM_EnemyPtsStarPost		; starpost
+		plreq ArtTile_Ring_Sparks, ArtKosPM_Ring_Sparks		; rings
+		plreq ArtTile_HUD, ArtKosPM_HUD						; HUD
+		plreq ArtTile_LifeIcon, ArtKosPM_SonicLifeIcon			; life icon
 PLC1_Sonic_end
 
 ; ===========================================================================
@@ -19,10 +19,10 @@ PLC1_Sonic_end
 ; ===========================================================================
 
 PLC1_Miles: plrlistheader
-		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost			; StarPost
-		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks			; Rings
-		plreq ArtTile_HUD, ArtKosM_HUD							; HUD
-		plreq ArtTile_LifeIcon, ArtKosM_MilesLifeIcon				; Life Icon
+		plreq ArtTile_StarPost, ArtKosPM_EnemyPtsStarPost		; StarPost
+		plreq ArtTile_Ring_Sparks, ArtKosPM_Ring_Sparks		; Rings
+		plreq ArtTile_HUD, ArtKosPM_HUD						; HUD
+		plreq ArtTile_LifeIcon, ArtKosPM_MilesLifeIcon			; Life Icon
 PLC1_Miles_end
 
 ; ===========================================================================
@@ -30,10 +30,10 @@ PLC1_Miles_end
 ; ===========================================================================
 
 PLC1_Tails: plrlistheader
-		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
-		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
-		plreq ArtTile_LifeIcon, ArtKosM_TailsLifeIcon			; life icon
+		plreq ArtTile_StarPost, ArtKosPM_EnemyPtsStarPost		; starpost
+		plreq ArtTile_Ring_Sparks, ArtKosPM_Ring_Sparks		; rings
+		plreq ArtTile_HUD, ArtKosPM_HUD						; HUD
+		plreq ArtTile_LifeIcon, ArtKosPM_TailsLifeIcon			; life icon
 PLC1_Tails_end
 
 ; ===========================================================================
@@ -41,10 +41,10 @@ PLC1_Tails_end
 ; ===========================================================================
 
 PLC1_Knuckles: plrlistheader
-		plreq ArtTile_StarPost, ArtKosM_EnemyPtsStarPost	; starpost
-		plreq ArtTile_Ring_Sparks, ArtKosM_Ring_Sparks	; rings
-		plreq ArtTile_HUD, ArtKosM_HUD					; HUD
-		plreq ArtTile_LifeIcon, ArtKosM_KnucklesLifeIcon		; life icon
+		plreq ArtTile_StarPost, ArtKosPM_EnemyPtsStarPost		; starpost
+		plreq ArtTile_Ring_Sparks, ArtKosPM_Ring_Sparks		; rings
+		plreq ArtTile_HUD, ArtKosPM_HUD						; HUD
+		plreq ArtTile_LifeIcon, ArtKosPM_KnucklesLifeIcon		; life icon
 PLC1_Knuckles_end
 
 ; ===========================================================================
@@ -52,9 +52,9 @@ PLC1_Knuckles_end
 ; ===========================================================================
 
 PLC2_Sonic: plrlistheader
-		plreq ArtTile_SpikesSprings, ArtKosM_SpikesSprings	; spikes and normal spring
-		plreq ArtTile_Monitors, ArtKosM_Monitors			; monitors
-		plreq $5A0, ArtKosM_Explosion						; explosion
+		plreq ArtTile_SpikesSprings, ArtKosPM_SpikesSprings		; spikes and normal spring
+		plreq ArtTile_Monitors, ArtKosPM_Monitors				; monitors
+		plreq $5A0, ArtKosPM_Explosion						; explosion
 PLC2_Sonic_end
 
 ; ===========================================================================
@@ -67,7 +67,7 @@ PLC2_Sonic_end
 ; ===========================================================================
 
 PLC1_DEZ1_Before: plrlistheader
-		plreq $47E, ArtKosM_GrayButton					; button
+		plreq $47E, ArtKosPM_GrayButton						; button
 PLC1_DEZ1_Before_end
 
 ; ===========================================================================
@@ -75,7 +75,7 @@ PLC1_DEZ1_Before_end
 ; ===========================================================================
 
 PLC2_DEZ1_After: plrlistheader
-		plreq $500, ArtKosM_Spikebonker					; spikebonker badnik
+		plreq $500, ArtKosPM_Spikebonker						; spikebonker badnik
 PLC2_DEZ1_After_end
 
 ; ===========================================================================
@@ -83,7 +83,7 @@ PLC2_DEZ1_After_end
 ; ===========================================================================
 
 PLC1_DEZ2_Before: plrlistheader
-		plreq $47E, ArtKosM_GrayButton					; button
+		plreq $47E, ArtKosPM_GrayButton						; button
 PLC1_DEZ2_Before_end
 
 ; ===========================================================================
@@ -91,7 +91,7 @@ PLC1_DEZ2_Before_end
 ; ===========================================================================
 
 PLC2_DEZ2_After: plrlistheader
-		plreq $500, ArtKosM_Spikebonker					; spikebonker badnik
+		plreq $500, ArtKosPM_Spikebonker						; spikebonker badnik
 PLC2_DEZ2_After_end
 
 ; ===========================================================================
@@ -99,7 +99,7 @@ PLC2_DEZ2_After_end
 ; ===========================================================================
 
 PLC1_DEZ3_Before: plrlistheader
-		plreq $47E, ArtKosM_GrayButton					; button
+		plreq $47E, ArtKosPM_GrayButton						; button
 PLC1_DEZ3_Before_end
 
 ; ===========================================================================
@@ -107,7 +107,7 @@ PLC1_DEZ3_Before_end
 ; ===========================================================================
 
 PLC2_DEZ3_After: plrlistheader
-		plreq $500, ArtKosM_Spikebonker					; spikebonker badnik
+		plreq $500, ArtKosPM_Spikebonker						; spikebonker badnik
 PLC2_DEZ3_After_end
 
 ; ===========================================================================
@@ -115,7 +115,7 @@ PLC2_DEZ3_After_end
 ; ===========================================================================
 
 PLC1_DEZ4_Before: plrlistheader
-		plreq $47E, ArtKosM_GrayButton					; button
+		plreq $47E, ArtKosPM_GrayButton						; button
 PLC1_DEZ4_Before_end
 
 ; ===========================================================================
@@ -123,7 +123,7 @@ PLC1_DEZ4_Before_end
 ; ===========================================================================
 
 PLC2_DEZ4_After: plrlistheader
-		plreq $500, ArtKosM_Spikebonker					; spikebonker badnik
+		plreq $500, ArtKosPM_Spikebonker						; spikebonker badnik
 PLC2_DEZ4_After_end
 
 ; ===========================================================================
@@ -136,6 +136,6 @@ PLC2_DEZ4_After_end
 ; ===========================================================================
 
 PLCAnimals_DEZ1: plrlistheader
-		plreq $580, ArtKosM_BlueFlicky
-		plreq $592, ArtKosM_Chicken
+		plreq $580, ArtKosPM_BlueFlicky
+		plreq $592, ArtKosPM_Chicken
 PLCAnimals_DEZ1_end

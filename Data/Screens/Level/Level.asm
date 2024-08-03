@@ -3,24 +3,24 @@
 ; ---------------------------------------------------------------------------
 
 Level_VDP:
-		dc.w $8004					; disable HInt, HV counter, 8-colour mode
-		dc.w $8200+(vram_fg>>10)	; set foreground nametable address
-		dc.w $8300+(vram_bg>>10)	; set window nametable address
-		dc.w $8400+(vram_bg>>13)	; set background nametable address
-		dc.w $8700+(2<<4)			; set background colour (line 3; colour 0)
-		dc.w $8B03					; line scroll mode
-		dc.w $8C81					; set 40cell screen size, no interlacing, no s/h
-		dc.w $9001					; 64x32 cell nametable area
-		dc.w $9100					; set window H position at default
-		dc.w $9200					; set window V position at default
-		dc.w 0						; end
+		dc.w $8004																; disable HInt, HV counter, 8-colour mode
+		dc.w $8200+(VRAM_Plane_A_Name_Table>>10)								; set foreground nametable address
+		dc.w $8300+(VRAM_Plane_B_Name_Table>>10)								; set window nametable address
+		dc.w $8400+(VRAM_Plane_B_Name_Table>>13)								; set background nametable address
+		dc.w $8700+(2<<4)														; set background colour (line 3; colour 0)
+		dc.w $8B03																; line scroll mode
+		dc.w $8C81																; set 40cell screen size, no interlacing, no s/h
+		dc.w $9001																; 64x32 cell nametable area
+		dc.w $9100																; set window H position at default
+		dc.w $9200																; set window V position at default
+		dc.w 0																	; end marker
 
 ; =============== S U B R O U T I N E =======================================
 
 LevelScreen:
 		bset	#GameModeFlag_TitleCard,(Game_mode).w								; set bit 7 is indicate that we're loading the level
 		music	mus_FadeOut													; fade out music
-		jsr	(Clear_Kos_Module_Queue).w											; clear KosM PLCs
+		jsr	(Clear_KosPlus_Module_Queue).w										; clear KosPlusM PLCs
 		ResetDMAQueue															; clear DMA queue
 		jsr	(Pal_FadeToBlack).w
 		disableInts
@@ -29,11 +29,11 @@ LevelScreen:
 		jsr	(Clear_DisplayData).w
 		enableInts
 		tst.b	(Last_star_post_hit).w
-		beq.s	.nostarpost														; if no starpost was set, branch
+		beq.s	.notstarpost														; if no starpost was set, branch
 		move.w	(Saved_zone_and_act).w,(Current_zone_and_act).w
 		move.w	(Saved_apparent_zone_and_act).w,(Apparent_zone_and_act).w
 
-.nostarpost
+.notstarpost
 		clearRAM Object_RAM, Object_RAM_end									; clear the object RAM
 		clearRAM Lag_frame_count, Lag_frame_count_end							; clear variables
 		clearRAM Camera_RAM, Camera_RAM_end									; clear the camera RAM
@@ -45,7 +45,7 @@ LevelScreen:
 	if GameDebug
 		btst	#button_C,(Ctrl_1_held).w												; is C button held?
 		beq.s	.cnotheld															; if not, branch
-		move.w	#$8C89,VDP_control_port-VDP_control_port(a6)						; set shadow/highlight mode
+		move.w	#$8C89,VDP_control_port-VDP_control_port(a6)						; set shadow/highlight mode	; warning: don't overwrite a6
 
 .cnotheld
 		btst	#button_A,(Ctrl_1_held).w												; is A button held?
@@ -60,7 +60,7 @@ LevelScreen:
 
 		; load player palette
 		moveq	#PalID_Sonic,d0
-		cmpi.w	#3,(Player_mode).w
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
 		bne.s	.notknux
 		moveq	#PalID_Knuckles,d0
 
@@ -83,15 +83,15 @@ LevelScreen:
 		movea.l	(a5,d0.w),a5
 
 		; check Miles
-		cmpi.w	#1*4,d0
+		cmpi.w	#(PlayerModeID_Tails-1)*4,d0
 		bne.s	.notMiles
 		tst.b	(Graphics_flags).w													; check console region
 		bmi.s	.notMiles
 		lea	(PLC1_Miles).l,a5
 
 .notMiles
-		jsr	(LoadPLC_Raw_KosM).w												; load HUD and ring art
-		jsr	(CheckLevelForWater).l
+		jsr	(LoadPLC_Raw_KosPlusM).w											; load HUD and ring art
+		jsr	(CheckLevelForWater).w
 		clearRAM Water_palette_line_2, Normal_palette
 		tst.b	(Water_flag).w
 		beq.s	.notwater
@@ -107,14 +107,14 @@ LevelScreen:
 
 .wait
 		move.b	#VintID_Fade,(V_int_routine).w
-		jsr	(Process_Kos_Queue).w
+		jsr	(Process_KosPlus_Queue).w
 		jsr	(Wait_VSync).w
 		jsr	(Process_Sprites).w
 		jsr	(Render_Sprites).w
-		jsr	(Process_Kos_Module_Queue).w
+		jsr	(Process_KosPlus_Module_Queue).w
 		tst.w	(Dynamic_object_RAM+(object_size*5)+objoff_48).w					; has title card sequence finished?
 		bne.s	.wait															; if not, branch
-		tst.w	(Kos_modules_left).w												; are there any items in the pattern load cue?
+		tst.w	(KosPlus_modules_left).w											; are there any items in the pattern load cue?
 		bne.s	.wait															; if yes, branch
 		disableInts
 		jsr	(HUD_DrawInitial).w													; init HUD
@@ -126,8 +126,14 @@ LevelScreen:
 		disableInts
 		jsr	(Level_Setup).w														; draw level
 		enableInts
-		movea.l	(Level_data_addr_RAM.AnimateTilesInit).w,a0						; animate art init
-		jsr	(a0)
+
+		; check
+		move.l	(Level_data_addr_RAM.AnimateTilesInit).w,d0
+		beq.s	.askip
+		movea.l	d0,a0
+		jsr	(a0)																	; animate art init
+
+.askip
 		jsr	(Load_Solids).w
 		jsr	(Handle_Onscreen_Water_Height).w
 		moveq	#0,d0
@@ -136,7 +142,6 @@ LevelScreen:
 		move.w	d0,(Ctrl_1).w
 		move.w	d0,(Ctrl_2).w
 		move.b	d0,(HUD_RAM.status).w											; clear HUD flag
-		move.b	d0,(Update_HUD_timer).w											; clear time counter update flag
 		tst.b	(Last_star_post_hit).w													; are you starting from a starpost?
 		bne.s	.starpost															; if yes, branch
 		move.w	d0,(Ring_count).w												; clear rings
@@ -173,17 +178,19 @@ LevelScreen:
 		moveq	#22,d0
 		move.w	d0,(Palette_fade_timer).w											; time for Pal_FromBlack
 		move.w	d0,(Dynamic_object_RAM+(object_size*5)+objoff_2E).w				; time for Title Card
-		move.w	#$7F00,(Ctrl_1).w
-		move.w	#$7F00,(Ctrl_2).w
+		move.w	#$7F00,d0
+		move.w	d0,(Ctrl_1).w
+		move.w	d0,(Ctrl_2).w
 		andi.b	#$7F,(Last_star_post_hit).w
 		bclr	#GameModeFlag_TitleCard,(Game_mode).w								; subtract $80 from mode to end pre-level stuff
 
 .loop
 		jsr	(Pause_Game).w
 		move.b	#VintID_Level,(V_int_routine).w
-		jsr	(Process_Kos_Queue).w
+		jsr	(Process_KosPlus_Queue).w
 		jsr	(Wait_VSync).w
 		addq.w	#1,(Level_frame_counter).w
+		jsr	(Special_Events).w
 		jsr	(Load_Sprites).w
 		jsr	(Process_Sprites).w
 		tst.b	(Restart_level_flag).w
@@ -194,7 +201,7 @@ LevelScreen:
 		jsr	(Load_Rings).w
 		jsr	(Animate_Palette).w
 		jsr	(Animate_Tiles).w
-		jsr	(Process_Kos_Module_Queue).w
+		jsr	(Process_KosPlus_Module_Queue).w
 		jsr	(OscillateNumDo).w
 		jsr	(ChangeRingFrame).w
 		jsr	(Render_Sprites).w

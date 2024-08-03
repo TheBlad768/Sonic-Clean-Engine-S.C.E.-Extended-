@@ -1,3 +1,7 @@
+; ---------------------------------------------------------------------------
+; Tails Mappings
+; ---------------------------------------------------------------------------
+
 Map_Tails:
 		dc.w word_1490AE-Map_Tails; 0
 		dc.w word_1490B0-Map_Tails; 1
@@ -250,6 +254,7 @@ Map_Tails:
 		dc.w word_14A066-Map_Tails; 248
 		dc.w word_14A06E-Map_Tails; 249
 		dc.w word_14A07C-Map_Tails; 250
+Map_Tails_end
 word_1490AE:	dc.w 0			; DATA XREF: ROM:00148EB8o
 word_1490B0:	dc.w 4			; DATA XREF: ROM:00148EB8o
 		dc.b	0,   9,	  0,   0, $FF, $E4

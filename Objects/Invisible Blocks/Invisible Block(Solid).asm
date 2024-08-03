@@ -43,11 +43,11 @@ locret_1ECA8:
 
 loc_1EBAA:
 		move.w	respawn_addr(a0),d0
-		beq.s	loc_1EBB6
+		beq.s	.delete
 		movea.w	d0,a2
 		bclr	#7,(a2)
 
-loc_1EBB6:
+.delete
 		jmp	(Delete_Current_Sprite).w
 ; ---------------------------------------------------------------------------
 

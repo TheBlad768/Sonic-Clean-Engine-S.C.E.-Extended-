@@ -12,23 +12,25 @@ Obj_Tails:
 		lea	(Dust_P2).w,a6
 
 	if GameDebug
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	Tails_Normal
 		tst.w	(Debug_placement_mode).w
 		beq.s	Tails_Normal
 
 		; debug only code
-		cmpi.b	#1,(Debug_placement_type).w
-		beq.s	loc_136A8
+		cmpi.b	#1,(Debug_placement_type).w							; are Tails in debug object placement mode?
+		beq.s	loc_136A8											; if so, skip to debug mode routine
+
+		; by this point, we're assuming you're in frame cycling mode
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_1368C
-		clr.w	(Debug_placement_mode).w
+		clr.w	(Debug_placement_mode).w							; leave debug mode
 
 loc_1368C:
-		addq.b	#1,mapping_frame(a0)
-		cmpi.b	#$FB,mapping_frame(a0)
+		addq.b	#1,mapping_frame(a0)									; next frame
+		cmpi.b	#((Map_Tails_end-Map_Tails)/2)-1,mapping_frame(a0)	; have we reached the end of Tails's frames?
 		blo.s		loc_1369E
-		clr.b	mapping_frame(a0)
+		clr.b	mapping_frame(a0)										; if so, reset to Tails's first frame
 
 loc_1369E:
 		bsr.w	Tails_Load_PLC
@@ -65,11 +67,11 @@ Tails_Init:													; Routine 0
 		move.w	#$100,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
 		move.b	#$84,render_flags(a0)
-		move.b	#1,character_id(a0)
+		move.b	#PlayerID_Tails,character_id(a0)
 		move.w	#$600,Max_speed_P2-Max_speed_P2(a4)
 		move.w	#$C,Acceleration_P2-Max_speed_P2(a4)
 		move.w	#$80,Deceleration_P2-Max_speed_P2(a4)
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_1375E
 		tst.b	(Last_star_post_hit).w
 		bne.s	Tails_Init_Continued
@@ -114,7 +116,7 @@ loc_137A4:
 
 Tails_Control:
 	if GameDebug
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_13808
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_13808
@@ -256,7 +258,7 @@ Tails_ChkInvin:												; checks if invincibility has expired and disables it
 		bne.s	Tails_ChkShoes
 		subq.b	#1,invincibility_timer(a0)						; reduce invincibility_timer only on every 8th frame
 		bne.s	Tails_ChkShoes								; if time is still left, branch
-		tst.b	(Level_end_flag).w								; don't change music if level is end
+		tst.b	(Level_results_flag).w								; don't change music if level is end
 		bne.s	Tails_RmvInvin
 		tst.b	(Boss_flag).w										; don't change music if in a boss fight
 		bne.s	Tails_RmvInvin
@@ -330,7 +332,7 @@ loc_13A10:
 		nop
 
 loc_13AF4:
-		clr.b	anim(a0)												; id_Walk
+		clr.b	anim(a0)													; id_Walk
 		clr.l	x_vel(a0)
 		clr.w	ground_vel(a0)
 		clr.b	status(a0)
@@ -499,11 +501,11 @@ loc_13CD2:
 		bne.s	loc_13D42
 		or.w	d0,d1
 		bne.s	loc_13D42
-		cmpi.b	#PlayerID_Death,(Player_1+routine).w
-		bhs.s	loc_13D42
+		cmpi.b	#PlayerID_Death,(Player_1+routine).w		; has player just died?
+		bhs.s	loc_13D42								; if yes, branch
 		move.w	#6,(Tails_CPU_routine).w
 		clr.b	object_control(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)									; id_Walk
 		clr.l	x_vel(a0)
 		clr.w	ground_vel(a0)
 		andi.b	#$40,status(a0)
@@ -648,7 +650,7 @@ loc_13E9C:
 		moveq	#$3F,d0
 		and.b	(Level_frame_counter+1).w,d0
 		bne.s	loc_13EB8
-		cmpi.b	#id_Duck,anim(a0)
+		cmpi.b	#AniIDSonAni_Duck,anim(a0)
 		beq.s	loc_13EB8
 		ori.w	#$7070,d1
 		move.b	#1,(Tails_CPU_auto_jump_flag).w
@@ -735,7 +737,7 @@ loc_13F74:
 		moveq	#$7F,d0
 		and.b	(Level_frame_counter+1).w,d0
 		beq.s	loc_13FA4
-		cmpi.b	#id_Duck,anim(a0)
+		cmpi.b	#AniIDSonAni_Duck,anim(a0)
 		bne.s	locret_13FBE
 		move.w	#bytes_to_word(btnDn+btnABC,btnDn+btnABC),(Ctrl_2_logical).w
 		rts
@@ -800,7 +802,7 @@ loc_14016:
 
 loc_14068:
 		move.w	top_solid_bit(a1),top_solid_bit(a0)						; set top_solid_bit and lrb_solid_bit
-		cmpi.w	#1,(Player_mode).w
+		cmpi.w	#PlayerModeID_Sonic,(Player_mode).w
 		bne.s	loc_14082
 		move.w	#$10,(Tails_CPU_routine).w
 
@@ -1113,7 +1115,7 @@ loc_14428:
 		bset	#Status_InAir,status(a1)
 		move.b	#1,jumping(a1)
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a1)	; set y_radius and x_radius
-		move.b	#id_Roll,anim(a1)
+		move.b	#AniIDSonAni_Roll,anim(a1)
 		bset	#Status_Roll,status(a1)
 		bclr	#Status_RollJump,status(a1)
 		rts
@@ -1242,10 +1244,10 @@ sub_1459E:
 		move.w	d0,y_pos(a1)
 
 		; set anim
-		move.w	#bytes_to_word(id_Carry,id_Walk),d0			; put Sonic in his falling animation
-		cmpi.b	#2,character_id(a1)							; is character Knuckles?
-		bne.s	.set											; if not, branch
-		move.w	#bytes_to_word($25,id_Walk),d0				; put Knuckles in his falling animation
+		move.w	#bytes_to_word(AniIDSonAni_Carry,AniIDSonAni_Walk),d0	; put Sonic in his falling animation
+		cmpi.b	#PlayerID_Knuckles,character_id(a1)						; is character Knuckles?
+		bne.s	.set														; if not, branch
+		move.w	#bytes_to_word(AniIDKnuxAni_Carry,AniIDSonAni_Walk),d0	; put Knuckles in his falling animation
 
 .set
 		move.w	d0,anim(a1)
@@ -1307,8 +1309,8 @@ loc_1469C:
 		asr.w	y_vel(a0)
 		asr.w	y_vel(a0)
 		beq.s	locret_14638
-		move.w	#bytes_to_word(1,0),anim(a6)	; splash animation, write 1 to anim and clear prev_anim
-		sfx	sfx_Splash,1						; splash sound
+		move.w	#bytes_to_word(1,0),anim(a6)		; splash animation, write 1 to anim and clear prev_anim
+		sfx	sfx_Splash,1							; splash sound
 ; ---------------------------------------------------------------------------
 
 loc_146BA:
@@ -1334,17 +1336,17 @@ loc_1470A:
 		asl.w	y_vel(a0)
 
 loc_14718:
-		cmpi.b	#id_Blank,anim(a0)			; is Tails in his 'blank' animation
-		beq.w	locret_14638					; if so, branch
+		cmpi.b	#AniIDSonAni_Blank,anim(a0)		; is Tails in his 'blank' animation
+		beq.w	locret_14638						; if so, branch
 		tst.w	y_vel(a0)
 		beq.w	locret_14638
-		move.w	#bytes_to_word(1,0),anim(a6)	; splash animation, write 1 to anim and clear prev_anim
+		move.w	#bytes_to_word(1,0),anim(a6)		; splash animation, write 1 to anim and clear prev_anim
 		cmpi.w	#-$1000,y_vel(a0)
 		bgt.s	loc_1473E
 		move.w	#-$1000,y_vel(a0)
 
 loc_1473E:
-		sfx	sfx_Splash,1						; splash sound
+		sfx	sfx_Splash,1							; splash sound
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -1367,7 +1369,31 @@ loc_14760:
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
-		bra.w	Player_SlopeRepel
+		bsr.w	Player_SlopeRepel
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_147B6
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_147A6
+		sub.w	d1,x_pos(a0)
+
+loc_147A6:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_147B2
+		add.w	d1,x_pos(a0)
+
+loc_147B2:
+		movem.l	(sp)+,a4-a6
+
+locret_147B6:
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Start of subroutine Tails_MdAir
@@ -1570,7 +1596,31 @@ loc_14956:
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
-		bra.w	Player_SlopeRepel
+		bsr.w	Player_SlopeRepel
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_149A0
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_14990
+		sub.w	d1,x_pos(a0)
+
+loc_14990:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_1499C
+		add.w	d1,x_pos(a0)
+
+loc_1499C:
+		movem.l	(sp)+,a4-a6
+
+locret_149A0:
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Start of subroutine Tails_MdJump
@@ -1643,7 +1693,7 @@ loc_14A16:
 		tst.w	ground_vel(a0)
 		bne.w	loc_14B14
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		btst	#Status_OnObj,status(a0)
 		beq.s	loc_14A6C
 		movea.w	interact(a0),a1
@@ -1684,7 +1734,7 @@ loc_14A92:
 		bset	#0,status(a0)
 
 loc_14A98:
-		move.b	#id_Balance,anim(a0)
+		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.s	loc_14B14
 ; ---------------------------------------------------------------------------
 
@@ -1693,7 +1743,7 @@ loc_14AA0:
 		bne.s	loc_14ADA
 		btst	#button_down,(Ctrl_2_logical).w
 		beq.s	loc_14ADA
-		move.b	#id_Duck,anim(a0)
+		move.b	#AniIDSonAni_Duck,anim(a0)
 		addq.b	#1,scroll_delay_counter(a0)
 		cmpi.b	#2*60,scroll_delay_counter(a0)
 		blo.s		loc_14B1A
@@ -1716,7 +1766,7 @@ loc_14AD0:
 loc_14ADA:
 		btst	#button_up,(Ctrl_2_logical).w
 		beq.s	loc_14B14
-		move.b	#id_LookUp,anim(a0)
+		move.b	#AniIDSonAni_LookUp,anim(a0)
 		addq.b	#1,scroll_delay_counter(a0)
 		cmpi.b	#2*60,scroll_delay_counter(a0)
 		blo.s		loc_14B1A
@@ -1803,7 +1853,7 @@ loc_14BA8:
 		move.b	angle(a0),d0
 		add.b	d1,d0
 		move.w	d0,-(sp)
-		bsr.w	CalcRoomInFront
+		jsr	(CalcRoomInFront).w
 		move.w	(sp)+,d0
 		tst.w	d1
 		bpl.s	locret_14BF8
@@ -1858,7 +1908,7 @@ loc_14C28:
 		bset	#0,status(a0)
 		bne.s	loc_14C3C
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Run,prev_anim(a0)
+		move.b	#AniIDSonAni_Run,prev_anim(a0)
 
 loc_14C3C:
 		sub.w	d5,d0
@@ -1893,12 +1943,12 @@ loc_14C62:
 		tst.b	flip_type(a0)
 		bmi.s	locret_14CAA
 		sfx	sfx_Skid
-		move.b	#id_Stop,anim(a0)
+		move.b	#AniIDSonAni_Stop,anim(a0)
 		bclr	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_14CAA							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; Dust
-		move.b	#$15,mapping_frame(a6)				; Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust_P2
+		move.b	#$15,mapping_frame(a6)				; Dust_P2
 
 locret_14CAA:
 		rts
@@ -1911,7 +1961,7 @@ sub_14CAC:
 		bclr	#0,status(a0)
 		beq.s	loc_14CC6
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Run,prev_anim(a0)
+		move.b	#AniIDSonAni_Run,prev_anim(a0)
 
 loc_14CC6:
 		add.w	d5,d0
@@ -1924,7 +1974,7 @@ loc_14CC6:
 
 loc_14CD4:
 		move.w	d0,ground_vel(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)	; AniIDSonAni_Walk
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1944,12 +1994,12 @@ loc_14CE8:
 		tst.b	flip_type(a0)
 		bmi.s	locret_14D30
 		sfx	sfx_Skid
-		move.b	#id_Stop,anim(a0)
+		move.b	#AniIDSonAni_Stop,anim(a0)
 		bset	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_14D30							; if less than 12, branch
-		move.l	#DashDust_CheckSkid,address(a6)		; Dust
-		move.b	#$15,mapping_frame(a6)				; Dust
+		move.l	#DashDust_CheckSkid,address(a6)		; Dust_P2
+		move.b	#$15,mapping_frame(a6)				; Dust_P2
 
 locret_14D30:
 		rts
@@ -2013,7 +2063,7 @@ loc_14DA2:
 		bclr	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		move.w	default_y_radius(a0),y_radius(a0)			; set y_radius and x_radius
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2071,7 +2121,7 @@ sub_14E32:
 
 loc_14E3A:
 		bset	#0,status(a0)
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -2090,7 +2140,7 @@ sub_14E56:
 		move.w	ground_vel(a0),d0
 		bmi.s	loc_14E6A
 		bclr	#0,status(a0)
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -2186,7 +2236,7 @@ Tails_Roll:
 ;		tst.w	move_lock(a0)							; Knuckles has problems with spin dash...
 ;		bne.s	locret_14FA8
 
-		cmpi.b	#id_Slide,anim(a0)						; alt idea...
+		cmpi.b	#AniIDSonAni_Slide,anim(a0)				; alt idea...
 		beq.s	locret_14FA8
 
 		tst.w	(Camera_H_scroll_shift).w
@@ -2207,14 +2257,14 @@ loc_14F94:
 ;		btst	#Status_OnObj,status(a0)			; is Tails stand on object?
 ;		bne.s	locret_14FA8					; if yes, branch
 
-		move.b	#id_Duck,anim(a0)
+		move.b	#AniIDSonAni_Duck,anim(a0)
 
 locret_14FA8:
 		rts
 ; ---------------------------------------------------------------------------
 
 loc_14FAA:
-		cmpi.b	#id_Duck,anim(a0)
+		cmpi.b	#AniIDSonAni_Duck,anim(a0)
 		bne.s	locret_14FA8
 		clr.b	anim(a0)			; id_Walk
 		rts
@@ -2229,7 +2279,7 @@ loc_14FBA:
 loc_14FC4:
 		bset	#Status_Roll,status(a0)
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		addq.w	#1,y_pos(a0)
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_14FEA
@@ -2291,7 +2341,7 @@ loc_1504C:
 		btst	#Status_Roll,status(a0)
 		bne.s	locret_150D0
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		bset	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		sub.b	default_y_radius(a0),d0
@@ -2345,7 +2395,7 @@ Tails_Test_For_Flight:
 		moveq	#btnABC,d0
 		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	locret_1511A
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_15156
 		bra.s	loc_1515C
 ; ---------------------------------------------------------------------------
@@ -2380,24 +2430,44 @@ loc_1518C:
 Tails_Spindash:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_1527C
-		cmpi.b	#id_Duck,anim(a0)
+		cmpi.b	#AniIDSonAni_Duck,anim(a0)
 		bne.s	locret_1527A
 		moveq	#btnABC,d0
 		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	locret_1527A
-		move.b	#id_SpinDash,anim(a0)
+		move.b	#AniIDSonAni_SpinDash,anim(a0)
 		sfx	sfx_SpinDash
 		addq.w	#4,sp
 		move.b	#1,spin_dash_flag(a0)
 		clr.w	spin_dash_counter(a0)
 		cmpi.b	#12,air_left(a0)							; check air remaining
 		blo.s		loc_15242								; if less than 12, branch
-		move.b	#2,anim(a6)								; Dust
+		move.b	#2,anim(a6)								; Dust_P2
 
 loc_15242:
 		bsr.w	Player_LevelBound
-		bra.w	Call_Player_AnglePos
-; ---------------------------------------------------------------------------
+		bsr.w	Call_Player_AnglePos
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_1527A
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_1526A
+		sub.w	d1,x_pos(a0)
+
+loc_1526A:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_15276
+		add.w	d1,x_pos(a0)
+
+loc_15276:
+		movem.l	(sp)+,a4-a6
 
 locret_1527A:
 		rts
@@ -2407,7 +2477,7 @@ loc_1527C:
 		btst	#button_down,(Ctrl_2_logical).w
 		bne.w	loc_15332
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		addq.w	#1,y_pos(a0)
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_152A8
@@ -2438,7 +2508,7 @@ loc_152EA:
 
 loc_152F8:
 		bset	#Status_Roll,status(a0)
-		clr.w	anim(a6)		; Dust
+		clr.w	anim(a6)		; Dust_P2
 		sfx	sfx_Dash
 		bra.s	loc_1537A
 ; ---------------------------------------------------------------------------
@@ -2478,7 +2548,7 @@ loc_1534A:
 		moveq	#btnABC,d0
 		and.b	(Ctrl_2_pressed_logical).w,d0
 		beq.s	loc_1537A
-		move.w	#bytes_to_word(id_SpinDash,id_Walk),anim(a0)
+		move.w	#bytes_to_word(AniIDSonAni_SpinDash,AniIDSonAni_Walk),anim(a0)
 		sfx	sfx_SpinDash
 		addi.w	#$200,spin_dash_counter(a0)
 		cmpi.w	#$800,spin_dash_counter(a0)
@@ -2507,7 +2577,31 @@ loc_15386:
 
 loc_15388:
 		bsr.w	Player_LevelBound
-		bra.w	Call_Player_AnglePos
+		bsr.w	Call_Player_AnglePos
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_153C0
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_153B0
+		sub.w	d1,x_pos(a0)
+
+loc_153B0:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_153BC
+		add.w	d1,x_pos(a0)
+
+loc_153BC:
+		movem.l	(sp)+,a4-a6
+
+locret_153C0:
+		rts
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -2790,7 +2884,7 @@ loc_1565E:
 
 		; without this check, AI Tails will ruin the player's
 		; combo when he touches the floor
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	.notp1
 		move.w	d0,(Chain_bonus_counter).w
 
@@ -2805,7 +2899,7 @@ loc_1565E:
 
 Tails_Hurt:
 	if GameDebug
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_156BE
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_156BE
@@ -2881,7 +2975,7 @@ loc_15742:
 		move.b	d0,anim(a0)				; id_Walk
 		move.b	d0,spin_dash_flag(a0)
 		move.w	#$100,priority(a0)
-		move.b	#2,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 		move.b	#2*60,invulnerability_timer(a0)
 
 locret_15786:
@@ -2895,7 +2989,7 @@ loc_15788:
 
 Tails_Death:
 	if GameDebug
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_157B0
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_157B0
@@ -2941,7 +3035,7 @@ loc_157F4:
 		bne.s	loc_15806
 		tst.w	(V_scroll_amount_P2).w
 		bne.s	loc_15806
-		move.b	#2,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 
 loc_15806:
 		bsr.s	sub_15842
@@ -2950,7 +3044,7 @@ loc_15806:
 
 Tails_Drown:
 	if GameDebug
-		cmpi.w	#2,(Player_mode).w
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_15832
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_15832
@@ -3109,15 +3203,15 @@ loc_15960:
 		move.b	d0,d3
 		add.b	d3,d3
 		add.b	d3,d3
-		lea	(AniTails00).l,a1
+		lea	(TailsAni_Walk).l,a1 		; use walking animation
 		cmpi.w	#$600,d2
 		blo.s		loc_1598A
-		lea	(AniTails01).l,a1
+		lea	(TailsAni_Run).l,a1 		; use running animation
 		move.b	d0,d3
 		add.b	d3,d3
 		cmpi.w	#$700,d2
 		blo.s		loc_1598A
-		lea	(AniTails1F).l,a1
+		lea	(TailsAni_Run2).l,a1 		; use running 2 animation
 		move.b	d0,d3
 
 loc_1598A:
@@ -3163,10 +3257,10 @@ loc_159C8:
 
 loc_159EE:
 		add.w	(Camera_H_scroll_shift).w,d2
-		lea	(AniTails03).l,a1
+		lea	(TailsAni_Roll2).l,a1 		; use roll 2 animation
 		cmpi.w	#$600,d2
 		bhs.s	loc_15A00
-		lea	(AniTails02).l,a1
+		lea	(TailsAni_Roll).l,a1 		; use roll animation
 
 loc_15A00:
 		neg.w	d2
@@ -3195,7 +3289,7 @@ loc_15A24:
 loc_15A2C:
 		lsr.w	#6,d2
 		move.b	d2,anim_frame_timer(a0)
-		lea	(AniTails04).l,a1
+		lea	(TailsAni_Push).l,a1		; use push animation
 		bra.w	sub_158B0
 ; ---------------------------------------------------------------------------
 
@@ -3255,7 +3349,7 @@ Tails_Tail_Load_PLC:
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	loc_15A92.return
-		move.w	#tiles_to_bytes(ArtTile_Player_2_Tail),d4			; normal
+		move.w	#tiles_to_bytes(ArtTile_Player_2_Tail),d4
 		move.l	#dmaSource(ArtUnc_Tails_Tail),d6
 		bra.s	Tails_Load_PLC2.loop
 
@@ -3275,9 +3369,9 @@ Tails_Load_PLC2:
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	.return
-		move.w	#tiles_to_bytes(ArtTile_Player_2),d4		; normal
+		move.w	#tiles_to_bytes(ArtTile_Player_2),d4
 		move.l	#dmaSource(ArtUnc_Tails),d6
-		cmpi.w	#$D1*2,d0								; mapping frame * 2
+		cmpi.w	#$D1*2,d0										; mapping frame * 2
 		blo.s		.loop
 		move.l	#dmaSource(ArtUnc_Tails_Extra),d6
 

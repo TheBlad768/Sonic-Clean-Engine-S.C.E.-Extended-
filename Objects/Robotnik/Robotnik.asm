@@ -23,15 +23,15 @@ Obj_RobotnikHead3Init:
 		lea	ObjDat_RobotnikHead(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#AniRaw_RobotnikHead,$30(a0)
-		cmpi.b	#2,(Player_1+character_id).w
+		cmpi.b	#PlayerID_Knuckles,(Player_1+character_id).w
 		bne.s	loc_67C76
 		bsr.w	sub_67B14
 
 loc_67C76:
 		movea.w	parent3(a0),a1
-		btst	#7,art_tile(a1)
+		btst	#high_priority_bit,art_tile(a1)
 		beq.s	+
-		bset	#7,art_tile(a0)
+		bset	#high_priority_bit,art_tile(a0)
 +		rts
 ; ---------------------------------------------------------------------------
 
@@ -51,8 +51,8 @@ Obj_RobotnikHead3Main:
 ; ---------------------------------------------------------------------------
 +		move.b	#4,routine(a0)
 		move.b	#5,mapping_frame(a0)
-		cmpi.w	#3,(Player_mode).w
-		blo.s		Obj_RobotnikHeadEnd
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
+		bne.s	Obj_RobotnikHeadEnd
 		move.b	#3,mapping_frame(a0)
 
 Obj_RobotnikHeadEnd:
@@ -69,7 +69,7 @@ Obj_RobotnikHead3End:
 
 Obj_RobotnikHead3_Laugh:
 		lea	AniRaw_RobotnikHead_Laugh(pc),a1
-		cmpi.b	#2,(Player_1+character_id).w
+		cmpi.b	#PlayerID_Knuckles,(Player_1+character_id).w
 		bne.s	.skip
 		lea	AniRaw_EggRoboHead_Laugh(pc),a1
 
@@ -90,7 +90,7 @@ Obj_RobotnikHead4:
 		move.w	RobotnikHead4_Index(pc,d0.w),d1
 		jsr	RobotnikHead4_Index(pc,d1.w)
 		movea.w	parent3(a0),a1
-		btst	#5,$38(a1)
+		btst	#5,objoff_38(a1)
 		bne.s	loc_67CFE
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
@@ -117,7 +117,7 @@ Obj_RobotnikShipFlame:
 
 RobotnikShipFlame_Main:
 		movea.w	parent3(a0),a1
-		btst	#4,$38(a1)
+		btst	#4,objoff_38(a1)
 		bne.s	loc_67CFE
 		jsr	(Refresh_ChildPositionAdjusted).w
 		btst	#0,(V_int_run_count+3).w
@@ -133,9 +133,9 @@ sub_67B14:
 
 loc_67B1C:
 		move.l	#AniRaw_EggRoboHead,$30(a0)
-		lea	(ArtKosM_EggRoboHead).l,a1
+		lea	(ArtKosPM_EggRoboHead).l,a1
 		move.w	#tiles_to_bytes($52E),d2
-		jmp	(Queue_Kos_Module).w
+		jmp	(Queue_KosPlus_Module).w
 
 ; ---------------------------------------------------------------------------
 ; Robotnik ship pieces
@@ -155,11 +155,11 @@ Obj_RobotnikShipPieces:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_RobotnikShip:			subObjData Map_RobotnikShip, $52E, $200, 64/2, 64/2, $C, $F
-ObjDat_RobotnikShip_Glass:	subObjData Map_RobotnikShip, $52E, $200, 64/2, 64/2, 7, $F
-ObjDat_RobotnikHead:		subObjData Map_RobotnikShip, $52E, $280, 32/2, 16/2, 0, 0
+ObjDat_RobotnikShip:			subObjData Map_RobotnikShip, $52E, 0, 0, $200, 64/2, 64/2, $C, $F
+ObjDat_RobotnikShip_Glass:	subObjData Map_RobotnikShip, $52E, 0, 0, $200, 64/2, 64/2, 7, $F
+ObjDat_RobotnikHead:		subObjData Map_RobotnikShip, $52E, 0, 0, $280, 32/2, 16/2, 0, 0
 ObjDat2_RoboShipFlame:		subObjData3 $280, 16/2, 8/2, 8, 0
-ObjDat_RobotnikShipPieces:	subObjData Map_RobotnikShipPieces, $852E, 0, 64/2, 64/2, 0, 0
+ObjDat_RobotnikShipPieces:	subObjData Map_RobotnikShipPieces, $52E, 0, 1, 0, 64/2, 64/2, 0, 0
 
 AniRaw_RobotnikHead:
 		dc.b 5, 0, 1, arfEnd
@@ -195,5 +195,4 @@ AngleLookup_3:	binclude "Objects/Robotnik/Object Data/AngleLookup3.bin"
 
 		include "Objects/Robotnik/Object Data/Map - Robotnik Ship.asm"
 		include "Objects/Robotnik/Object Data/Map - Robotnik Ship Pieces.asm"
-		include "Objects/Robotnik/Object Data/Map - Eggrobo.asm"
 		include "Objects/Robotnik/Object Data/Map - Egg Robo Head.asm"

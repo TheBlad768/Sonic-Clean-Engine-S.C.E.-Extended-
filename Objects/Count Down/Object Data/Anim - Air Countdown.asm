@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Animation script - Air countdown
+; Animation script - air countdown
 ; ---------------------------------------------------------------------------
 
 Ani_AirCountdown: offsetTable

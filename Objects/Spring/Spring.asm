@@ -15,16 +15,31 @@ Obj_Spring:
 		move.b	subtype(a0),d0
 		lsr.w	#3,d0
 		andi.w	#$E,d0
-		move.w	Spring_Index(pc,d0.w),d0
-		jmp	Spring_Index(pc,d0.w)
+		jmp	.index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
-Spring_Index: offsetTable
-		offsetTableEntry.w Spring_Up			; 0
-		offsetTableEntry.w Spring_Horizontal	; 2
-		offsetTableEntry.w Spring_Down		; 4
-		offsetTableEntry.w Spring_UpDiag		; 6
-		offsetTableEntry.w Spring_DownDiag	; 8
+.index
+		bra.s	Spring_Up												; 0
+		bra.s	Spring_Horizontal											; 2
+		bra.s	Spring_Down												; 4
+		bra.s	Spring_UpDiag											; 6
+; ---------------------------------------------------------------------------
+
+		; down diag														; 8
+		move.b	#4,anim(a0)
+		move.b	#$A,mapping_frame(a0)
+		move.w	#make_art_tile($468,0,0),art_tile(a0)						; set diagonal
+		bset	#1,status(a0)
+		move.l	#Obj_Spring_DownDiag,address(a0)
+		bra.s	Spring_Common
+; ---------------------------------------------------------------------------
+
+Spring_UpDiag:
+		move.b	#4,anim(a0)
+		move.b	#7,mapping_frame(a0)
+		move.w	#make_art_tile($468,0,0),art_tile(a0)						; set diagonal
+		move.l	#Obj_Spring_UpDiag,address(a0)
+		bra.s	Spring_Common
 ; ---------------------------------------------------------------------------
 
 Spring_Horizontal:
@@ -44,23 +59,6 @@ Spring_Down:
 loc_22DFC:
 		move.b	#6,mapping_frame(a0)
 		move.l	#Obj_Spring_Down,address(a0)
-		bra.s	Spring_Common
-; ---------------------------------------------------------------------------
-
-Spring_UpDiag:
-		move.b	#4,anim(a0)
-		move.b	#7,mapping_frame(a0)
-		move.w	#$468,art_tile(a0)										; set diagonal
-		move.l	#Obj_Spring_UpDiag,address(a0)
-		bra.s	Spring_Common
-; ---------------------------------------------------------------------------
-
-Spring_DownDiag:
-		move.b	#4,anim(a0)
-		move.b	#$A,mapping_frame(a0)
-		move.w	#$468,art_tile(a0)										; set diagonal
-		bset	#1,status(a0)
-		move.l	#Obj_Spring_DownDiag,address(a0)
 		bra.s	Spring_Common
 ; ---------------------------------------------------------------------------
 
@@ -160,7 +158,7 @@ sub_22F98:
 		bclr	#Status_OnObj,status(a1)
 		clr.b	jumping(a1)
 		clr.b	spin_dash_flag(a1)
-		move.b	#id_Spring,anim(a1)
+		move.b	#AniIDSonAni_Spring,anim(a1)
 		move.b	#PlayerID_Control,routine(a1)
 		move.b	subtype(a0),d0
 		btst	#0,d0
@@ -184,14 +182,12 @@ loc_23020:
 		andi.b	#$C,d0
 		cmpi.b	#4,d0
 		bne.s	loc_23036
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 
 loc_23036:
 		cmpi.b	#8,d0
 		bne.s	loc_23048
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_23048:
 		sfx	sfx_Spring,1
@@ -293,14 +289,12 @@ loc_23224:
 		andi.b	#$C,d0
 		cmpi.b	#4,d0
 		bne.s	loc_2323A
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 
 loc_2323A:
 		cmpi.b	#8,d0
 		bne.s	loc_2324C
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_2324C:
 		bclr	#p1_pushing_bit,status(a0)
@@ -330,8 +324,8 @@ loc_2328E:
 		lea	(Player_1).w,a1
 		tst.b	object_control(a1)
 		bmi.s	loc_232E2
-		cmpi.b	#PlayerID_Death,routine(a1)
-		bhs.s	loc_232E2
+		cmpi.b	#PlayerID_Death,routine(a1)								; has player just died?
+		bhs.s	loc_232E2												; if yes, branch
 		tst.w	(Debug_placement_mode).w
 		bne.s	loc_232E2
 		btst	#Status_InAir,status(a1)
@@ -362,8 +356,8 @@ loc_232E2:
 		lea	(Player_2).w,a1
 		tst.b	object_control(a1)
 		bmi.s	locret_23324
-		cmpi.b	#PlayerID_Death,routine(a1)
-		bhs.s	locret_23324
+		cmpi.b	#PlayerID_Death,routine(a1)								; has player just died?
+		bhs.s	locret_23324												; if yes, branch
 		btst	#Status_InAir,status(a1)
 		bne.s	locret_23324
 		move.w	ground_vel(a1),d4
@@ -458,14 +452,12 @@ loc_23444:
 		andi.b	#$C,d0
 		cmpi.b	#4,d0
 		bne.s	loc_2345A
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 
 loc_2345A:
 		cmpi.b	#8,d0
 		bne.s	loc_2346C
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_2346C:
 		bset	#Status_InAir,status(a1)
@@ -546,7 +538,7 @@ loc_23542:
 		bset	#Status_InAir,status(a1)
 		bclr	#Status_OnObj,status(a1)
 		clr.b	jumping(a1)
-		move.b	#id_Spring,anim(a1)
+		move.b	#AniIDSonAni_Spring,anim(a1)
 		move.b	#PlayerID_Control,routine(a1)
 		move.b	subtype(a0),d0
 		btst	#0,d0
@@ -570,14 +562,12 @@ loc_235A2:
 		andi.b	#$C,d0
 		cmpi.b	#4,d0
 		bne.s	loc_235B8
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 
 loc_235B8:
 		cmpi.b	#8,d0
 		bne.s	loc_235CA
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_235CA:
 		sfx	sfx_Spring,1
@@ -659,14 +649,12 @@ loc_236BA:
 		andi.b	#$C,d0
 		cmpi.b	#4,d0
 		bne.s	loc_236D0
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 
 loc_236D0:
 		cmpi.b	#8,d0
 		bne.s	loc_236E2
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_236E2:
 		sfx	sfx_Spring,1

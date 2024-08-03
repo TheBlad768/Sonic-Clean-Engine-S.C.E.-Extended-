@@ -12,7 +12,7 @@ ArtUnc_Tails_Extra:					binclude "Objects/Tails/Uncompressed Art/Tails Extra.unc
 	even
 ArtUnc_Tails_Tail:					binclude "Objects/Tails/Uncompressed Art/Tails tails.unc"
 	even
-ArtUnc_Knux:						binclude "Objects/Knuckles/Uncompressed Art/Knuckles.unc"
+ArtUnc_Knuckles:						binclude "Objects/Knuckles/Uncompressed Art/Knuckles.unc"
 	even
 ArtUnc_DashDust:					binclude "Objects/Spin Dust/Uncompressed Art/Dash Dust.unc"
 	even

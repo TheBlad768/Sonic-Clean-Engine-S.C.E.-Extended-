@@ -112,9 +112,9 @@ Obj_MonitorFallUpsideDown:
 SolidObject_Monitor_SonicKnux:
 		btst	d6,status(a0)											; is Sonic/Knux standing on the monitor?
 		bne.s	Monitor_ChkOverEdge								; if so, branch
-		cmpi.b	#id_Roll,anim(a1)									; is Sonic/Knux in their rolling animation?
+		cmpi.b	#AniIDSonAni_Roll,anim(a1)						; is Sonic/Knux in their rolling animation?
 		beq.s	.return											; if so, return
-		cmpi.b	#2,character_id(a1)								; is character Knuckles?
+		cmpi.b	#PlayerID_Knuckles,character_id(a1)				; is character Knuckles?
 		bne.s	.solid											; if not, branch
 		cmpi.b	#1,double_jump_flag(a1)							; is Knuckles gliding?
 		beq.s	.return											; if so, return
@@ -248,14 +248,13 @@ Obj_MonitorContents:
 		neg.w	y_vel(a0)
 
 .notflipy
-		moveq	#0,d0
-		move.b	anim(a0),d0
-		addq.b	#1,d0
+		moveq	#1,d0
+		add.b	anim(a0),d0
 		move.b	d0,mapping_frame(a0)
 		add.b	d0,d0
 		lea	Map_Monitor(pc),a1
 		adda.w	(a1,d0.w),a1
-		addq.w	#2,a1
+		addq.w	#2,a1											; skip the number of sprite tiles
 		move.l	a1,mappings(a0)
 
 .main
@@ -279,17 +278,15 @@ sub_1D820:
 		bne.s	loc_1D83C
 		tst.w	y_vel(a0)
 		bpl.s	loc_1D850
-		jsr	(MoveSprite2).w
-		addi.w	#$18,y_vel(a0)
-		rts
+		moveq	#$18,d1
+		jmp	(MoveSprite_CustomGravity).w
 ; ---------------------------------------------------------------------------
 
 loc_1D83C:
 		tst.w	y_vel(a0)
 		bmi.s	loc_1D850
-		jsr	(MoveSprite2).w
-		subi.w	#$18,y_vel(a0)
-		rts
+		moveq	#-$18,d1
+		jmp	(MoveSprite_CustomGravity).w
 ; ---------------------------------------------------------------------------
 
 loc_1D850:
@@ -301,24 +298,28 @@ loc_1D850:
 		moveq	#0,d0
 		move.b	anim(a0),d0
 		add.w	d0,d0
-		move.w	MonitorContents_Index(pc,d0.w),d0
-		jmp	MonitorContents_Index(pc,d0.w)
+		add.w	d0,d0
+		jmp	.index(pc,d0.w)
 ; ---------------------------------------------------------------------------
 
-MonitorContents_Index: offsetTable
-		offsetTableEntry.w Monitor_Give_Eggman			; 0
-		offsetTableEntry.w Monitor_Give_1up				; 2
-		offsetTableEntry.w Monitor_Give_Eggman			; 4
-		offsetTableEntry.w Monitor_Give_Rings				; 6
-		offsetTableEntry.w Monitor_Give_SpeedShoes			; 8
-		offsetTableEntry.w Monitor_Give_Fire_Shield			; A
-		offsetTableEntry.w Monitor_Give_Lightning_Shield	; C
-		offsetTableEntry.w Monitor_Give_Bubble_Shield		; E
-		offsetTableEntry.w Monitor_Give_Invincibility			; 10
-		offsetTableEntry.w Monitor_Give_Eggman			; 12
+.index
+		bra.s	Monitor_Give_Eggman			; 0
+		rts		; nop
+		bra.s	Monitor_Give_1up				; 2
+		rts		; nop
+		bra.s	Monitor_Give_Eggman			; 4
+		rts		; nop
+		bra.s	Monitor_Give_Rings				; 6
+		rts		; nop
+		bra.s	Monitor_Give_SpeedShoes			; 8
+		rts		; nop
+		bra.w	Monitor_Give_Fire_Shield			; A
+		bra.w	Monitor_Give_Lightning_Shield	; C
+		bra.w	Monitor_Give_Bubble_Shield		; E
+		bra.w	Monitor_Give_Invincibility			; 10
 ; ---------------------------------------------------------------------------
 
-Monitor_Give_Eggman:
+Monitor_Give_Eggman:							; 12
 		jmp	Touch_ChkHurt3(pc)
 ; ---------------------------------------------------------------------------
 
@@ -326,6 +327,23 @@ Monitor_Give_1up:
 		addq.b	#1,(Life_count).w
 		addq.b	#1,(Update_HUD_life_count).w
 		music	mus_ExtraLife,1									; play the 1up song
+; ---------------------------------------------------------------------------
+
+Monitor_Give_SpeedShoes:
+		bset	#Status_SpeedShoes,status_secondary(a1)
+		move.b	#150,speed_shoes_timer(a1)
+
+		; set player speed
+		lea	(Max_speed).w,a4
+		cmpi.b	#PlayerID_Tails,character_id(a1)					; is player Tails?
+		bne.s	.sets												; if not, branch
+		lea	(Max_speed_P2).w,a4
+
+.sets
+		move.w	#$C00,Max_speed-Max_speed(a4)					; set max speed
+		move.w	#$18,Acceleration-Max_speed(a4)					; set acceleration
+		move.w	#$80,Deceleration-Max_speed(a4)					; set deceleration
+		music	mus_Speedup,1									; speed up the music
 ; ---------------------------------------------------------------------------
 
 Monitor_Give_Rings:
@@ -351,23 +369,6 @@ loc_1D8DA:
 
 loc_1D8F6:
 		sfx	sfx_RingRight,1										; play ring sound
-; ---------------------------------------------------------------------------
-
-Monitor_Give_SpeedShoes:
-		bset	#Status_SpeedShoes,status_secondary(a1)
-		move.b	#150,speed_shoes_timer(a1)
-
-		; set player speed
-		lea	(Max_speed).w,a4
-		cmpi.b	#1,character_id(a1)								; is player Tails?
-		bne.s	.sets												; if not, branch
-		lea	(Max_speed_P2).w,a4
-
-.sets
-		move.w	#$C00,Max_speed-Max_speed(a4)					; set max speed
-		move.w	#$18,Acceleration-Max_speed(a4)					; set acceleration
-		move.w	#$80,Deceleration-Max_speed(a4)					; set deceleration
-		music	mus_Speedup,1									; speed up the music
 ; ---------------------------------------------------------------------------
 
 Monitor_Give_Fire_Shield:
@@ -400,7 +401,7 @@ Monitor_Give_Bubble_Shield:
 Monitor_Give_Invincibility:
 		bset	#Status_Invincible,status_secondary(a1)
 		move.b	#150,invincibility_timer(a1)
-		tst.b	(Level_end_flag).w
+		tst.b	(Level_results_flag).w
 		bne.s	.skipmusic
 		tst.b	(Boss_flag).w
 		bne.s	.skipmusic

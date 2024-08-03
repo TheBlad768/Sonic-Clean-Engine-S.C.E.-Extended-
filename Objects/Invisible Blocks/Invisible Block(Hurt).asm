@@ -106,7 +106,7 @@ loc_1F4C4:
 		andi.b	#p1_touch_side,d0
 		beq.s	loc_1F4F8
 		lea	(Player_1).w,a1
-		bsr.w	sub_1F58C
+		bsr.s	sub_1F58C
 
 loc_1F4F8:
 		andi.b	#p2_touch_side,d6

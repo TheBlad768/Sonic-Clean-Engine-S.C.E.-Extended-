@@ -5,7 +5,7 @@ Obj_Knuckles:
 
 		; load some addresses into registers
 		; this is done to allow some subroutines to be
-		; shared with Tails/Knuckles.
+		; shared with Tails/Sonic.
 
 		lea	(Max_speed).w,a4
 		lea	(Distance_from_top).w,a5
@@ -16,17 +16,19 @@ Obj_Knuckles:
 		beq.s	Knuckles_Normal
 
 		; debug only code
-		cmpi.b	#1,(Debug_placement_type).w
-		beq.s	loc_16488
+		cmpi.b	#1,(Debug_placement_type).w									; are Knuckles in debug object placement mode?
+		beq.s	loc_16488													; if so, skip to debug mode routine
+
+		; by this point, we're assuming you're in frame cycling mode
 		btst	#button_B,(Ctrl_1_pressed).w
 		beq.s	loc_1646C
-		clr.w	(Debug_placement_mode).w
+		clr.w	(Debug_placement_mode).w									; leave debug mode
 
 loc_1646C:
-		addq.b	#1,mapping_frame(a0)
-		cmpi.b	#$FB,mapping_frame(a0)
+		addq.b	#1,mapping_frame(a0)											; next frame
+		cmpi.b	#((Map_Knuckles_end-Map_Knuckles)/2)-1,mapping_frame(a0)		; have we reached the end of Knuckles's frames?
 		blo.s		loc_1647E
-		clr.b	mapping_frame(a0)
+		clr.b	mapping_frame(a0)												; if so, reset to Knuckles's first frame
 
 loc_1647E:
 		bsr.w	Knuckles_Load_PLC
@@ -63,7 +65,7 @@ Knuckles_Init:												; Routine 0
 		move.w	#$100,priority(a0)
 		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
 		move.b	#4,render_flags(a0)
-		move.b	#2,character_id(a0)
+		move.b	#PlayerID_Knuckles,character_id(a0)
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
 		move.w	#$80,Deceleration-Max_speed(a4)
@@ -148,7 +150,7 @@ loc_165D8:
 		move.b	(Secondary_Angle).w,tilt(a0)
 		tst.b	(WindTunnel_flag).w
 		beq.s	.anim
-		tst.b	anim(a0)							; id_Walk
+		tst.b	anim(a0)							; AniIDKnuxAni_Walk
 		bne.s	.anim
 		move.b	prev_anim(a0),anim(a0)
 
@@ -205,7 +207,7 @@ Knux_ChkInvin:										; checks if invincibility has expired and disables it if
 		bne.s	Knux_ChkShoes
 		subq.b	#1,invincibility_timer(a0)				; reduce invincibility_timer only on every 8th frame
 		bne.s	Knux_ChkShoes						; if time is still left, branch
-		tst.b	(Level_end_flag).w						; don't change music if level is end
+		tst.b	(Level_results_flag).w						; don't change music if level is end
 		bne.s	Knux_RmvInvin
 		tst.b	(Boss_flag).w								; don't change music if in a boss fight
 		bne.s	Knux_RmvInvin
@@ -286,7 +288,7 @@ loc_1676E:
 		asl.w	y_vel(a0)
 
 loc_167C4:
-		cmpi.b	#id_Blank,anim(a0)				; is Knuckles in his 'blank' animation
+		cmpi.b	#AniIDSonAni_Blank,anim(a0)		; is Knuckles in his 'blank' animation
 		beq.w	locret_166F4						; if so, branch
 		tst.w	y_vel(a0)
 		beq.w	locret_166F4
@@ -309,7 +311,31 @@ Knux_MdNormal:
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
-		bra.w	Player_SlopeRepel
+		bsr.w	Player_SlopeRepel
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_1684A
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_1683A
+		sub.w	d1,x_pos(a0)
+
+loc_1683A:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_16846
+		add.w	d1,x_pos(a0)
+
+loc_16846:
+		movem.l	(sp)+,a4-a6
+
+locret_1684A:
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Start of subroutine Knux_MdAir
@@ -508,7 +534,7 @@ Knuckles_Gliding_HitWall:
 		cmpi.w	#12,d1
 		bhs.s	.fail
 		sub.w	d1,y_pos(a0)
-		bra.w	.success
+		bra.s	.success
 ; ---------------------------------------------------------------------------
 ; loc_16A58:
 .checkFloorRight:
@@ -801,7 +827,7 @@ Knuckles_Wall_Climb:
 		clr.l	x_vel(a0)
 		clr.w	ground_vel(a0)
 		bsr.w	Knux_TouchFloor
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 ; loc_16CFC:
@@ -859,7 +885,7 @@ Knuckles_Wall_Climb:
 		clr.l	x_vel(a0)
 		clr.w	ground_vel(a0)
 		bsr.w	Knux_TouchFloor
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 ; loc_16D96:
@@ -1005,7 +1031,7 @@ Knuckles_Wall_Climb:
 		bset	#Status_InAir,status(a0)
 		move.b	#1,jumping(a0)
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		bset	#Status_Roll,status(a0)
 		clr.b	double_jump_flag(a0)
 
@@ -1026,7 +1052,7 @@ Knuckles_ClimbUp:
 ; loc_16ED2:
 Knuckles_LetGoOfWall:
 		move.b	#2,double_jump_flag(a0)
-		move.w	#$2121,anim(a0)
+		move.w	#bytes_to_word($21,$21),anim(a0)
 		move.b	#$CB,mapping_frame(a0)
 		move.b	#7,anim_frame_timer(a0)
 		move.b	#1,anim_frame(a0)
@@ -1087,13 +1113,13 @@ GetDistanceFromWall:
 
 ;.facingRight:
 		move.w	x_pos(a0),d3
-		bra.w	sub_FAA4
+		jmp	(sub_FAA4).w
 ; ---------------------------------------------------------------------------
 ; loc_16F62:
 .facingLeft:
 		move.w	x_pos(a0),d3
 		subq.w	#1,d3
-		bra.w	sub_FDC8
+		jmp	(sub_FDC8).w
 ; ---------------------------------------------------------------------------
 
 Knuckles_Climb_Ledge:
@@ -1115,7 +1141,7 @@ Knuckles_Climb_Ledge:
 
 .notflipx
 		bsr.w	Knux_TouchFloor
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 
 .return
 		rts
@@ -1125,7 +1151,7 @@ Knuckles_Climb_Ledge:
 Knuckles_Set_Gliding_Animation:
 		move.b	#$20,anim_frame_timer(a0)
 		clr.b	anim_frame(a0)
-		move.w	#$2020,anim(a0)
+		move.w	#bytes_to_word($20,$20),anim(a0)
 		bclr	#Status_Push,status(a0)
 		bclr	#Status_Facing,status(a0)
 
@@ -1286,7 +1312,31 @@ loc_170CC:
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Call_Player_AnglePos
-		bra.w	Player_SlopeRepel
+		bsr.w	Player_SlopeRepel
+
+		; check flag
+		tst.b	(Background_collision_flag).w
+		beq.s	locret_17116
+		jsr	(sub_F846).w
+		tst.w	d1
+		bmi.w	Kill_Character
+		movem.l	a4-a6,-(sp)
+		jsr	(CheckLeftWallDist).w
+		tst.w	d1
+		bpl.s	loc_17106
+		sub.w	d1,x_pos(a0)
+
+loc_17106:
+		jsr	(CheckRightWallDist).w
+		tst.w	d1
+		bpl.s	loc_17112
+		add.w	d1,x_pos(a0)
+
+loc_17112:
+		movem.l	(sp)+,a4-a6
+
+locret_17116:
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Start of subroutine Knux_MdJump
@@ -1349,7 +1399,7 @@ loc_17174:
 		tst.w	ground_vel(a0)
 		bne.w	loc_1731C
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		btst	#Status_OnObj,status(a0)
 		beq.w	loc_1722C
 		movea.w	interact(a0),a1
@@ -1372,7 +1422,7 @@ loc_17174:
 loc_171D0:
 		btst	#0,status(a0)
 		bne.s	loc_171E2
-		move.b	#id_Balance,anim(a0)
+		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1380,14 +1430,14 @@ loc_171E2:
 		bclr	#0,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
-		move.w	#bytes_to_word(id_Balance,id_Balance),anim(a0)
+		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
 loc_171FE:
 		btst	#0,status(a0)
 		beq.s	loc_17210
-		move.b	#id_Balance,anim(a0)
+		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1395,7 +1445,7 @@ loc_17210:
 		bset	#0,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
-		move.w	#bytes_to_word(id_Balance,id_Balance),anim(a0)
+		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1408,7 +1458,7 @@ loc_1722C:
 		bne.s	loc_17272
 		btst	#0,status(a0)
 		bne.s	loc_17256
-		move.b	#id_Balance,anim(a0)
+		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1416,7 +1466,7 @@ loc_17256:
 		bclr	#0,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
-		move.w	#bytes_to_word(id_Balance,id_Balance),anim(a0)
+		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1425,7 +1475,7 @@ loc_17272:
 		bne.s	loc_172A8
 		btst	#0,status(a0)
 		beq.s	loc_1728C
-		move.b	#id_Balance,anim(a0)
+		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1433,7 +1483,7 @@ loc_1728C:
 		bset	#0,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
-		move.w	#bytes_to_word(id_Balance,id_Balance),anim(a0)
+		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
 		bra.s	loc_1731C
 ; ---------------------------------------------------------------------------
 
@@ -1442,7 +1492,7 @@ loc_172A8:
 		bne.s	loc_172E2
 		btst	#button_down,(Ctrl_1_logical).w
 		beq.s	loc_172E2
-		move.b	#id_Duck,anim(a0)
+		move.b	#AniIDSonAni_Duck,anim(a0)
 		addq.b	#1,scroll_delay_counter(a0)
 		cmpi.b	#2*60,scroll_delay_counter(a0)
 		blo.s		loc_17322
@@ -1465,7 +1515,7 @@ loc_172D8:
 loc_172E2:
 		btst	#button_up,(Ctrl_1_logical).w
 		beq.s	loc_1731C
-		move.b	#id_LookUp,anim(a0)
+		move.b	#AniIDSonAni_LookUp,anim(a0)
 		addq.b	#1,scroll_delay_counter(a0)
 		cmpi.b	#2*60,scroll_delay_counter(a0)
 		blo.s		loc_17322
@@ -1552,7 +1602,7 @@ loc_173B0:
 		move.b	angle(a0),d0
 		add.b	d1,d0
 		move.w	d0,-(sp)
-		bsr.w	CalcRoomInFront
+		jsr	(CalcRoomInFront).w
 		move.w	(sp)+,d0
 		tst.w	d1
 		bpl.s	locret_17400
@@ -1605,7 +1655,7 @@ loc_17430:
 		bset	#0,status(a0)
 		bne.s	loc_17444
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Run,prev_anim(a0)
+		move.b	#AniIDSonAni_Run,prev_anim(a0)
 
 loc_17444:
 		sub.w	d5,d0
@@ -1620,7 +1670,7 @@ loc_17444:
 
 loc_17456:
 		move.w	d0,ground_vel(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)	; AniIDKnuxAni_Walk
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1640,7 +1690,7 @@ loc_1746A:
 		tst.b	flip_type(a0)
 		bmi.s	locret_174B2
 		sfx	sfx_Skid
-		move.b	#id_Stop,anim(a0)
+		move.b	#AniIDSonAni_Stop,anim(a0)
 		bclr	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_174B2							; if less than 12, branch
@@ -1658,7 +1708,7 @@ sub_174B4:
 		bclr	#0,status(a0)
 		beq.s	loc_174CE
 		bclr	#Status_Push,status(a0)
-		move.b	#id_Run,prev_anim(a0)
+		move.b	#AniIDSonAni_Run,prev_anim(a0)
 
 loc_174CE:
 		add.w	d5,d0
@@ -1671,7 +1721,7 @@ loc_174CE:
 
 loc_174DC:
 		move.w	d0,ground_vel(a0)
-		clr.b	anim(a0)	; id_Walk
+		clr.b	anim(a0)	; AniIDKnuxAni_Walk
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1691,7 +1741,7 @@ loc_174F0:
 		tst.b	flip_type(a0)
 		bmi.s	locret_17538
 		sfx	sfx_Skid
-		move.b	#id_Stop,anim(a0)
+		move.b	#AniIDSonAni_Stop,anim(a0)
 		bset	#0,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_17538							; if less than 12, branch
@@ -1760,7 +1810,7 @@ loc_175AA:
 		bclr	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		move.w	default_y_radius(a0),y_radius(a0)	; set default_y_radius and default_x_radius
-		move.b	#id_Wait,anim(a0)
+		move.b	#AniIDSonAni_Wait,anim(a0)
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -1818,7 +1868,7 @@ sub_1763A:
 
 loc_17642:
 		bset	#0,status(a0)
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1837,7 +1887,7 @@ sub_1765E:
 		move.w	ground_vel(a0),d0
 		bmi.s	loc_17672
 		bclr	#0,status(a0)
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1972,7 +2022,7 @@ loc_1775C:
 		btst	#Status_Roll,status(a0)
 		bne.s	locret_177E0
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#id_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)
 		bset	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		sub.b	default_y_radius(a0),d0
@@ -2248,7 +2298,7 @@ locret_17B16:
 Knux_TouchFloor_Check_Spindash:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_17B6A
-		clr.b	anim(a0)									; id_Walk
+		clr.b	anim(a0)									; AniIDKnuxAni_Walk
 
 Knux_TouchFloor:
 		move.b	y_radius(a0),d0
@@ -2256,7 +2306,7 @@ Knux_TouchFloor:
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_17B6A
 		bclr	#Status_Roll,status(a0)
-		clr.b	anim(a0)									; id_Walk
+		clr.b	anim(a0)									; AniIDKnuxAni_Walk
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2357,10 +2407,10 @@ loc_17C3C:
 		move.l	d0,x_vel(a0)
 		move.w	d0,ground_vel(a0)
 		move.b	d0,object_control(a0)
-		move.b	d0,anim(a0)	; id_Walk
+		move.b	d0,anim(a0)		; AniIDKnuxAni_Walk
 		move.b	d0,spin_dash_flag(a0)
 		move.w	#$100,priority(a0)
-		move.b	#2,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 		move.b	#2*60,invulnerability_timer(a0)
 
 locret_17C80:
@@ -2408,7 +2458,7 @@ loc_17CCE:
 		bne.s	loc_17CE0
 		tst.w	(V_scroll_amount).w
 		bne.s	loc_17CE0
-		move.b	#2,routine(a0)
+		move.b	#PlayerID_Control,routine(a0)
 
 loc_17CE0:
 		bsr.s	sub_17D1E
@@ -2557,10 +2607,10 @@ loc_17E24:
 		add.w	d2,d2
 
 loc_17E2E:
-		lea	(AniKnux01).l,a1
+		lea	(KnuxAni_Run).l,a1 	; use running animation
 		cmpi.w	#$600,d2
 		bhs.s	loc_17E42
-		lea	(AniKnux00).l,a1
+		lea	(KnuxAni_Walk).l,a1 	; use walking animation
 		add.b	d0,d0
 
 loc_17E42:
@@ -2606,10 +2656,10 @@ loc_17E84:
 
 loc_17EA6:
 		add.w	(Camera_H_scroll_shift).w,d2
-		lea	(AniKnux03).l,a1
+		lea	(KnuxAni_Roll2).l,a1 	; use roll 2 animation
 		cmpi.w	#$600,d2
 		bhs.s	loc_17EB8
-		lea	(AniKnux02).l,a1
+		lea	(KnuxAni_Roll).l,a1 	; use roll animation
 
 loc_17EB8:
 		neg.w	d2
@@ -2638,7 +2688,7 @@ loc_17EDC:
 loc_17EE4:
 		lsr.w	#8,d2
 		move.b	d2,anim_frame_timer(a0)
-		lea	(AniKnux04).l,a1
+		lea	(KnuxAni_Push).l,a1		; use push animation
 		bra.w	loc_17D7E
 
 ; =============== S U B R O U T I N E =======================================
@@ -2657,7 +2707,7 @@ Knuckles_Load_PLC2:
 		move.w	(a2)+,d5
 		subq.w	#1,d5
 		bmi.s	.return
-		move.l	#dmaSource(ArtUnc_Knux),d6
+		move.l	#dmaSource(ArtUnc_Knuckles),d6
 		move.w	#tiles_to_bytes(ArtTile_Player_1),d4
 
 .loop

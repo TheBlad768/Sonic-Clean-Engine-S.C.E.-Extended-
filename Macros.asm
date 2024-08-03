@@ -16,7 +16,7 @@ vdpComm function addr,type,rwd,(((type&rwd)&3)<<30)|((addr&$3FFF)<<16)|(((type&r
 
 ; sign-extends a 32-bit integer to 64-bit
 ; all RAM addresses are run through this function to allow them to work in both 16-bit and 32-bit addressing modes
-ramaddr function x,(-(x&$80000000)<<1)|x
+ramaddr function x,-(-x)&$FFFFFFFF
 
 ; function using these variables
 id function ptr,((ptr-offset)/ptrsize+idstart)
@@ -143,11 +143,10 @@ dbglistobj macro obj, mapaddr, subtype, frame, vram
 ; macro for declaring a "main level load block" (MLLB)
 ; ---------------------------------------------------------------------------
 
-levartptrs macro art1,art2,map16x16,mapram,map128x1281,map128x1282,palette,wpalette,music
-	dc.l (palette)<<24|(art1&$FFFFFF), art2
-	dc.l (wpalette)<<24|((map16x16)&$FFFFFF)
-	dc.l (music)<<24|((mapram)&$FFFFFF)
-	dc.l map128x1281, map128x1282
+levartptrs macro art1,art2,map16x16r,map16x161,map16x162,map128x128r,map128x1281,map128x1282,palette,wpalette,music
+	dc.l (palette)<<24|((art1)&$FFFFFF), art2
+	dc.l (wpalette)<<24|((map16x16r)&$FFFFFF), map16x161, map16x162
+	dc.l (music)<<24|((map128x128r)&$FFFFFF), map128x1281, map128x1282
     endm
 ; ---------------------------------------------------------------------------
 
@@ -164,15 +163,15 @@ watpalptrs macro height,spal,kpal
 ; ---------------------------------------------------------------------------
 
 ; macro to declare sub-object data
-subObjData	macro mappings,vram,priority,width,height,frame,collision
+subObjData	macro mappings,vram,pal,pri,priority,width,height,frame,collision
 	dc.l mappings
-	dc.w vram,priority
+	dc.w make_art_tile(vram,pal,pri),priority
 	dc.b width,height,frame,collision
     endm
 
 ; macro to declare sub-object data
-subObjData2	macro vram,priority,width,height,frame,collision
-	dc.w vram,priority
+subObjData2	macro vram,pal,pri,priority,width,height,frame,collision
+	dc.w make_art_tile(vram,pal,pri),priority
 	dc.b width,height,frame,collision
     endm
 
@@ -183,35 +182,35 @@ subObjData3	macro priority,width,height,frame,collision
     endm
 
 ; macro to declare sub-object slotted data
-subObjSlotData macro slots,vram,offset,index,mappings,priority,width,height,frame,collision
-	dc.w slots,vram,offset,index
+subObjSlotData macro slots,vram,pal,pri,offset,index,mappings,priority,width,height,frame,collision
+	dc.w slots,make_art_tile(vram,pal,pri),offset,index
 	dc.l mappings
 	dc.w priority
 	dc.b width,height,frame,collision
     endm
 
 ; macro to declare sub-object data
-subObjMainData	macro address,render,routine,height,width,priority,art,mappings,frame,collision
-	dc.l address						; address
-	dc.b render, routine, height, width	; render, routine, height, width
-	dc.w priority, art					; priority, art tile
-	dc.l mappings						; mappings
-	dc.b frame, collision				; mapping frame, collision flags
+subObjMainData	macro address,render,routine,height,width,priority,vram,pal,pri,mappings,frame,collision
+	dc.l address								; address
+	dc.b render, routine, height, width			; render, routine, height, width
+	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
+	dc.l mappings								; mappings
+	dc.b frame, collision						; mapping frame, collision flags
     endm
 
 ; macro to declare sub-object data
-subObjMainData2	macro address,render,routine,height,width,priority,art,mappings
-	dc.l address						; address
-	dc.b render, routine, height, width	; render, routine, height, width
-	dc.w priority, art					; priority, art tile
-	dc.l mappings						; mappings
+subObjMainData2	macro address,render,routine,height,width,priority,vram,pal,pri,mappings
+	dc.l address								; address
+	dc.b render, routine, height, width			; render, routine, height, width
+	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
+	dc.l mappings								; mappings
     endm
 
 ; macro to declare sub-object data
-subObjMainData3	macro render,routine,height,width,priority,art,mappings
-	dc.b render, routine, height, width	; render, routine, height, width
-	dc.w priority, art					; priority, art tile
-	dc.l mappings						; mappings
+subObjMainData3	macro render,routine,height,width,priority,vram,pal,pri,mappings
+	dc.b render, routine, height, width			; render, routine, height, width
+	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
+	dc.l mappings								; mappings
     endm
 ; ---------------------------------------------------------------------------
 
@@ -365,11 +364,11 @@ copyRAM2 macro startaddr,endaddr,startaddr2
     endm
 
 ; ---------------------------------------------------------------------------
-; load Kosinski and Kosinski Moduled
+; load Kosinski Plus and Kosinski Plus Moduled
 ; ---------------------------------------------------------------------------
 
-; load Kosinski data to RAM
-QueueKos macro data,ram,terminate
+; load Kosinski Plus data to RAM
+QueueKosPlus macro data,ram,terminate
 	lea	(data).l,a1
     if ((ram)&$8000)==0
 	lea	(ram).l,a2
@@ -377,14 +376,14 @@ QueueKos macro data,ram,terminate
 	lea	(ram).w,a2
     endif
       if ("terminate"="0") || ("terminate"="")
-	jsr	(Queue_Kos).w
+	jsr	(Queue_KosPlus).w
       else
-	jmp	(Queue_Kos).w
+	jmp	(Queue_KosPlus).w
       endif
     endm
 
-; load Kosinski Moduled art to VRAM
-QueueKosModule macro art,vram,terminate
+; load Kosinski Plus Moduled art to VRAM
+QueueKosPlusModule macro art,vram,terminate
 	lea	(art).l,a1
     if ((vram)<=3)
 	moveq	#tiles_to_bytes(vram),d2
@@ -392,9 +391,9 @@ QueueKosModule macro art,vram,terminate
 	move.w	#tiles_to_bytes(vram),d2
       endif
       if ("terminate"="0") || ("terminate"="")
-	jsr	(Queue_Kos_Module).w
+	jsr	(Queue_KosPlus_Module).w
       else
-	jmp	(Queue_Kos_Module).w
+	jmp	(Queue_KosPlus_Module).w
       endif
     endm
 
@@ -403,14 +402,14 @@ QueueKosModule macro art,vram,terminate
 ; ---------------------------------------------------------------------------
 
 ; load Enigma data to RAM
-EniDecomp macro data,ram,vram,terminate
+EniDecomp macro data,ram,vram,palette,priority,terminate
 	lea	(data).l,a0
     if ((ram)&$8000)==0
 	lea	(ram).l,a1
     else
 	lea	(ram).w,a1
     endif
-	move.w	#make_art_tile vram,d0
+	move.w	#make_art_tile(vram,palette,priority),d0
       if ("terminate"="0") || ("terminate"="")
 	jsr	(Eni_Decomp).w
       else
@@ -881,31 +880,14 @@ planeLocH40 function col,line,(($80 * line) + (2 * col))
 planeLocH80 function col,line,(($100 * line) + (2 * col))
 ; ---------------------------------------------------------------------------
 
-_Kos_UseLUT := 1
-_Kos_LoopUnroll := 3
-_Kos_ExtremeUnrolling := 1
+_KosPlus_LoopUnroll := 3
 
-_Kos_RunBitStream macro
+_KosPlus_ReadBit macro
 	dbf	d2,.skip
-	moveq	#7,d2				; Set repeat count to 8.
-	move.b	d1,d0				; Use the remaining 8 bits.
-	not.w	d3					; Have all 16 bits been used up?
-	bne.s	.skip				; Branch if not.
-	move.b	(a0)+,d0				; Get desc field low-byte.
-	move.b	(a0)+,d1				; Get desc field hi-byte.
-	if _Kos_UseLUT==1
-		move.b	(a4,d0.w),d0		; Invert bit order...
-		move.b	(a4,d1.w),d1		; ... for both bytes.
-	endif
-.skip
-    endm
-
-_Kos_ReadBit macro
-	if _Kos_UseLUT==1
-		add.b	d0,d0			; Get a bit from the bitstream.
-	else
-		lsr.b	d0					; Get a bit from the bitstream.
-	endif
+	moveq	#7,d2						; We have 8 new bits, but will use one up below.
+	move.b	(a0)+,d0						; Get desc field low-byte.
+.skip:
+	add.b	d0,d0						; Get a bit from the bitstream.
     endm
 ; ---------------------------------------------------------------------------
 

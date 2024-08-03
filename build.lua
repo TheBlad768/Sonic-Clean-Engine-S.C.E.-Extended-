@@ -7,21 +7,16 @@
 -- Create the debug ROM.
 local debug = false
 
--- Set this to true to use a better compression algorithm for the DAC driver.
--- Having this set to false will use an inferior compression algorithm that
--- results in an accurate ROM being produced.
-local improved_dac_driver_compression = true
-
 ---------------------
 -- End of settings --
 ---------------------
 
 -- Delete old files.
-os.remove("Sonic.h", "Sonic.p")
+os.remove("Sonic.gen")
 
 local common = require "AS.lua.common"
 
-local compression = improved_dac_driver_compression and "kosinski-optimised" or "kosinski"
+local compression = "kosinskiplus"
 
 -- Assemble the ROM.
 local message, abort = common.build_rom("Sonic", "Sonic", "", "-p=FF -z=0," .. compression .. ",Size_of_DAC_driver_guess,after", false, "https://github.com/sonicretro/skdisasm")
@@ -67,9 +62,6 @@ common.fix_header("Sonic.gen")
 if debug then
 	common.fix_header("Sonic.Debug.gen")
 end
-
--- Delete old files.
-os.remove("Sonic.h", "Sonic.p")
 
 -- copy ROM.
 local os_name, arch_name = require "AS.lua.get_os_name".get_os_name()

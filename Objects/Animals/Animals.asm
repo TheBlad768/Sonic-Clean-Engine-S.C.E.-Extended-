@@ -54,10 +54,10 @@ Squirrel:		objanimaldecl Map_Animals2, Obj_Animal_Walk, -$280, -$380		; 6
 
 Obj_Animal:
 		jsr	(Random_Number).w
-		move.w	#$580,d1											; animal 1 (VRAM)
+		move.w	#make_art_tile($580,0,0),d1							; animal 1 (VRAM)
 		andi.w	#1,d0
 		beq.s	.rskip
-		move.w	#$592,d1											; animal 2 (VRAM)
+		move.w	#make_art_tile($592,0,0),d1							; animal 2 (VRAM)
 
 .rskip
 		move.w	d1,art_tile(a0)
@@ -86,7 +86,7 @@ Obj_Animal:
 		jsr	(CreateChild6_Simple).w
 		bne.s	.draw
 		move.w	objoff_3E(a0),d0
-		lsr.w	d0
+		lsr.w	d0													; division by 2
 		move.b	d0,mapping_frame(a1)
 		bra.s	.draw
 ; ---------------------------------------------------------------------------
@@ -134,7 +134,7 @@ Obj_Animal_Walk:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Animal_Fly:
-		moveq	#$18,d2
+		moveq	#$18,d1
 		jsr	(MoveSprite_CustomGravity).w
 		tst.w	y_vel(a0)
 		bmi.s	.anim
@@ -145,10 +145,10 @@ Obj_Animal_Fly:
 		move.w	animal_ground_y_vel(a0),y_vel(a0)
 
 .anim
-		subq.b	#1,anim_frame_timer(a0)
-		bpl.s	.skipanim
-		addq.b	#1+1,anim_frame_timer(a0)
-		bchg	#0,mapping_frame(a0)
+		subq.b	#1,anim_frame_timer(a0)								; decrement timer
+		bpl.s	.skipanim											; if time remains, branch
+		addq.b	#1+1,anim_frame_timer(a0)							; reset timer to 1 frames
+		bchg	#0,mapping_frame(a0)								; change frame
 
 .skipanim
 		tst.b	render_flags(a0)											; object visible on the screen?
@@ -166,7 +166,7 @@ Obj_Animal_Ending:
 		; these are the S1 ending actions
 		moveq	#0,d0
 		move.b	subtype(a0),d0
-		lsl.w	#4,d0
+		lsl.w	#4,d0													; multiply by $10
 		lea	Animal_Ending_Index(pc,d0.w),a1							; $E size data
 		move.l	(a1)+,address(a0)										; Go to "NEXT"
 		move.l	(a1)+,mappings(a0)
@@ -192,29 +192,29 @@ objanimalending macro address, mappings, vram, xvel, yvel
 Animal_Ending_Index:
 
 		; the following tables tell the properties of animals based on their subtype
-		objanimalending Obj_Animal_FlickyWait, Map_Animals1, $5A5, -$440, -$400			; 0 ($F)
-		objanimalending Obj_Animal_FlickyWait, Map_Animals1, $5A5, -$440, -$400			; 1 ($10)
-		objanimalending Obj_Animal_FlickyJump, Map_Animals1, $5A5	, -$440, -$400		; 2 ($11)
-		objanimalending Obj_Animal_RabbitWait, Map_Animals5, $553, -$300, -$400		; 3 ($12)
-		objanimalending Obj_Animal_LandJump, Map_Animals5, $553, -$300, -$400			; 4 ($13)
-		objanimalending Obj_Animal_SingleBounce, Map_Animals5, $573, -$180, -$300		; 5 ($14)
-		objanimalending Obj_Animal_LandJump, Map_Animals5, $573, -$180, -$300			; 6 ($15)
-		objanimalending Obj_Animal_SingleBounce, Map_Animals4, $585, -$140, -$180 		; 7 ($16)
-		objanimalending Obj_Animal_LandJump, Map_Animals3, $593, -$1C0, -$300			; 8 ($17)
-		objanimalending Obj_Animal_FlyBounce, Map_Animals1, $565, -$200, -$300			; 9 ($18)
-		objanimalending Obj_Animal_DoubleBounce, Map_Animals2, $5B3, -$280, -$380		; A ($19)
+		objanimalending Obj_Animal_FlickyWait, Map_Animals1, make_art_tile($5A5,0,0), -$440, -$400		; 0 ($F)
+		objanimalending Obj_Animal_FlickyWait, Map_Animals1, make_art_tile($5A5,0,0), -$440, -$400		; 1 ($10)
+		objanimalending Obj_Animal_FlickyJump, Map_Animals1, make_art_tile($5A5,0,0), -$440, -$400		; 2 ($11)
+		objanimalending Obj_Animal_RabbitWait, Map_Animals5, make_art_tile($553,0,0), -$300, -$400		; 3 ($12)
+		objanimalending Obj_Animal_LandJump, Map_Animals5, make_art_tile($553,0,0), -$300, -$400		; 4 ($13)
+		objanimalending Obj_Animal_SingleBounce, Map_Animals5, make_art_tile($573,0,0), -$180, -$300		; 5 ($14)
+		objanimalending Obj_Animal_LandJump, Map_Animals5, make_art_tile($573,0,0), -$180, -$300		; 6 ($15)
+		objanimalending Obj_Animal_SingleBounce, Map_Animals4, make_art_tile($585,0,0), -$140, -$180 		; 7 ($16)
+		objanimalending Obj_Animal_LandJump, Map_Animals3, make_art_tile($593,0,0), -$1C0, -$300		; 8 ($17)
+		objanimalending Obj_Animal_FlyBounce, Map_Animals1, make_art_tile($565,0,0), -$200, -$300		; 9 ($18)
+		objanimalending Obj_Animal_DoubleBounce, Map_Animals2, make_art_tile($5B3,0,0), -$280, -$380		; A ($19)
 
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Animal_FlickyWait:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	.chkdel										; if not, branch
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	.chkdel												; if not, branch
 		move.l	animal_ground_x_vel(a0),x_vel(a0)
 		move.l	#.fly,address(a0)
 
 .fly
-		moveq	#$18,d2
+		moveq	#$18,d1
 		jsr	(MoveSprite_CustomGravity).w
 		tst.w	y_vel(a0)
 		bmi.s	.anim
@@ -229,10 +229,10 @@ Obj_Animal_FlickyWait:
 		bchg	#0,render_flags(a0)
 
 .anim
-		subq.b	#1,anim_frame_timer(a0)
-		bpl.s	.chkdel
-		addq.b	#1+1,anim_frame_timer(a0)
-		bchg	#0,mapping_frame(a0)
+		subq.b	#1,anim_frame_timer(a0)								; decrement timer
+		bpl.s	.chkdel												; if time remains, branch
+		addq.b	#1+1,anim_frame_timer(a0)							; reset timer to 1 frames
+		bchg	#0,mapping_frame(a0)								; change frame
 
 .chkdel
 		bra.w	Obj_Animal_ChkDel
@@ -241,20 +241,20 @@ Obj_Animal_FlickyWait:
 
 Obj_Animal_FlickyJump:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	.chkdel										; if not, branch
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	.chkdel												; if not, branch
 		clr.w	x_vel(a0)
 		clr.w	animal_ground_x_vel(a0)
-		moveq	#$18,d2
+		moveq	#$18,d1
 		jsr	(MoveSprite_CustomGravity).w
 		bsr.w	Obj_Animal_Jump
 		bsr.w	Obj_Animal_FaceSonic
 
 		; anim
-		subq.b	#1,anim_frame_timer(a0)
-		bpl.s	.chkdel
-		addq.b	#1+1,anim_frame_timer(a0)
-		bchg	#0,mapping_frame(a0)
+		subq.b	#1,anim_frame_timer(a0)								; decrement timer
+		bpl.s	.chkdel												; if time remains, branch
+		addq.b	#1+1,anim_frame_timer(a0)							; reset timer to 1 frames
+		bchg	#0,mapping_frame(a0)								; change frame
 
 .chkdel
 		bra.w	Obj_Animal_ChkDel
@@ -263,8 +263,8 @@ Obj_Animal_FlickyJump:
 
 Obj_Animal_RabbitWait:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	.chkdel										; if not, branch
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	.chkdel												; if not, branch
 		move.l	animal_ground_x_vel(a0),x_vel(a0)
 		move.l	#.walk,address(a0)
 
@@ -310,8 +310,8 @@ Obj_Animal_DoubleBounce:
 
 Obj_Animal_LandJump:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	.chkdel										; if not, branch
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	.chkdel												; if not, branch
 		clr.w	x_vel(a0)
 		clr.w	animal_ground_x_vel(a0)
 		jsr	(MoveSprite).w
@@ -325,8 +325,8 @@ Obj_Animal_LandJump:
 
 Obj_Animal_SingleBounce:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	.chkdel										; if not, branch
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	.chkdel												; if not, branch
 		jsr	(MoveSprite).w
 		move.b	#1,mapping_frame(a0)
 		tst.w	y_vel(a0)
@@ -347,9 +347,9 @@ Obj_Animal_SingleBounce:
 
 Obj_Animal_FlyBounce:
 		jsr	(Find_SonicObject).w
-		cmpi.w	#(320/2)+24,d2								; is Sonic within $B8 pixels (x-axis)?
-		bhs.s	Obj_Animal_ChkDel							; if not, branch
-		moveq	#$18,d2
+		cmpi.w	#(320/2)+24,d2										; is Sonic within $B8 pixels (x-axis)?
+		bhs.s	Obj_Animal_ChkDel									; if not, branch
+		moveq	#$18,d1
 		jsr	(MoveSprite_CustomGravity).w
 		tst.w	y_vel(a0)
 		bmi.s	.anim
@@ -366,10 +366,10 @@ Obj_Animal_FlyBounce:
 		move.w	animal_ground_y_vel(a0),y_vel(a0)
 
 .anim
-		subq.b	#1,anim_frame_timer(a0)
-		bpl.s	Obj_Animal_ChkDel
-		addq.b	#1+1,anim_frame_timer(a0)
-		bchg	#0,mapping_frame(a0)
+		subq.b	#1,anim_frame_timer(a0)								; decrement timer
+		bpl.s	Obj_Animal_ChkDel									; if time remains, branch
+		addq.b	#1+1,anim_frame_timer(a0)							; reset timer to 1 frames
+		bchg	#0,mapping_frame(a0)								; change frame
 
 ; =============== S U B R O U T I N E =======================================
 

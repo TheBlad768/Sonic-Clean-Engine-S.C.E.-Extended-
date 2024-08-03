@@ -85,31 +85,33 @@ Vectors:
 		dc.l ErrorTrap			; unused (reserved)
 		dc.l ErrorTrap			; unused (reserved) (64)
 
-Header:			dc.b "SEGA GENESIS    "
-Copyright:		dc.b "(C)SEGA XXXX.XXX"
-Domestic_Name:	dc.b "SONIC THE               HEDGEHOG                "
-Overseas_Name:	dc.b "SONIC THE               HEDGEHOG                "
-Serial_Number:	dc.b "GM MK-0000 -00"
-Checksum:		dc.w 0
-Input:			dc.b "J               "
-ROMStartLoc:	dc.l StartOfROM
-ROMEndLoc:		dc.l EndOfROM-1
-RAMStartLoc:	dc.l (RAM_start&$FFFFFF)
-RAMEndLoc:		dc.l (RAM_start&$FFFFFF)+$FFFF
+Header:				dc.b "SEGA GENESIS    "
+Copyright:			dc.b "(C)SEGA XXXX.XXX"
+Domestic_Name:		dc.b "SONIC THE               HEDGEHOG                "
+Overseas_Name:		dc.b "SONIC THE               HEDGEHOG                "
+Serial_Number:		dc.b "GM MK-0000 -00"
+Checksum:			dc.w 0
+Input:				dc.b "J               "
+ROMStartLoc:		dc.l StartOfROM
+ROMEndLoc:			dc.l EndOfROM-1
+RAMStartLoc:		dc.l (RAM_start&$FFFFFF)
+RAMEndLoc:			dc.l (RAM_start&$FFFFFF)+$FFFF
 SRAMSupport:
-	if EnableSRAM=1
-CartRAM_Info:	dc.b "RA"
-CartRAM_Type:	dc.b $A0+(BackupSRAM<<6)+(AddressSRAM<<3), $20
-CartRAMStartLoc:dc.l SRAM_Size|SRAM_Type.SRAM_Start	; SRAM start ($200000)
-CartRAMEndLoc:	dc.l SRAM_Size|SRAM_Type.SRAM_End		; SRAM end ($20xxxx)
+
+	if EnableSRAM
+CartRAM_Info:		dc.b "RA"
+CartRAM_Type:		dc.b $A0+(BackupSRAM<<6)+(AddressSRAM<<3), $20
+CartRAMStartLoc:	dc.l SRAM_Start				; SRAM start ($200000)
+CartRAMEndLoc:		dc.l SRAM_Start+SRAM_End	; SRAM end ($20xxxx)
 	else
-CartRAM_Info:	dc.b "  "
-CartRAM_Type:	dc.w %10000000100000
-CartRAMStartLoc:dc.l $20202020	; SRAM start ($200000)
-CartRAMEndLoc:	dc.l $20202020	; SRAM end ($20xxxx)
+CartRAM_Info:		dc.b "  "
+CartRAM_Type:		dc.w %10000000100000
+CartRAMStartLoc:	dc.b "    "						; SRAM start ($200000)
+CartRAMEndLoc:		dc.b "    "						; SRAM end ($20xxxx)
 	endif
-Modem_Info:		dc.b "                                                    "
-Country_Code:	dc.b "JUE             "
+
+Modem_Info:			dc.b "                                                    "
+Country_Code:		dc.b "JUE             "
 EndOfHeader
 
 ; ---------------------------------------------------------------------------
@@ -141,8 +143,8 @@ EndOfHeader
 ; ---------------------------------------------------------------------------
 
 		include "Data/Decompression/Enigma Decompression.asm"
-		include "Data/Decompression/Kosinski Decompression.asm"
-		include "Data/Decompression/Kosinski Module Decompression.asm"
+		include "Data/Decompression/Kosinski Plus Decompression.asm"
+		include "Data/Decompression/Kosinski Plus Module Decompression.asm"
 
 ; ---------------------------------------------------------------------------
 ; Clone Driver - Functions Subroutine
@@ -227,13 +229,13 @@ EndOfHeader
 ; Draw Level Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Main/DrawLevel.asm"
+		include "Data/Main/Draw Level.asm"
 
 ; ---------------------------------------------------------------------------
 ; Deform Layer Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Main/DeformBgLayer.asm"
+		include "Data/Main/Move Camera.asm"
 
 ; ---------------------------------------------------------------------------
 ; Parallax Engine Subroutine
@@ -251,32 +253,32 @@ EndOfHeader
 ; Objects Subroutines
 ; ---------------------------------------------------------------------------
 
-		include "Data/Objects/AnimateRaw.asm"
-		include "Data/Objects/AnimateSprite.asm"
-		include "Data/Objects/CalcAngle.asm"
-		include "Data/Objects/CalcSine.asm"
-		include "Data/Objects/DisplaySprite.asm"
-		include "Data/Objects/DeleteObject.asm"
-		include "Data/Objects/FindFreeObj.asm"
-		include "Data/Objects/MoveSprite.asm"
-		include "Data/Objects/MoveSprite Circular.asm"
+		include "Data/Objects/Animate Raw.asm"
+		include "Data/Objects/Animate Sprite.asm"
+		include "Data/Objects/Calc Angle.asm"
+		include "Data/Objects/Calc Sine.asm"
+		include "Data/Objects/Draw Sprite.asm"
+		include "Data/Objects/Delete Object.asm"
+		include "Data/Objects/Create Sprite.asm"
+		include "Data/Objects/Move Sprite.asm"
+		include "Data/Objects/Move Sprite Circular.asm"
 		include "Data/Objects/Object Swing.asm"
 		include "Data/Objects/Object Wait.asm"
-		include "Data/Objects/ChangeFlip.asm"
-		include "Data/Objects/CreateChildSprite.asm"
-		include "Data/Objects/ChildGetPriority.asm"
-		include "Data/Objects/CheckRange.asm"
-		include "Data/Objects/FindSonic.asm"
+		include "Data/Objects/Change Flip.asm"
+		include "Data/Objects/Create Child Sprite.asm"
+		include "Data/Objects/Child Get Priority.asm"
+		include "Data/Objects/Check Range.asm"
+		include "Data/Objects/Find Sonic.asm"
 		include "Data/Objects/Misc.asm"
 		include "Data/Objects/Palette Script.asm"
-		include "Data/Objects/RememberState.asm"
+		include "Data/Objects/Remember State.asm"
 
 ; ---------------------------------------------------------------------------
 ; Objects Functions Subroutines
 ; ---------------------------------------------------------------------------
 
-		include "Data/Objects/FindFloor.asm"
-		include "Data/Objects/SolidObject.asm"
+		include "Data/Objects/Find Floor.asm"
+		include "Data/Objects/Solid Object.asm"
 
 ; ---------------------------------------------------------------------------
 ; Animate Palette Subroutine
@@ -297,22 +299,28 @@ EndOfHeader
 		include "Data/Main/Level Setup.asm"
 
 ; ---------------------------------------------------------------------------
+; Special Events Subroutine
+; ---------------------------------------------------------------------------
+
+		include "Data/Main/Special Events.asm"
+
+; ---------------------------------------------------------------------------
 ; Get Level Size Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Main/GetLevelSizeStart.asm"
+		include "Data/Main/Level Start.asm"
 
 ; ---------------------------------------------------------------------------
 ; Resize Events Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Main/DoResizeEvents.asm"
+		include "Data/Main/Level Events.asm"
 
 ; ---------------------------------------------------------------------------
 ; Handle On screen Water Height Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Main/HandleOnscreenWaterHeight.asm"
+		include "Data/Main/Water Effects.asm"
 
 ; ---------------------------------------------------------------------------
 ; Interrupt Handler Subroutine
@@ -324,7 +332,7 @@ EndOfHeader
 ; Touch Response Subroutine
 ; ---------------------------------------------------------------------------
 
-		include "Data/Objects/TouchResponse.asm"
+		include "Data/Objects/Touch Response.asm"
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load Sonic object
@@ -409,20 +417,20 @@ EndOfHeader
 		; Sonic
 		include "Objects/Sonic/Object Data/Anim - Sonic.asm"
 		include "Objects/Sonic/Object Data/Map - Sonic.asm"
-		include "Objects/Sonic/Object Data/Sonic pattern load cues.asm"
+		include "Objects/Sonic/Object Data/DPLC - Sonic.asm"
 
 		; Tails
 		include "Objects/Tails/Object Data/Anim - Tails.asm"
 		include "Objects/Tails/Object Data/Anim - Tails Tail.asm"
 		include "Objects/Tails/Object Data/Map - Tails.asm"
 		include "Objects/Tails/Object Data/Map - Tails tails.asm"
-		include "Objects/Tails/Object Data/Tails pattern load cues.asm"
-		include "Objects/Tails/Object Data/Tails tails pattern load cues.asm"
+		include "Objects/Tails/Object Data/DPLC - Tails.asm"
+		include "Objects/Tails/Object Data/DPLC - Tails tails.asm"
 
 		; Knuckles
 		include "Objects/Knuckles/Object Data/Anim - Knuckles.asm"
 		include "Objects/Knuckles/Object Data/Map - Knuckles.asm"
-		include "Objects/Knuckles/Object Data/Knuckles pattern load cues.asm"
+		include "Objects/Knuckles/Object Data/DPLC - Knuckles.asm"
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load level events
@@ -456,16 +464,16 @@ EndOfHeader
 		include "Pointers/Pattern Load Cues.asm"
 
 ; ---------------------------------------------------------------------------
-; Kosinski Module compressed graphics pointers
+; Kosinski Plus Module compressed graphics pointers
 ; ---------------------------------------------------------------------------
 
-		include "Pointers/Kosinski Module Data.asm"
+		include "Pointers/Kosinski Plus Module Data.asm"
 
 ; ---------------------------------------------------------------------------
-; Kosinski compressed graphics pointers
+; Kosinski Plus compressed graphics pointers
 ; ---------------------------------------------------------------------------
 
-		include "Pointers/Kosinski Data.asm"
+		include "Pointers/Kosinski Plus Data.asm"
 
 ; ---------------------------------------------------------------------------
 ; Enigma compressed graphics pointers

@@ -172,14 +172,14 @@ Release_PlayerFromObject:
 		beq.s	.notp1
 		lea	(Player_1).w,a1
 		bclr	#Status_Push,status(a1)
-		move.w	#bytes_to_word(id_Walk,id_Run),anim(a1)			; reset player anim
+		move.w	#bytes_to_word(AniIDSonAni_Walk,AniIDSonAni_Run),anim(a1)	; reset player anim
 
 .notp1
 		bclr	#p2_pushing_bit,status(a0)
 		beq.s	.return
 		lea	(Player_2).w,a1
 		bclr	#Status_Push,status(a1)
-		move.w	#bytes_to_word(id_Walk,id_Run),anim(a1)			; reset player anim
+		move.w	#bytes_to_word(AniIDSonAni_Walk,AniIDSonAni_Run),anim(a1)	; reset player anim
 
 .return
 		rts
@@ -193,14 +193,14 @@ Displace_PlayerOffObject:
 		and.b	status(a0),d0										; is Sonic or Tails standing on the object?
 		beq.s	.return											; if not, branch
 		bclr	#p1_standing_bit,status(a0)
-		beq.s	.notp1
+		beq.s	.notp1											; branch, if Sonic wasn't standing on the object
 		lea	(Player_1).w,a1
 		bclr	#Status_OnObj,status(a1)
 		bset	#Status_InAir,status(a1)
 
 .notp1
 		bclr	#p2_standing_bit,status(a0)
-		beq.s	.return
+		beq.s	.return											; branch, if Tails wasn't standing on the object
 		lea	(Player_2).w,a1
 		bclr	#Status_OnObj,status(a1)
 		bset	#Status_InAir,status(a1)
@@ -360,7 +360,7 @@ HurtCharacter_WithoutDamage:
 		bset	#Status_InAir,status(a1)
 		move.l	#words_to_long(-$200,-$300),x_vel(a1)				; set speed of player
 		clr.w	ground_vel(a1)									; zero out inertia
-		move.b	#id_Hurt,anim(a1)								; set falling animation
+		move.b	#AniIDSonAni_Hurt,anim(a1)						; set falling animation
 		sfx	sfx_Death,1											; play death sound
 
 ; =============== S U B R O U T I N E =======================================
@@ -371,7 +371,7 @@ LaunchCharacter:
 		bclr	#Status_OnObj,status(a1)								; clear character on object flag
 		clr.b	jumping(a1)											; clear character jumping flag
 		clr.b	spin_dash_flag(a1)									; clear spin dash flag
-		move.b	#id_Spring,anim(a1)								; change Sonic's animation to "spring" ($10)
+		move.b	#AniIDSonAni_Spring,anim(a1)						; change Sonic's animation to "spring" ($10)
 		move.b	#PlayerID_Control,routine(a1)						; set character to airborne state
 		sfx	sfx_Spring,1											; play spring sound
 
@@ -380,9 +380,9 @@ LaunchCharacter:
 Check_PlayerAttack:
 		btst	#Status_Invincible,status_secondary(a1)					; is character invincible?
 		bne.s	.hit												; if so, branch
-		cmpi.b	#id_SpinDash,anim(a1)							; is player in their spin dash animation?
+		cmpi.b	#AniIDSonAni_SpinDash,anim(a1)					; is player in their spin dash animation?
 		beq.s	.hit												; if so, branch
-		cmpi.b	#id_Roll,anim(a1)									; is player in their rolling animation?
+		cmpi.b	#AniIDSonAni_Roll,anim(a1)						; is player in their rolling animation?
 		beq.s	.hit												; if so, branch
 
 		; check player
@@ -450,12 +450,12 @@ Load_LevelResults:
 		lea	(Player_1).w,a1
 		btst	#7,status(a1)
 		bne.s	.return
-		btst	#Status_InAir,status(a1)
-		bne.s	.return
+		btst	#Status_InAir,status(a1)								; is the player in the air?
+		bne.s	.return											; if yes, branch
 		cmpi.b	#PlayerID_Death,routine(a1)						; is player dead?
 		bhs.s	.return											; if yes, branch
 		bsr.s	Set_PlayerEndingPose
-		clr.b	(TitleCard_end_flag).w
+		clr.b	(End_of_level_flag).w
 		bsr.w	Create_New_Sprite
 		bne.s	.return
 		move.l	#Obj_LevelResults,address(a1)
@@ -467,7 +467,7 @@ Load_LevelResults:
 
 Set_PlayerEndingPose:
 		move.b	#$81,object_control(a1)
-		move.b	#id_Landing,anim(a1)
+		move.b	#AniIDSonAni_Landing,anim(a1)					; set landing animation
 		clr.l	x_vel(a1)
 		clr.w	ground_vel(a1)
 		clr.b	spin_dash_flag(a1)
@@ -507,7 +507,7 @@ Restore_PlayerControl:
 Restore_PlayerControl2:
 		clr.b	object_control(a1)
 		bclr	#Status_InAir,status(a1)
-		move.w	#bytes_to_word(id_Wait,id_Wait),anim(a1)
+		move.w	#bytes_to_word(AniIDSonAni_Wait,AniIDSonAni_Wait),anim(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
 		rts
@@ -646,8 +646,8 @@ BossFlash:
 		dc.w (Normal_palette_line_1+$1C)&$FFFF
 		dc.w (Normal_palette_line_1+$1E)&$FFFF
 .palcycle
-		dc.w 8, $866, 0
-		dc.w $888, $CCC, $EEE
+		dc.w 8, $866, cBlack
+		dc.w $888, $CCC, cWhite
 
 ; =============== S U B R O U T I N E =======================================
 

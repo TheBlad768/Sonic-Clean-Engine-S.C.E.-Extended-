@@ -5,7 +5,9 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_GameOver:
-		tst.w	(Kos_modules_left).w
+
+		; wait for KosPlusM queue to clear
+		tst.w	(KosPlus_modules_left).w
 		beq.s	.endplc
 		rts
 ; ---------------------------------------------------------------------------

@@ -21,7 +21,7 @@ Obj_DashDust:
 		cmpa.w	#Dust,a0
 		beq.s	.main
 		st	dashdust_tails(a0)										; Tails flag
-		cmpi.w	#2,(Player_mode).w									; is Tails?
+		cmpi.w	#PlayerModeID_Tails,(Player_mode).w					; is Tails?
 		beq.s	.main												; if yes, branch
 		move.w	#ArtTile_DashDust_P2,art_tile(a0)
 		move.w	#Player_2,parent(a0)
@@ -131,9 +131,9 @@ Obj_DashDust:
 DashDust_CheckSkid:
 		movea.w	parent(a0),a2											; a2=character
 		moveq	#16,d1
-		cmpi.b	#id_Stop,anim(a2)									; is Sonic stopped?
+		cmpi.b	#AniIDSonAni_Stop,anim(a2)							; is Sonic stopped?
 		beq.s	.create												; if so, branch
-		cmpi.b	#2,character_id(a2)									; is player Knuckles?
+		cmpi.b	#PlayerID_Knuckles,character_id(a2)					; is player Knuckles?
 		bne.s	.back												; if not, branch
 		moveq	#6,d1
 		cmpi.b	#3,double_jump_flag(a2)								; is Knuckles sliding across the ground after gliding?
