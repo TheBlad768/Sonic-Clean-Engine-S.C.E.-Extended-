@@ -100,7 +100,7 @@ FlgID__End			= flg__Last+1
 ;
 
 ; ---MUSIC CONSTANTS---
-MusID_ExtraLife		= $00
+MusID_ExtraLife		= mus_ExtraLife
 ;	| ID of your Extra Life jingle
 ;
 
