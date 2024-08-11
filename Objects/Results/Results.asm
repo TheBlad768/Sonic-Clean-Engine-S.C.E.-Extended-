@@ -21,7 +21,7 @@ Obj_LevelResults:
 		moveq	#0,d0
 		lea	TitleCardAct_Index(pc),a1
 		move.b	(Current_act).w,d0
-		add.w	d0,d0
+		add.w	d0,d0												; multiply by 4
 		add.w	d0,d0
 		movea.l	(a1,d0.w),a1
 		move.w	#tiles_to_bytes($566),d2
@@ -29,7 +29,7 @@ Obj_LevelResults:
 
 		; load character name art
 		move.w	(Player_mode).w,d0
-		add.w	d0,d0
+		add.w	d0,d0												; multiply by 4
 		add.w	d0,d0
 		lea	PlayerResults_Index(pc),a1									; select character name to use based on character of course
 		movea.l	(a1,d0.w),a1
