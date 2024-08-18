@@ -37,6 +37,7 @@ JmpTo_DebugMode:
 
 Sonic_Normal:
 	endif
+
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Sonic_Index(pc,d0.w),d0
@@ -94,6 +95,7 @@ Sonic_Init_Continued:
 ; ---------------------------------------------------------------------------
 
 Sonic_Control:								; Routine 2
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w				; is debug cheat enabled?
 		beq.s	loc_10BF0					; if not, branch
@@ -116,6 +118,7 @@ locret_10BEE:
 
 loc_10BF0:
 	endif
+
 		tst.b	(Ctrl_1_locked).w					; are controls locked?
 		bne.s	loc_10BFC					; if yes, branch
 		move.w	(Ctrl_1).w,(Ctrl_1_logical).w	; copy new held buttons, to enable joypad control
@@ -232,7 +235,8 @@ Sonic_ChkShoes:										; checks if Speed Shoes have expired and disables them 
 		move.w	#$C,Acceleration-Max_speed(a4)		; set Acceleration
 		move.w	#$80,Deceleration-Max_speed(a4)		; set Deceleration
 		bclr	#Status_SpeedShoes,status_secondary(a0)
-		music	mus_Slowdown,1						; slow down tempo
+		moveq	#0,d0
+		jmp	(Change_Music_Tempo).w					; slow down tempo
 ; ---------------------------------------------------------------------------
 
 Sonic_ExitChk:
@@ -418,9 +422,11 @@ Call_Player_AnglePos:
 
 ; Sonic_Stand_Freespace:
 Sonic_MdAir:
+
 	if RollInAir
 		bsr.w	Sonic_ChgFallAnim
 	endif
+
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_ChgJumpDir
 		bsr.w	Player_LevelBound
@@ -1613,6 +1619,7 @@ loc_11D2E:
 		move.w	#$800,spin_dash_counter(a0)
 
 loc_11D5E:
+
 	if ExtendedCamera
 		moveq	#0,d0
 		move.b	spin_dash_counter(a0),d0
@@ -1623,6 +1630,7 @@ loc_11D5E:
 		neg.w	ground_vel(a0)
 +
 	endif
+
 		addq.w	#4,sp
 		cmpi.w	#$60,(a5)
 		beq.s	loc_11D6C
@@ -2232,6 +2240,7 @@ BubbleShield_Bounce:
 ; ---------------------------------------------------------------------------
 
 Sonic_Hurt:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	+
@@ -2243,6 +2252,7 @@ Sonic_Hurt:
 ; ---------------------------------------------------------------------------
 +
 	endif
+
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$30,y_vel(a0)
 		btst	#Status_Underwater,status(a0)
@@ -2310,6 +2320,7 @@ loc_1238A:
 ; =============== S U B R O U T I N E =======================================
 
 Sonic_Death:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	+
@@ -2321,6 +2332,7 @@ Sonic_Death:
 ; ---------------------------------------------------------------------------
 +
 	endif
+
 		bsr.s	sub_123C2
 		jsr	(MoveSprite_TestGravity).w
 		bsr.w	Sonic_RecordPos
@@ -2416,6 +2428,7 @@ loc_12590:
 ; =============== S U B R O U T I N E =======================================
 
 Sonic_Drown:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	+
@@ -2427,6 +2440,7 @@ Sonic_Drown:
 ; ---------------------------------------------------------------------------
 +
 	endif
+
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$10,y_vel(a0)
 		bsr.w	Sonic_RecordPos

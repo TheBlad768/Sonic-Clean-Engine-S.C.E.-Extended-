@@ -43,6 +43,7 @@ loc_136A8:
 
 Tails_Normal:
 	endif
+
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Tails_Index(pc,d0.w),d0
@@ -115,6 +116,7 @@ loc_137A4:
 ; ---------------------------------------------------------------------------
 
 Tails_Control:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_13808
@@ -140,6 +142,7 @@ locret_13806:
 
 loc_13808:
 	endif
+
 		cmpa.w	#Player_1,a0
 		bne.s	loc_13830
 		move.w	(Ctrl_1_logical).w,(Ctrl_2_logical).w
@@ -284,7 +287,8 @@ Tails_ChkShoes:												; checks if Speed Shoes have expired and disables the
 		move.w	#$C,Acceleration_P2-Max_speed_P2(a4)			; set Acceleration
 		move.w	#$80,Deceleration_P2-Max_speed_P2(a4)		; set Deceleration
 		bclr	#Status_SpeedShoes,status_secondary(a0)
-		music	mus_Slowdown,1								; slow down tempo
+		moveq	#0,d0
+		jmp	(Change_Music_Tempo).w							; slow down tempo
 ; ---------------------------------------------------------------------------
 
 Tails_ExitChk:
@@ -1406,9 +1410,11 @@ locret_147B6:
 Tails_MdAir:
 		tst.b	double_jump_flag(a0)
 		bne.s	Tails_FlyingSwimming
+
 	if RollInAir
 		bsr.w	Sonic_ChgFallAnim
 	endif
+
 		bsr.w	Tails_JumpHeight
 		bsr.w	Tails_InputAcceleration_Freespace
 		bsr.w	Player_LevelBound
@@ -2556,6 +2562,7 @@ loc_1534A:
 		move.w	#$800,spin_dash_counter(a0)
 
 loc_1537A:
+
 	if ExtendedCamera
 		moveq	#0,d0
 		move.b	spin_dash_counter(a0),d0
@@ -2566,6 +2573,7 @@ loc_1537A:
 		neg.w	ground_vel(a0)
 +
 	endif
+
 		addq.w	#4,sp
 		cmpi.w	#$60,(a5)
 		beq.s	loc_15388
@@ -2898,6 +2906,7 @@ loc_1565E:
 ; ---------------------------------------------------------------------------
 
 Tails_Hurt:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_156BE
@@ -2912,6 +2921,7 @@ Tails_Hurt:
 
 loc_156BE:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_156D6
 		lea	(Player_1).w,a1
@@ -2988,6 +2998,7 @@ loc_15788:
 ; ---------------------------------------------------------------------------
 
 Tails_Death:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_157B0
@@ -3002,6 +3013,7 @@ Tails_Death:
 
 loc_157B0:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_157C8
 		lea	(Player_1).w,a1
@@ -3043,6 +3055,7 @@ loc_15806:
 ; ---------------------------------------------------------------------------
 
 Tails_Drown:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_15832
@@ -3057,6 +3070,7 @@ Tails_Drown:
 
 loc_15832:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_15828
 		lea	(Player_1).w,a1

@@ -33,9 +33,6 @@ VInt:
 		move.w	VInt_Table(pc,d0.w),d0
 		jsr	VInt_Table(pc,d0.w)
 
-VInt_Music:
-		SMPS_UpdateSoundDriver										; update SMPS	; warning: a5-a6 will be overwritten
-
 VInt_Done:
 		jsr	(Random_Number).w
 		addq.l	#1,(V_int_run_count).w
@@ -101,7 +98,7 @@ VInt_Lag_FullyUnderwater:
 VInt_Lag_Water_Cont:
 		move.w	(H_int_counter_command).w,VDP_control_port-VDP_control_port(a5)
 		startZ80
-		bra.w	VInt_Music
+		bra.w	VInt_Done
 ; ---------------------------------------------------------------------------
 
 VInt_Lag_NoWater:
@@ -118,7 +115,7 @@ VInt_Lag_NoWater:
 		move.w	(H_int_counter_command).w,VDP_control_port-VDP_control_port(a5)
 
 VInt_Lag_Done:
-		bra.w	VInt_Music
+		bra.w	VInt_Done
 
 ; ---------------------------------------------------------------------------
 ; Main
@@ -310,7 +307,6 @@ VInt_Level_Cont:
 		cmpi.b	#92,(H_int_counter).w								; is H-int occuring on or below line 92?
 		bhs.s	.notwater											; if it is, branch
 		st	(Do_Updates_in_H_int).w
-		move.l	#VInt_Done,(sp)										; skip update SMPS
 		jmp	(Set_KosPlus_Bookmark).w
 ; ---------------------------------------------------------------------------
 
@@ -378,7 +374,7 @@ VInt_SpecialFunction:
 HInt:
 		disableInts
 		tst.b	(H_int_flag).w
-		beq.w	HInt_Done
+		beq.s	HInt_Done
 		clr.b	(H_int_flag).w
 		movem.l	a0-a1,-(sp)
 		lea	(VDP_data_port).l,a1
@@ -396,7 +392,6 @@ HInt:
 		clr.b	(Do_Updates_in_H_int).w
 		movem.l	d0-a6,-(sp)											; move all the registers to the stack
 		bsr.w	Do_Updates
-		SMPS_UpdateSoundDriver										; Update SMPS
 		movem.l	(sp)+,d0-a6											; load saved registers from the stack
 
 HInt_Done:

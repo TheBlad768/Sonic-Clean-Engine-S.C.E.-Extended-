@@ -233,6 +233,7 @@ Go_CheckPlayerRelease:
 
 Obj_Song_Fade_Transition:
 		music	mus_FadeOut									; fade out music
+		move.w	#(2*60)-30,objoff_2E(a0)
 		move.l	#Song_Fade_Transition_Wait,address(a0)
 
 Song_Fade_Transition_Return:
@@ -240,8 +241,8 @@ Song_Fade_Transition_Return:
 ; ---------------------------------------------------------------------------
 
 Song_Fade_Transition_Wait:
-		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
-		bne.s	Song_Fade_Transition_Return
+		subq.w	#1,objoff_2E(a0)
+		bpl.s	Song_Fade_Transition_Return
 		move.b	subtype(a0),d0
 		move.b	d0,(Current_music+1).w
 		bsr.w	Play_Music										; play music
@@ -251,6 +252,7 @@ Song_Fade_Transition_Wait:
 
 Obj_Song_Fade_ToLevelMusic:
 		music	mus_FadeOut									; fade out music
+		move.w	#2*60,objoff_2E(a0)
 		move.l	#Song_Fade_ToLevelMusic_Wait,address(a0)
 
 Song_Fade_ToLevelMusic_Return:
@@ -258,8 +260,8 @@ Song_Fade_ToLevelMusic_Return:
 ; ---------------------------------------------------------------------------
 
 Song_Fade_ToLevelMusic_Wait:
-		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
-		bne.s	Song_Fade_ToLevelMusic_Return
+		subq.w	#1,objoff_2E(a0)
+		bpl.s	Song_Fade_ToLevelMusic_Return
 		bsr.s	Restore_LevelMusic
 		bra.w	Delete_Current_Sprite
 

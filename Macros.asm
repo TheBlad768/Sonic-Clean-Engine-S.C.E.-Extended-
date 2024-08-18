@@ -1013,29 +1013,9 @@ sample	macro id, terminate, byte
 	move.w	#(id),d0
     endif
       if ("terminate"="0") || ("terminate"="")
-	jsr	(SMPS_PlayDACSample).w
+	jsr	(Play_Sample).w
       else
-	jmp	(SMPS_PlayDACSample).w
-      endif
-    endm
-
-	; extended music
-emusic	macro track, terminate
-	move.w	#(track),d0
-      if ("terminate"="0") || ("terminate"="")
-	jsr	(SMPS_QueueSound1_Extended).w
-      else
-	jmp	(SMPS_QueueSound1_Extended).w
-      endif
-    endm
-
-	; extended sfx
-esfx	macro track, terminate
-	move.w	#(track),d0
-      if ("terminate"="0") || ("terminate"="")
-	jsr	(SMPS_QueueSound2_Extended).w
-      else
-	jmp	(SMPS_QueueSound2_Extended).w
+	jmp	(Play_Sample).w
       endif
     endm
 

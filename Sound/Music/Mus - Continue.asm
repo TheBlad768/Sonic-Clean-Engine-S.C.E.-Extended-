@@ -2,7 +2,7 @@ Snd_Continue_Header:
 	smpsHeaderStartSong 3
 	smpsHeaderVoiceUVB
 	smpsHeaderChan      $06, $03
-	smpsHeaderTempo     $01, $43
+	smpsHeaderTempo     $01, $58
 
 	smpsHeaderDAC       Snd_Continue_DAC
 	smpsHeaderFM        Snd_Continue_FM1,	$18, $12
