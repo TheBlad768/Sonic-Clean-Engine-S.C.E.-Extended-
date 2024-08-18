@@ -183,7 +183,7 @@ LevelSelect_Controls:
 ; Play sample
 ; ---------------------------------------------------------------------------
 
-.getsample															; 8
+		; get sample													; 8
 		moveq	#LevelSelect_MaxSampleNumber,d2						; set max count
 		move.w	(LevelSelect_sample_count).w,d3
 		lea	(LevelSelect_control_timer).w,a3
