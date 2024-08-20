@@ -44,6 +44,9 @@ ContinueScreen:
 		lea	Continue_VDP(pc),a1
 		jsr	(Load_VDP).w
 		clearRAM Object_RAM, Object_RAM_end								; clear the object RAM
+		clearRAM Lag_frame_count, Lag_frame_count_end						; clear variables
+		clearRAM Camera_RAM, Camera_RAM_end								; clear the camera RAM
+		clearRAM Oscillating_variables, Oscillating_variables_end					; clear variables
 
 		; clear
 		move.b	d0,(Water_full_screen_flag).w
