@@ -63,6 +63,9 @@ Obj_LevelResults:
 		bra.s	.setrb
 ; ---------------------------------------------------------------------------
 
+.tbonus	dc.w 5000, 5000, 1000, 500, 400, 300, 100, 10					; time bonus
+; ---------------------------------------------------------------------------
+
 .nottb
 		divu.w	#30,d0												; divide time by 30
 		moveq	#7,d1
@@ -72,8 +75,7 @@ Obj_LevelResults:
 
 .gettb
 		add.w	d0,d0
-		lea	TimeBonus(pc),a1
-		move.w	(a1,d0.w),(Time_bonus_countdown).w					; get the time bonus
+		move.w	.tbonus(pc,d0.w),(Time_bonus_countdown).w				; get the time bonus
 
 .setrb
 		move.w	(Ring_count).w,d0
@@ -102,7 +104,7 @@ Obj_LevelResults:
 		move.l	(a2)+,address(a1)
 		move.w	(a2)+,objoff_46(a1)
 		move.w	(a2)+,x_pos(a1)
-		spl	5(a1)
+		spl	objoff_05(a1)
 		move.w	(a2)+,y_pos(a1)
 		move.b	(a2)+,mapping_frame(a1)
 		move.b	(a2)+,width_pixels(a1)
@@ -305,8 +307,8 @@ LevelResults_MoveElement:
 .loc_2DE20
 		cmp.b	objoff_28(a0),d0										; level element moving out. Test if value of parent queue matches given queue value
 		blo.s		.return
-		moveq	#-$20,d0											; if so, move out
-		tst.b	5(a0)
+		moveq	#-32,d0												; if so, move out
+		tst.b	objoff_05(a0)
 		beq.s	.loc_2DE32
 		neg.w	d0													; change direction depending on where it came from
 
@@ -366,119 +368,19 @@ LevResults_GetDecimalScore:
 		tribyte $32768, $16384, $8192, $4096, $2048, $1024, $512, $256, $128, $64, $32, $16, 8, 4, 2, 1
 .decdata
 
-TimeBonus:	dc.w 5000, 5000, 1000, 500, 400, 300, 100, 10
-
-ObjArray_LevResults:
-		dc.w ((ObjArray_LevResults_end-ObjArray_LevResults)/$E)-1		; count
-
-		; 1
-		dc.l Obj_LevResultsCharName									; object address
-		dc.w $E0													; x destination
-		dc.w $FDE0													; xpos
-		dc.w $B8														; ypos
-		dc.b $13														; mapping frame
-		dc.b $48														; width
-		dc.w 1														; place in exit queue
-
-		; 2
-		dc.l Obj_LevResultsGeneral										; object address
-		dc.w $130													; x destination
-		dc.w $FE30													; xpos
-		dc.w $B8														; ypos
-		dc.b $11														; mapping frame
-		dc.b $30														; width
-		dc.w 1														; place in exit queue
-
-		; 3
-		dc.l Obj_LevResultsGeneral										; object address
-		dc.w $E8														; x destination
-		dc.w $468													; xpos
-		dc.w $CC													; ypos
-		dc.b $10														; mapping frame
-		dc.b $70														; width
-		dc.w 3														; place in exit queue
-
-		; 4
-		dc.l Obj_LevResultsGeneral										; object address
-		dc.w $160													; x destination
-		dc.w $4E0													; xpos
-		dc.w $BC													; ypos
-		dc.b $F														; mapping frame
-		dc.b $38														; width
-		dc.w 3														; place in exit queue
-
-		; 5
-		dc.l Obj_LevResultsGeneral										; object address
-		dc.w $C0													; bonus (time) HUD sprite x position
-		dc.w $4C0
-		dc.w $F0														; bonus (time) HUD sprite y position
-		dc.b $E
-		dc.b $20
-		dc.w 5
-
-		; 6
-		dc.l Obj_LevResultsGeneral
-		dc.w $E8														; time HUD sprite x position
-		dc.w $4E8
-		dc.w $F0														; time HUD sprite y position
-		dc.b $C
-		dc.b $30
-		dc.w 5
-
-		; 7
-		dc.l Obj_LevelResultsTimeBonus
-		dc.w $178													; time bonus number x position
-		dc.w $578
-		dc.w $F0														; time bonus number y position
-		dc.b 1
-		dc.b $40
-		dc.w 5
-
-		; 8
-		dc.l Obj_LevResultsGeneral
-		dc.w $C0													; bonus (ring) HUD sprite x position
-		dc.w $500
-		dc.w $100													; bonus (ring) HUD sprite y position
-		dc.b $D
-		dc.b $20
-		dc.w 7
-
-		; 9
-		dc.l Obj_LevResultsGeneral
-		dc.w $E8														; ring HUD sprite x position
-		dc.w $528
-		dc.w $100													; ring HUD sprite y position
-		dc.b $C
-		dc.b $30
-		dc.w 7
-
-		; 10
-		dc.l Obj_LevelResultsRingBonus
-		dc.w $178													; ring bonus number x position
-		dc.w $5B8
-		dc.w $100													; ring bonus number y position
-		dc.b 1
-		dc.b $40
-		dc.w 7
-
-		; 11
-		dc.l Obj_LevResultsGeneral
-		dc.w $D4													; total HUD sprite x position
-		dc.w $554
-		dc.w $11C													; total HUD sprite y position
-		dc.b $B
-		dc.b $30
-		dc.w 9
-
-		; 12
-		dc.l Obj_LevelResultsTotal
-		dc.w $178													; total number x position
-		dc.w $5F8
-		dc.w $11C													; total number y position
-		dc.b 1
-		dc.b $40
-		dc.w 9
-
+ObjArray_LevResults: titlecardresultsheader
+	titlecardresultsobjdata	Obj_LevResultsCharName, 96, 0-(544+128), 56, $13, 144, 1		; 1
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 176, 0-(464+128), 56, $11, 96, 1			; 2
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 104, 1000, 76, $10, 224, 3				; 3
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 224, 1120, 60, $F, 112, 3				; 4
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 64, 1088, 112, $E, 64, 5				; 5 (bonus (time) HUD)
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 104, 1128, 112, $C, 96, 5				; 6 (time HUD)
+	titlecardresultsobjdata	Obj_LevelResultsTimeBonus, 248, 1272, 112, 1, 128, 5			; 7 (time bonus)
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 64, 1152, 128, $D, 64, 7				; 8 (bonus (ring) HUD)
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 104, 1192, 128, $C, 96, 7				; 9 (ring HUD)
+	titlecardresultsobjdata	Obj_LevelResultsRingBonus, 248, 1336, 128, 1, 128, 7			; 10 (ring bonus)
+	titlecardresultsobjdata	Obj_LevResultsGeneral, 84, 1236, 156, $B, 96, 9				; 11 (total HUD)
+	titlecardresultsobjdata	Obj_LevelResultsTotal, 248, 1400, 156, 1, 128, 9				; 12 (total number)
 ObjArray_LevResults_end
 ; ---------------------------------------------------------------------------
 

@@ -252,7 +252,7 @@ Check_SonicEndPose:
 		subq.w	#1,objoff_2E(a0)
 		bpl.s	.return
 
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		btst	#7,status(a1)
 		bne.s	.return
 		btst	#Status_InAir,status(a1)
@@ -275,7 +275,7 @@ Check_TailsEndPose:
 		beq.s	Check_SonicEndPose.return
 		btst	#7,objoff_38(a0)
 		bne.s	Check_SonicEndPose.return
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1								; a1=character
 		btst	#7,status(a1)
 		bne.s	Check_SonicEndPose.return
 		btst	#Status_InAir,status(a1)
@@ -294,7 +294,7 @@ Check_SonicEndPose_MGZ:
 		subq.w	#1,objoff_2E(a0)
 		bpl.s	.return
 
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
 		bhs.s	.return									; if yes, branch
 		tst.b	render_flags(a1)								; player visible on the screen?
@@ -552,7 +552,7 @@ Obj_EggCapsule_Animals_Flipped:
 ; ---------------------------------------------------------------------------
 
 .move
-		lea	(Player_1).w,a1								; load player address
+		lea	(Player_1).w,a1								; a1=character
 		move.w	#$300,d0								; max xvel
 		move.w	#$100,d1								; max yvel
 		moveq	#$10,d2									; add xyvel
@@ -685,11 +685,11 @@ Load_EggCapsule:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_EggCapsule:				subObjData Map_EggCapsule, $494, 0, 1, $200, 64/2, 64/2, 0, 0
-ObjDat_EggCapsule_Button:		subObjData3 $200, 32/2, 16/2, 5, 0
-ObjDat3_EggCapsule_Propeller:		subObjData3 $200, 40/2, 8/2, 6, 0
-ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $494, 0, 1, $180, 24/2, 24/2, 0, 0
-ObjDat_EggCapsule_Animals:		subObjData3 $280, 16/2, 24/2, 2, 0
+ObjDat_EggCapsule:				subObjData Map_EggCapsule, $494, 0, 1, $200, 64, 64, 0, 0
+ObjDat_EggCapsule_Button:		subObjData3 $200, 32, 16, 5, 0
+ObjDat3_EggCapsule_Propeller:		subObjData3 $200, 40, 8, 6, 0
+ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $494, 0, 1, $180, 24, 24, 0, 0
+ObjDat_EggCapsule_Animals:		subObjData3 $280, 16, 24, 2, 0
 
 Child6_EggCapsule:
 		dc.w 1-1

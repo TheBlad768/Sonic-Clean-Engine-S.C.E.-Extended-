@@ -43,6 +43,7 @@ loc_136A8:
 
 Tails_Normal:
 	endif
+
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Tails_Index(pc,d0.w),d0
@@ -115,6 +116,7 @@ loc_137A4:
 ; ---------------------------------------------------------------------------
 
 Tails_Control:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_13808
@@ -140,6 +142,7 @@ locret_13806:
 
 loc_13808:
 	endif
+
 		cmpa.w	#Player_1,a0
 		bne.s	loc_13830
 		move.w	(Ctrl_1_logical).w,(Ctrl_2_logical).w
@@ -171,7 +174,7 @@ loc_1384A:
 		clr.b	double_jump_flag(a0)
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_1388C
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1						; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -299,7 +302,7 @@ Tails_CPU_Control:
 		move.w	#10*60,(Tails_CPU_idle_timer).w				; set wait
 
 .skip
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		move.w	(Tails_CPU_routine).w,d0
 		move.w	off_139EC(pc,d0.w),d0
 		jmp	off_139EC(pc,d0.w)
@@ -441,11 +444,7 @@ loc_13C50:
 		move.w	x_pos(a0),d0
 		sub.w	(Tails_CPU_target_X).w,d0
 		beq.s	loc_13CBE
-		move.w	d0,d2
-		bpl.s	loc_13C7E
-		neg.w	d2
-
-loc_13C7E:
+		mvabs.w	d0,d2
 		lsr.w	#4,d2
 		cmpi.w	#$C,d2
 		blo.s		loc_13C88
@@ -770,7 +769,7 @@ loc_13FC2:
 		move.b	#2,status(a0)
 		move.l	#words_to_long($100,0),x_vel(a0)
 		clr.w	ground_vel(a0)
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		bsr.w	sub_1459E
 		move.b	#1,(Flying_carrying_Sonic_flag).w
 		move.w	#$E,(Tails_CPU_routine).w
@@ -785,7 +784,7 @@ loc_13FFA:
 
 loc_14016:
 		lea	(Flying_carrying_Sonic_flag).w,a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		btst	#Status_InAir,status(a1)
 		bne.s	loc_14082
 		move.w	#6,(Tails_CPU_routine).w
@@ -844,7 +843,7 @@ loc_140CE:
 		move.b	#2,status(a0)
 		clr.l	x_vel(a0)
 		clr.w	ground_vel(a0)
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		bsr.w	sub_1459E
 		move.b	#1,(Flying_carrying_Sonic_flag).w
 		move.w	#$16,(Tails_CPU_routine).w
@@ -867,7 +866,7 @@ loc_14128:
 
 loc_1413C:
 		lea	(Flying_carrying_Sonic_flag).w,a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		move.w	(Ctrl_1).w,d0
 		bra.w	Tails_Carry_Sonic
 ; ---------------------------------------------------------------------------
@@ -922,7 +921,7 @@ loc_141D2:
 
 loc_141E2:
 		lea	(Flying_carrying_Sonic_flag).w,a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		move.w	(Ctrl_1).w,d0
 		bra.w	Tails_Carry_Sonic
 ; ---------------------------------------------------------------------------
@@ -995,7 +994,7 @@ locret_142E0:
 loc_142E2:
 		tst.b	(_unkFAAC).w
 		bne.s	loc_14362
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		tst.b	render_flags(a1)											; object visible on the screen?
 		bpl.s	loc_14330											; if not, branch
 		tst.w	(Tails_CPU_idle_timer).w
@@ -1044,7 +1043,7 @@ loc_14358:
 
 loc_14362:
 		clr.w	(Ctrl_2_logical).w
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		move.w	x_pos(a0),d0
 		move.w	y_pos(a0),d1
 		subi.w	#16,d1
@@ -1069,7 +1068,7 @@ loc_143A6:
 
 loc_143AA:
 		lea	(Flying_carrying_Sonic_flag).w,a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		move.w	(Ctrl_1).w,d0
 
 ; =============== S U B R O U T I N E =======================================
@@ -1185,7 +1184,7 @@ loc_144F8:
 		move.w	y_vel(a0),(Player_1+y_vel).w
 		move.w	y_vel(a0),(_unkF74C).w
 		movem.l	d0-a6,-(sp)
-		lea	(Player_1).w,a0
+		lea	(Player_1).w,a0				; a0=character
 		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,d0-a6
 		rts
@@ -1353,7 +1352,7 @@ loc_1473E:
 Tails_MdNormal:
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_14760
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1						; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -1406,16 +1405,18 @@ locret_147B6:
 Tails_MdAir:
 		tst.b	double_jump_flag(a0)
 		bne.s	Tails_FlyingSwimming
+
 	if RollInAir
 		bsr.w	Sonic_ChgFallAnim
 	endif
+
 		bsr.w	Tails_JumpHeight
 		bsr.w	Tails_InputAcceleration_Freespace
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
-		btst	#Status_Underwater,status(a0)	; is Tails underwater?
-		beq.s	loc_147DE				; if not, branch
-		subi.w	#$28,y_vel(a0)			; reduce gravity by $28 ($38-$28=$10)
+		btst	#Status_Underwater,status(a0)		; is Tails underwater?
+		beq.s	loc_147DE					; if not, branch
+		subi.w	#$28,y_vel(a0)				; reduce gravity by $28 ($38-$28=$10)
 
 loc_147DE:
 		cmpi.w	#$1000,y_vel(a0)
@@ -1440,7 +1441,7 @@ Tails_FlyingSwimming:
 		tst.w	(Player_mode).w
 		bne.s	locret_14820
 		lea	(Flying_carrying_Sonic_flag).w,a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1					; a1=character
 		move.w	(Ctrl_1).w,d0
 		bra.w	Tails_Carry_Sonic
 ; ---------------------------------------------------------------------------
@@ -1578,7 +1579,7 @@ loc_1492E:
 Tails_MdRoll:
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_1494C
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -1635,7 +1636,7 @@ locret_149A0:
 Tails_MdJump:
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_149BA
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1					; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -2051,11 +2052,7 @@ loc_14D96:
 		move.w	d0,ground_vel(a0)
 
 loc_14D9A:
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_14DA2
-		neg.w	d0
-
-loc_14DA2:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$80,d0
 		bhs.s	loc_14DF0
 		tst.b	spin_dash_flag(a0)
@@ -2246,11 +2243,7 @@ Tails_Roll:
 		bne.s	locret_14FA8
 		btst	#button_down,(Ctrl_2_logical).w
 		beq.s	loc_14FAA
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_14F94
-		neg.w	d0
-
-loc_14F94:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$100,d0
 		bhs.s	loc_14FBA
 
@@ -2556,6 +2549,7 @@ loc_1534A:
 		move.w	#$800,spin_dash_counter(a0)
 
 loc_1537A:
+
 	if ExtendedCamera
 		moveq	#0,d0
 		move.b	spin_dash_counter(a0),d0
@@ -2566,6 +2560,7 @@ loc_1537A:
 		neg.w	ground_vel(a0)
 +
 	endif
+
 		addq.w	#4,sp
 		cmpi.w	#$60,(a5)
 		beq.s	loc_15388
@@ -2898,6 +2893,7 @@ loc_1565E:
 ; ---------------------------------------------------------------------------
 
 Tails_Hurt:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_156BE
@@ -2912,9 +2908,10 @@ Tails_Hurt:
 
 loc_156BE:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_156D6
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -2988,6 +2985,7 @@ loc_15788:
 ; ---------------------------------------------------------------------------
 
 Tails_Death:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_157B0
@@ -3002,9 +3000,10 @@ Tails_Death:
 
 loc_157B0:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_157C8
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -3043,6 +3042,7 @@ loc_15806:
 ; ---------------------------------------------------------------------------
 
 Tails_Drown:
+
 	if GameDebug
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w
 		bne.s	loc_15832
@@ -3057,9 +3057,10 @@ Tails_Drown:
 
 loc_15832:
 	endif
+
 		tst.b	(Flying_carrying_Sonic_flag).w
 		beq.s	loc_15828
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		clr.b	object_control(a1)
 		clr.b	anim_frame(a1)
 		clr.b	anim_frame_timer(a1)
@@ -3189,11 +3190,7 @@ loc_15932:
 		bne.w	loc_15A14
 		lsr.b	#4,d0
 		andi.b	#6,d0
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_15956
-		neg.w	d2
-
-loc_15956:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_15960
@@ -3251,11 +3248,7 @@ loc_159C8:
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
 		bpl.w	locret_158C8
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_159EE
-		neg.w	d2
-
-loc_159EE:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(TailsAni_Roll2).l,a1 		; use roll 2 animation
 		cmpi.w	#$600,d2

@@ -133,10 +133,10 @@ __LABEL__ label *
     endm
 
 ; macro to define debug list object data
-dbglistobj macro obj, mapaddr, subtype, frame, vram
-	dc.l frame<<24|obj
-	dc.l subtype<<24|mapaddr
-	dc.w vram
+dbglistobj macro obj, mapaddr, subtype, frame, vram, pal, pri
+	dc.l frame<<24|((obj)&$FFFFFF)
+	dc.l subtype<<24|((mapaddr)&$FFFFFF)
+	dc.w make_art_tile(vram,pal,pri)
     endm
 
 ; ---------------------------------------------------------------------------
@@ -144,9 +144,9 @@ dbglistobj macro obj, mapaddr, subtype, frame, vram
 ; ---------------------------------------------------------------------------
 
 levartptrs macro art1,art2,map16x16r,map16x161,map16x162,map128x128r,map128x1281,map128x1282,palette,wpalette,music
-	dc.l (palette)<<24|((art1)&$FFFFFF), art2
-	dc.l (wpalette)<<24|((map16x16r)&$FFFFFF), map16x161, map16x162
-	dc.l (music)<<24|((map128x128r)&$FFFFFF), map128x1281, map128x1282
+	dc.l (palette)<<24|((art1)&$FFFFFF),art2
+	dc.l (wpalette)<<24|((map16x16r)&$FFFFFF),map16x161,map16x162
+	dc.l (music)<<24|((map128x128r)&$FFFFFF),map128x1281,map128x1282
     endm
 ; ---------------------------------------------------------------------------
 
@@ -166,19 +166,19 @@ watpalptrs macro height,spal,kpal
 subObjData	macro mappings,vram,pal,pri,priority,width,height,frame,collision
 	dc.l mappings
 	dc.w make_art_tile(vram,pal,pri),priority
-	dc.b width,height,frame,collision
+	dc.b (width/2),(height/2),frame,collision
     endm
 
 ; macro to declare sub-object data
 subObjData2	macro vram,pal,pri,priority,width,height,frame,collision
 	dc.w make_art_tile(vram,pal,pri),priority
-	dc.b width,height,frame,collision
+	dc.b (width/2),(height/2),frame,collision
     endm
 
 ; macro to declare sub-object data
 subObjData3	macro priority,width,height,frame,collision
 	dc.w priority
-	dc.b width,height,frame,collision
+	dc.b (width/2),(height/2),frame,collision
     endm
 
 ; macro to declare sub-object slotted data
@@ -186,31 +186,44 @@ subObjSlotData macro slots,vram,pal,pri,offset,index,mappings,priority,width,hei
 	dc.w slots,make_art_tile(vram,pal,pri),offset,index
 	dc.l mappings
 	dc.w priority
-	dc.b width,height,frame,collision
+	dc.b (width/2),(height/2),frame,collision
     endm
 
 ; macro to declare sub-object data
 subObjMainData	macro address,render,routine,height,width,priority,vram,pal,pri,mappings,frame,collision
-	dc.l address								; address
-	dc.b render, routine, height, width			; render, routine, height, width
-	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
-	dc.l mappings								; mappings
-	dc.b frame, collision						; mapping frame, collision flags
+	dc.l address
+	dc.b render,routine,(height/2),(width/2)
+	dc.w priority,make_art_tile(vram,pal,pri)
+	dc.l mappings
+	dc.b frame, collision
     endm
 
 ; macro to declare sub-object data
 subObjMainData2	macro address,render,routine,height,width,priority,vram,pal,pri,mappings
-	dc.l address								; address
-	dc.b render, routine, height, width			; render, routine, height, width
-	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
-	dc.l mappings								; mappings
+	dc.l address
+	dc.b render,routine,(height/2),(width/2)
+	dc.w priority,make_art_tile(vram,pal,pri)
+	dc.l mappings
     endm
 
 ; macro to declare sub-object data
 subObjMainData3	macro render,routine,height,width,priority,vram,pal,pri,mappings
-	dc.b render, routine, height, width			; render, routine, height, width
-	dc.w priority, make_art_tile(vram,pal,pri)	; priority, art tile
-	dc.l mappings								; mappings
+	dc.b render,routine,(height/2),(width/2)
+	dc.w priority,make_art_tile(vram,pal,pri)
+	dc.l mappings
+    endm
+; ---------------------------------------------------------------------------
+
+titlecardresultsheader macro {INTLABEL}
+__LABEL__ label *
+	dc.w ((__LABEL___end - __LABEL__) / $E)-1
+    endm
+
+titlecardresultsobjdata macro address,xdest,xpos,ypos,frame,width,exit
+	dc.l address							; object address
+	dc.w 128+xdest,128+xpos,128+ypos		; x destination, xpos, ypos
+	dc.b frame,(width/2)					; mapping frame, width
+	dc.w exit								; place in exit queue
     endm
 ; ---------------------------------------------------------------------------
 
@@ -237,6 +250,12 @@ bytesToXcnt function n,x,n/x-1
 
 ; fills a region of 68k RAM with 0
 clearRAM macro startaddr,endaddr
+    if startaddr>endaddr
+	fatal "Starting address of clearRAM \{startaddr} is after ending address \{endaddr}."
+    elseif startaddr==endaddr
+	warning "clearRAM is clearing zero bytes. Turning this into a nop instead."
+	exitm
+    endif
     if ((startaddr)&$8000)==0
 	lea	(startaddr).l,a1
     else
@@ -265,6 +284,12 @@ clearRAM macro startaddr,endaddr
 
 ; fills a region of 68k RAM with 0
 clearRAM2 macro startaddr,endaddr
+    if startaddr>endaddr
+	fatal "Starting address of clearRAM2 \{startaddr} is after ending address \{endaddr}."
+    elseif startaddr==endaddr
+	warning "clearRAM2 is clearing zero bytes. Turning this into a nop instead."
+	exitm
+    endif
     if ((startaddr)&$8000)==0
 	lea	(startaddr).l,a1
     else
@@ -285,26 +310,50 @@ clearRAM2 macro startaddr,endaddr
     endif
     endm
 
-; fills a region of 68k RAM with 0 (4 bytes at a time)
-clearRAM3 macro addr,length
-    if ((addr)&$8000)==0
-	lea	(addr).l,a1
+; fills a region of 68k RAM with 0
+clearRAM3 macro startaddr,endaddr
+    if startaddr>endaddr
+	fatal "Starting address of clearRAM \{startaddr} is after ending address \{endaddr}."
+    elseif startaddr==endaddr
+	warning "clearRAM is clearing zero bytes. Turning this into a nop instead."
+	exitm
+    endif
+    if ((startaddr)&$8000)==0
+	lea	(startaddr).l,a1
     else
-	lea	(addr).w,a1
+	lea	(startaddr).w,a1
     endif
 	moveq	#0,d0
-	move.w	#bytesTo4Lcnt(length-addr),d1
+    if ((startaddr)&1)
+	move.b	d0,(a1)+
+    endif
+    if ((bytesToXcnt(((endaddr-startaddr) - ((startaddr)&1)),(16*4)))<=$7F)
+	moveq	#bytesToXcnt(((endaddr-startaddr) - ((startaddr)&1)),(16*4)),d1
+    else
+	move.w	#bytesToXcnt(((endaddr-startaddr) - ((startaddr)&1)),(16*4)),d1
+    endif
 
 .clear:
+    rept 16
 	move.l	d0,(a1)+
-	move.l	d0,(a1)+
-	move.l	d0,(a1)+
-	move.l	d0,(a1)+
+    endr
 	dbf	d1,.clear
+    if (((endaddr-startaddr) - ((startaddr)&1))&2)
+	move.w	d0,(a1)+
+    endif
+    if (((endaddr-startaddr) - ((startaddr)&1))&1)
+	move.b	d0,(a1)+
+    endif
     endm
 
 ; copy 68k RAM
 copyRAM macro startaddr,endaddr,startaddr2
+    if startaddr>endaddr
+	fatal "Starting address of copyRAM \{startaddr} is after ending address \{endaddr}."
+    elseif startaddr==endaddr
+	warning "copyRAM is copy zero bytes. Turning this into a nop instead."
+	exitm
+    endif
     if ((startaddr)&$8000)==0
 	lea	(startaddr).l,a1
     else
@@ -338,6 +387,12 @@ copyRAM macro startaddr,endaddr,startaddr2
 
 ; copy 68k RAM
 copyRAM2 macro startaddr,endaddr,startaddr2
+    if startaddr>endaddr
+	fatal "Starting address of copyRAM2 \{startaddr} is after ending address \{endaddr}."
+    elseif startaddr==endaddr
+	warning "copyRAM2 is copy zero bytes. Turning this into a nop instead."
+	exitm
+    endif
     if ((startaddr)&$8000)==0
 	lea	(startaddr).l,a1
     else
@@ -486,7 +541,7 @@ getobjectRAMslot macro address
 	move.w	#Dynamic_object_RAM_end,d0
 	sub.w	a0,d0
 	lsr.w	#6,d0												; divide by $40... even though SSTs are $4A bytes long in this game
-	lea	(AllocateObjectAfterCurrent.find_first_sprite_table).w,address
+	lea	(Create_New_Sprite3.find_first_sprite_table).w,address
 	move.b	(address,d0.w),d0										; use a look-up table to get the right loop counter
     endm
 
@@ -1068,39 +1123,39 @@ __LABEL___Begin label *
 
 spritePiece macro xpos,ypos,width,height,tile,xflip,yflip,pal,pri
 	if SonicMappingsVer=1
-		dc.b	ypos
-		dc.b	(((width-1)&3)<<2)|((height-1)&3)
-		dc.b	((((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile))>>8
-		dc.b	tile&$FF
-		dc.b	xpos
+		dc.b ypos
+		dc.b (((width-1)&3)<<2)|((height-1)&3)
+		dc.b ((((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile))>>8
+		dc.b tile&$FF
+		dc.b xpos
 	elseif SonicMappingsVer=2
-		dc.w	((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
-		dc.w	(((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
-		dc.w	(((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(((tile)>>1)|((tile)&$8000))
-		dc.w	xpos
+		dc.w ((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
+		dc.w (((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
+		dc.w (((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(((tile)>>1)|((tile)&$8000))
+		dc.w xpos
 	else
-		dc.w	((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
-		dc.w	(((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
-		dc.w	xpos
+		dc.w ((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
+		dc.w (((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
+		dc.w xpos
 	endif
     endm
 
 spritePiece2P macro xpos,ypos,width,height,tile,xflip,yflip,pal,pri,tile2,xflip2,yflip2,pal2,pri2
 	if SonicMappingsVer=1
-		dc.b	ypos
-		dc.b	(((width-1)&3)<<2)|((height-1)&3)
-		dc.b	((((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile))>>8
-		dc.b	tile&$FF
-		dc.b	xpos
+		dc.b ypos
+		dc.b (((width-1)&3)<<2)|((height-1)&3)
+		dc.b ((((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile))>>8
+		dc.b tile&$FF
+		dc.b xpos
 	elseif SonicMappingsVer=2
-		dc.w	((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
-		dc.w	(((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
-		dc.w	(((pri2&1)<<15)|((pal2&3)<<13)|((yflip2&1)<<12)|((xflip2&1)<<11))+(tile2)
-		dc.w	xpos
+		dc.w ((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
+		dc.w (((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
+		dc.w (((pri2&1)<<15)|((pal2&3)<<13)|((yflip2&1)<<12)|((xflip2&1)<<11))+(tile2)
+		dc.w xpos
 	else
-		dc.w	((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
-		dc.w	(((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
-		dc.w	xpos
+		dc.w ((ypos&$FF)<<8)|(((width-1)&3)<<2)|((height-1)&3)
+		dc.w (((pri&1)<<15)|((pal&3)<<13)|((yflip&1)<<12)|((xflip&1)<<11))+(tile)
+		dc.w xpos
 	endif
     endm
 
@@ -1118,11 +1173,11 @@ __LABEL___Begin label *
 
 dplcEntry macro tiles,offset
 	if SonicDplcVer=3
-		dc.w	((offset&$FFF)<<4)|((tiles-1)&$F)
+		dc.w ((offset&$FFF)<<4)|((tiles-1)&$F)
 	elseif SonicDplcVer=4
-		dc.w	(((tiles-1)&$F)<<12)|((offset&$FFF)<<4)
+		dc.w (((tiles-1)&$F)<<12)|((offset&$FFF)<<4)
 	else
-		dc.w	(((tiles-1)&$F)<<12)|(offset&$FFF)
+		dc.w (((tiles-1)&$F)<<12)|(offset&$FFF)
 	endif
     endm
 
@@ -1134,7 +1189,7 @@ __LABEL__ label *
     endm
 
 s3kPlayerDplcEntry macro tiles,offset
-	dc.w	(((tiles-1)&$F)<<12)|(offset&$FFF)
+	dc.w (((tiles-1)&$F)<<12)|(offset&$FFF)
     endm
 
 ; ---------------------------------------------------------------------------
@@ -1449,4 +1504,23 @@ creditstr_end macro
 	CHARSET '_', 49
 	CHARSET '-', 50
 	CHARSET '=', 51
+	restore
+
+	; codepage for HUD
+	save
+	codepage HUD
+	CHARSET ' ',$FF
+	CHARSET '0',0
+	CHARSET '1',2
+	CHARSET '2',4
+	CHARSET '3',6
+	CHARSET '4',8
+	CHARSET '5',$A
+	CHARSET '6',$C
+	CHARSET '7',$E
+	CHARSET '8',$10
+	CHARSET '9',$12
+	CHARSET '*',$14
+	CHARSET ':',$16
+	CHARSET 'E',$18
 	restore

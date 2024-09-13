@@ -19,12 +19,12 @@ Obj_PathSwap:
 		add.w	d0,d0
 		move.w	word_1CD34(pc,d0.w),objoff_32(a0)
 		move.w	y_pos(a0),d1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		cmp.w	y_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_34(a0)
 +
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1									; a1=character
 		cmp.w	y_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_35(a0)
@@ -46,12 +46,12 @@ loc_1CD3C:
 		add.w	d0,d0
 		move.w	word_1CD34(pc,d0.w),objoff_32(a0)
 		move.w	x_pos(a0),d1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		cmp.w	x_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_34(a0)
 +
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1									; a1=character
 		cmp.w	x_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_35(a0)
@@ -62,9 +62,9 @@ loc_1CD3C:
 		bne.s	+
 		move.w	x_pos(a0),d1
 		lea	objoff_34(a0),a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		bsr.s	sub_1CDDA
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1									; a1=character
 		bsr.s	sub_1CDDA
 		jmp	(Delete_Sprite_If_Not_In_Range).w
 ; ---------------------------------------------------------------------------
@@ -173,9 +173,9 @@ loc_1CEF2:
 		bne.s	+
 		move.w	y_pos(a0),d1
 		lea	objoff_34(a0),a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		bsr.s	sub_1CF42
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1									; a1=character
 		bsr.s	sub_1CF42
 		jmp	(Delete_Sprite_If_Not_In_Range).w
 ; ---------------------------------------------------------------------------

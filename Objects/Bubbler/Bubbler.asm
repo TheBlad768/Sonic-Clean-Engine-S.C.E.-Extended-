@@ -207,11 +207,11 @@ loc_2FA14:
 sub_2FBA8:
 		tst.w	(Debug_placement_mode).w					; is debug mode on?
 		bne.s	.p2											; if yes, branch
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1									; a1=character
 		bsr.s	.main
 
 .p2
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1									; a1=character
 		tst.l	address(a1)
 		beq.s	.return
 

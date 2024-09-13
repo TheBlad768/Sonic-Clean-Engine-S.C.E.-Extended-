@@ -1,3 +1,6 @@
+; ---------------------------------------------------------------------------
+; Check range subroutine
+; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -14,13 +17,17 @@ Check_CameraInRange:
 		bhi.s	Check_CameraInRange_Fail
 		bclr	#7,objoff_27(a0)
 		cmp.w	(a1),d0
-		bls.s		+
+		bls.s		.skip
 		bset	#7,objoff_27(a0)
-+		bclr	#6,objoff_27(a0)
+
+.skip
+		bclr	#6,objoff_27(a0)
 		cmp.w	4(a1),d1
-		bls.s		+
+		bls.s		.skip2
 		bset	#6,objoff_27(a0)
-+		move.l	(sp),address(a0)
+
+.skip2
+		move.l	(sp),address(a0)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -194,7 +201,7 @@ Check_InMyRange_Fail:
 
 Check_PlayerInRange:
 		moveq	#0,d0
-		lea	(Player_2).w,a2
+		lea	(Player_2).w,a2														; a2=character
 		move.w	x_pos(a2),d1
 		move.w	y_pos(a2),d2
 		move.w	x_pos(a0),d3
@@ -207,7 +214,7 @@ Check_PlayerInRange:
 		add.w	(a1)+,d6
 		bsr.s	.check
 		swap	d0
-		lea	(Player_1).w,a2
+		lea	(Player_1).w,a2														; a2=character
 		move.w	x_pos(a2),d1
 		move.w	y_pos(a2),d2
 

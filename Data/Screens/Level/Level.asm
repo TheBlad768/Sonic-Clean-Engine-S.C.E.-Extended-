@@ -227,10 +227,12 @@ SpawnLevelMainSprites:
 		move.l	#Obj_InstaShield,(Shield+address).w
 		move.w	#Player_1,(Shield+parent).w
 		move.l	#Obj_Tails,(Player_2+address).w
-		move.w	(Player_1+x_pos).w,(Player_2+x_pos).w
-		move.w	(Player_1+y_pos).w,(Player_2+y_pos).w
-		subi.w	#32,(Player_2+x_pos).w
-		addq.w	#4,(Player_2+y_pos).w
+		moveq	#-32,d0
+		add.w	(Player_1+x_pos).w,d0
+		move.w	d0,(Player_2+x_pos).w
+		move.w	(Player_1+y_pos).w,d0
+		addq.w	#4,d0
+		move.w	d0,(Player_2+y_pos).w
 		move.l	#Obj_DashDust,(Dust_P2+address).w
 		clr.w	(Tails_CPU_routine).w
 		rts

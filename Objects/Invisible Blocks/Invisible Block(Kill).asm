@@ -55,13 +55,13 @@ loc_1F606:
 		move.b	d6,d0
 		andi.b	#p1_standing,d0
 		beq.s	loc_1F63C
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		bsr.w	sub_1F734
 
 loc_1F63C:
 		andi.b	#p2_standing,d6
 		beq.s	loc_1F64A
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1								; a1=character
 		bsr.w	sub_1F734
 
 loc_1F64A:
@@ -86,13 +86,13 @@ loc_1F66C:
 		move.b	d6,d0
 		andi.b	#p1_touch_side,d0
 		beq.s	loc_1F6A0
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		bsr.w	sub_1F734
 
 loc_1F6A0:
 		andi.b	#p2_touch_side,d6
 		beq.s	loc_1F6AE
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1								; a1=character
 		bsr.s	sub_1F734
 
 loc_1F6AE:
@@ -117,13 +117,13 @@ loc_1F6D0:
 		move.b	d6,d0
 		andi.b	#p1_touch_bottom,d0
 		beq.s	loc_1F704
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1								; a1=character
 		bsr.s	sub_1F734
 
 loc_1F704:
 		andi.b	#p2_touch_bottom,d6
 		beq.s	loc_1F712
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1								; a1=character
 		bsr.s	sub_1F734
 
 loc_1F712:

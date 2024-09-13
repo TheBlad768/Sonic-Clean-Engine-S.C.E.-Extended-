@@ -41,6 +41,7 @@ loc_16488:
 
 Knuckles_Normal:
 	endif
+
 		moveq	#0,d0
 		move.b	routine(a0),d0
 		move.w	Knuckles_Index(pc,d0.w),d0
@@ -95,6 +96,7 @@ Knuckles_Init_Continued:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Control:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_165A2
@@ -117,6 +119,7 @@ locret_165A0:
 
 loc_165A2:
 	endif
+
 		tst.b	(Ctrl_1_locked).w
 		bne.s	loc_165AE
 		move.w	(Ctrl_1).w,(Ctrl_1_logical).w
@@ -348,9 +351,11 @@ locret_1684A:
 Knux_MdAir:
 		tst.b	double_jump_flag(a0)
 		bne.s	Knux_Glide_Freespace
+
 	if RollInAir
 		bsr.w	Sonic_ChgFallAnim
 	endif
+
 		bsr.w	Knux_JumpHeight
 		bsr.w	Knux_ChgJumpDir
 		bsr.w	Player_LevelBound
@@ -1798,11 +1803,7 @@ loc_1759E:
 		move.w	d0,ground_vel(a0)
 
 loc_175A2:
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_175AA
-		neg.w	d0
-
-loc_175AA:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$80,d0
 		bhs.s	loc_175F8
 		tst.b	spin_dash_flag(a0)
@@ -2345,6 +2346,7 @@ locret_17BB4:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Hurt:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17BD0
@@ -2357,6 +2359,7 @@ Knuckles_Hurt:
 
 loc_17BD0:
 	endif
+
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$30,y_vel(a0)
 		btst	#Status_Underwater,status(a0)
@@ -2423,6 +2426,7 @@ loc_17C82:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Death:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17CA2
@@ -2435,6 +2439,7 @@ Knuckles_Death:
 
 loc_17CA2:
 	endif
+
 		bsr.w	sub_123C2
 		jsr	(MoveSprite_TestGravity).w
 		bsr.w	Sonic_RecordPos
@@ -2466,6 +2471,7 @@ loc_17CE0:
 ; ---------------------------------------------------------------------------
 
 Knuckles_Drown:
+
 	if GameDebug
 		tst.b	(Debug_mode_flag).w
 		beq.s	loc_17D04
@@ -2478,6 +2484,7 @@ Knuckles_Drown:
 
 loc_17D04:
 	endif
+
 		jsr	(MoveSprite2_TestGravity).w
 		addi.w	#$10,y_vel(a0)
 		bsr.w	Sonic_RecordPos
@@ -2596,11 +2603,7 @@ loc_17E00:
 		bne.w	loc_17ECC
 		lsr.b	#4,d0
 		andi.b	#6,d0
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_17E24
-		neg.w	d2
-
-loc_17E24:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_17E2E
@@ -2650,11 +2653,7 @@ loc_17E84:
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
 		bpl.s	locret_17E82
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_17EA6
-		neg.w	d2
-
-loc_17EA6:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(KnuxAni_Roll2).l,a1 	; use roll 2 animation
 		cmpi.w	#$600,d2
