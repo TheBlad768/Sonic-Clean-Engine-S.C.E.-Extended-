@@ -5,7 +5,7 @@
 ; =============== S U B R O U T I N E =======================================
 
 Find_SonicObject:
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1			; a1=character
 
 Find_OtherObject:
 		moveq	#0,d0				; d0 = 0 if other object is left of calling object, 2 if right of it
@@ -34,7 +34,7 @@ Find_OtherObject:
 
 Find_SonicTails:
 		moveq	#0,d0				; d0 = 0 if Sonic/Tails is left of object, 2 if right of object
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1			; a1=character
 		move.w	x_pos(a0),d2
 		sub.w	x_pos(a1),d2
 		bpl.s	.sleft
@@ -43,7 +43,7 @@ Find_SonicTails:
 
 .sleft
 		moveq	#0,d1				; d1 = 0 if Sonic/Tails is above object, 2 if below object
-		lea	(Player_2).w,a2
+		lea	(Player_2).w,a2			; a2=character
 		move.w	x_pos(a0),d3
 		sub.w	x_pos(a2),d3
 		bpl.s	.tleft

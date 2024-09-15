@@ -35,7 +35,7 @@ Obj_EndSignControlAwaitStart:
 		; restore control
 		clr.w	(Ctrl_1_locked).w										; unlock control 1 and control 2
 		jsr	(Restore_PlayerControl).w
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1											; a1=character
 		jmp	(Restore_PlayerControl2).w
 ; ---------------------------------------------------------------------------
 
@@ -159,7 +159,7 @@ Obj_EndSign:
 ; ---------------------------------------------------------------------------
 
 .signresults
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1											; a1=character
 		btst	#Status_InAir,status(a1)
 		bne.s	.draw2												; if player is not standing on the ground, wait until he is
 		move.l	#.signafter,address(a0)
@@ -360,9 +360,9 @@ EndSign_CheckWall:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjSlot_EndSigns:		subObjSlotData 0, $494, 0, 0, $18, 0, Map_EndSigns, $300, 48/2, 32/2, 0, 0
-ObjDat_SignpostStub:		subObjData Map_SignpostStub, $482, 0, 0, $300, 8/2, 16/2, 0, 0
-ObjDat_SignpostSparkle:	subObjData Map_Ring, ArtTile_Ring, 1, 0, $280, 16/2, 16/2, 4, 0
+ObjSlot_EndSigns:		subObjSlotData 0, $494, 0, 0, $18, 0, Map_EndSigns, $300, 48, 32, 0, 0
+ObjDat_SignpostStub:		subObjData Map_SignpostStub, $482, 0, 0, $300, 8, 16, 0, 0
+ObjDat_SignpostSparkle:	subObjData Map_Ring, ArtTile_Ring, 1, 0, $280, 16, 16, 4, 0
 PLCPtr_EndSigns:		dc.l dmaSource(ArtUnc_EndSigns), DPLC_EndSigns
 
 Child6_EndSign:

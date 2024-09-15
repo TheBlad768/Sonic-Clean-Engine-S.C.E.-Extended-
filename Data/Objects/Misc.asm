@@ -47,7 +47,7 @@ SetUp_ObjAttributesSlotted:
 		move.b	d0,subtype(a0)
 		move.b	d0,render_flags(a0)
 		move.w	d0,status(a0)					; if no open slots, then destroy this object period
-		addq.w	#4*2,sp
+		addq.w	#4*2,sp						; exit from current object
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -170,14 +170,14 @@ Release_PlayerFromObject:
 		beq.s	.return											; if not, branch
 		bclr	#p1_pushing_bit,status(a0)
 		beq.s	.notp1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		bclr	#Status_Push,status(a1)
 		move.w	#bytes_to_word(AniIDSonAni_Walk,AniIDSonAni_Run),anim(a1)	; reset player anim
 
 .notp1
 		bclr	#p2_pushing_bit,status(a0)
 		beq.s	.return
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		bclr	#Status_Push,status(a1)
 		move.w	#bytes_to_word(AniIDSonAni_Walk,AniIDSonAni_Run),anim(a1)	; reset player anim
 
@@ -194,14 +194,14 @@ Displace_PlayerOffObject:
 		beq.s	.return											; if not, branch
 		bclr	#p1_standing_bit,status(a0)
 		beq.s	.notp1											; branch, if Sonic wasn't standing on the object
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		bclr	#Status_OnObj,status(a1)
 		bset	#Status_InAir,status(a1)
 
 .notp1
 		bclr	#p2_standing_bit,status(a0)
 		beq.s	.return											; branch, if Tails wasn't standing on the object
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		bclr	#Status_OnObj,status(a1)
 		bset	#Status_InAir,status(a1)
 
@@ -212,14 +212,14 @@ Displace_PlayerOffObject:
 
 Go_CheckPlayerRelease:
 		movem.l	d7-a0/a2-a3,-(sp)
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		btst	#Status_OnObj,status(a1)
 		beq.s	.notp1
 		movea.w	interact(a1),a0
 		bsr.w	CheckPlayerReleaseFromObj
 
 .notp1
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		btst	#Status_OnObj,status(a1)
 		beq.s	.notp2
 		movea.w	interact(a1),a0
@@ -355,7 +355,7 @@ EnemyDefeat_Score:
 ; =============== S U B R O U T I N E =======================================
 
 HurtCharacter_WithoutDamage:
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		move.b	#PlayerID_Hurt,routine(a1)							; hit animation
 		bclr	#Status_OnObj,status(a1)
 		bclr	#Status_Push,status(a1)								; player is not standing on/pushing an object
@@ -449,7 +449,7 @@ Check_PlayerCollision:
 ; =============== S U B R O U T I N E =======================================
 
 Load_LevelResults:
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		btst	#7,status(a1)
 		bne.s	.return
 		btst	#Status_InAir,status(a1)								; is the player in the air?
@@ -504,7 +504,7 @@ Stop_Object:
 ; =============== S U B R O U T I N E =======================================
 
 Restore_PlayerControl:
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 
 Restore_PlayerControl2:
 		clr.b	object_control(a1)
@@ -518,7 +518,7 @@ Restore_PlayerControl2:
 
 Player_Load_PLC:
 		move.w	a0,-(sp)
-		lea	(Player_1).w,a0
+		lea	(Player_1).w,a0										; a0=character
 		moveq	#0,d0
 		move.b	character_id(a0),d0
 		add.w	d0,d0
@@ -965,8 +965,8 @@ Reset_ObjectsPosition4:
 Offset_ObjectsDuringTransition:
 
 		; all objects in this range
-		lea	(Dynamic_object_RAM+next_object).w,a1
-		moveq	#((Dynamic_object_RAM_end-Dynamic_object_RAM)/object_size)-1,d2
+		lea	(Dynamic_object_RAM).w,a1
+		moveq	#bytesToXcnt(Dynamic_object_RAM_end-Dynamic_object_RAM,object_size),d2
 
 .check
 		tst.l	address(a1)											; is this object slot occupied?

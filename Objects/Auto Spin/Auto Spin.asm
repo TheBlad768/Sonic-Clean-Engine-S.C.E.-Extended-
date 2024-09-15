@@ -19,12 +19,12 @@ Obj_AutoSpin:
 		add.w	d0,d0
 		move.w	word_1E854(pc,d0.w),objoff_32(a0)
 		move.w	y_pos(a0),d1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		cmp.w	y_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_34(a0)
 +
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		cmp.w	y_pos(a1),d1
 		bhs.s	+
 		move.b	#1,objoff_35(a0)
@@ -46,13 +46,13 @@ AutoSpin_CheckX:
 		add.w	d0,d0
 		move.w	word_1E854(pc,d0.w),objoff_32(a0)
 		move.w	x_pos(a0),d1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		cmp.w	x_pos(a1),d1
 		bhs.s	loc_1E880
 		move.b	#1,objoff_34(a0)
 
 loc_1E880:
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		cmp.w	x_pos(a1),d1
 		bhs.s	loc_1E890
 		move.b	#1,objoff_35(a0)
@@ -67,9 +67,9 @@ AutoSpin_MainX:
 		bne.s	loc_1E8C0
 		move.w	x_pos(a0),d1
 		lea	objoff_34(a0),a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		bsr.s	sub_1E8C6
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		cmpi.w	#4,(Tails_CPU_routine).w
 		beq.s	loc_1E8BA
 		bsr.s	sub_1E8C6
@@ -179,7 +179,7 @@ sub_1E9B6:
 
 loc_1E9C0:
 		bset	#Status_Roll,status(a1)
-		move.w	#bytes_to_word(28/2,14/2),y_radius(a1)	; set y_radius and x_radius
+		move.w	#bytes_to_word(28/2,14/2),y_radius(a1)				; set y_radius and x_radius
 		move.b	#AniIDSonAni_Roll,anim(a1)
 		addq.w	#5,y_pos(a1)
 		sfx	sfx_Roll,1
@@ -191,9 +191,9 @@ AutoSpin_MainY:
 		bne.s	loc_1EA0E
 		move.w	y_pos(a0),d1
 		lea	objoff_34(a0),a2
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		bsr.s	sub_1EA14
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		cmpi.w	#4,(Tails_CPU_routine).w
 		beq.s	loc_1EA08
 		bsr.s	sub_1EA14

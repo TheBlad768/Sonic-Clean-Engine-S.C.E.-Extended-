@@ -22,12 +22,12 @@ SolidObjectFull:
 		bsr.s	SolidObjectFull_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.b	render_flags(a1)
-		bpl.s	locret_1DCB4
+		tst.b	render_flags(a1)											; is the player visible on the screen?
+		bpl.s	locret_1DCB4											; if not, branch
 		addq.b	#1,d6
 
 SolidObjectFull_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SolidObject_OnScreenTest								; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -65,12 +65,12 @@ SolidObjectFull2:
 		bsr.s	SolidObjectFull2_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1DCB4											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectFull2_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SolidObject_cont										; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -121,12 +121,12 @@ SolidObjectFullSloped_Spring:
 		bsr.s	SolidObjectFullSloped_Spring_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1DD5A											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectFullSloped_Spring_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SlopedSolid_cont										; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -167,12 +167,12 @@ SolidObjectDoubleSloped:
 		bsr.s	SolidObjectDoubleSloped_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1DD5A											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectDoubleSloped_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	DoubleSlopedSolid_cont								; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -208,12 +208,12 @@ SolidObjectFullSloped:
 		bsr.s	SolidObjectFullSloped_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1DE0C											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectFullSloped_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SlopedSolid_cont										; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -253,12 +253,12 @@ SolidObjectFull_Offset:
 		bsr.s	SolidObjectFull_Offset_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1DE0C											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectFull_Offset_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.s	OffsetSolid_cont										; if not, branch
 		btst	#Status_InAir,status(a1)									; is the player in the air?
 		bne.s	loc_1DE58											; if yes, branch
@@ -802,12 +802,12 @@ SolidObjectTop:
 		bsr.s	SolidObjectTop_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1E2F2											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectTop_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	loc_1E42E											; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -845,12 +845,12 @@ SolidObjectTopSloped2:
 		bsr.s	SolidObjectTopSloped2_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1E2F2											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectTopSloped2_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SolidObjCheckSloped2									; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -886,12 +886,12 @@ SolidObjectTopSloped:
 		bsr.s	SolidObjectTopSloped_1P
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1E3A2											; if yes, branch
 		addq.b	#1,d6
 
 SolidObjectTopSloped_1P:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		beq.w	SolidObjCheckSloped									; if not, branch
 		move.w	d1,d2
 		add.w	d2,d2
@@ -929,12 +929,12 @@ sub_1E3AE:
 		bsr.s	sub_1E3C4
 		movem.l	(sp)+,d1-d4
 		lea	(Player_2).w,a1											; a1=character
-		tst.l	address(a1)												; is player RAM empty?
+		tst.l	address(a1)												; is the player RAM empty?
 		beq.s	locret_1E3A2											; if yes, branch
 		addq.b	#1,d6
 
 sub_1E3C4:
-		btst	d6,status(a0)												; is player standing on the current object?
+		btst	d6,status(a0)												; is the player standing on the current object?
 		bne.s	loc_1E3D6											; if yes, branch
 		btst	#Status_OnObj,status(a1)									; is player standing on any object?
 		bne.s	loc_1E402											; if yes, branch

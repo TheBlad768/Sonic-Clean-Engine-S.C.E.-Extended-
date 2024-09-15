@@ -43,14 +43,14 @@ Obj_Monitor:
 		move.w	x_pos(a0),d4
 
 		; check p1
-		lea	(Player_1).w,a1
+		lea	(Player_1).w,a1										; a1=character
 		moveq	#p1_standing_bit,d6
 		movem.l	d1-d4,-(sp)
 		bsr.w	SolidObject_Monitor_SonicKnux
 		movem.l	(sp)+,d1-d4
 
 		; check p2
-		lea	(Player_2).w,a1
+		lea	(Player_2).w,a1										; a1=character
 		tst.l	address(a1)											; is player RAM empty?
 		beq.s	.anim											; if yes, branch
 		moveq	#p2_standing_bit,d6

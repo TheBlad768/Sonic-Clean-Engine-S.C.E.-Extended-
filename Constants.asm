@@ -24,6 +24,11 @@ Z80_RAM_end =						$A02000						; end of non-reserved Z80 RAM
 Z80_bus_request =					$A11100
 Z80_reset =							$A11200
 
+ym2612_a0 =							$A04000
+ym2612_d0 =							$A04001
+ym2612_a1 =							$A04002
+ym2612_d1 =							$A04003
+
 ; ---------------------------------------------------------------------------
 ; I/O Area
 ; ---------------------------------------------------------------------------
@@ -682,7 +687,7 @@ afReset								= $FB							; move offscreen for remove(Using the Sprite_OnScreen
 
 arfIndex								= $FF							; go to animate raw index
 arfEnd								= $FE							; return to beginning of animation
-arfBack								= $FC							; go back (specified number) bytes
+arfChange							= $FC							; run specified animation (specified offset)
 arfJump								= $FA							; jump from $34(a0) address
 
 ; ---------------------------------------------------------------------------
@@ -771,6 +776,7 @@ ObjHitCeiling							= ObjCheckCeilingDist				; alias from Sonic 1 (GitHub)
 ObjHitWallLeft						= ObjCheckLeftWallDist			; alias from Sonic 1 (GitHub)
 SolidObject							= SolidObjectFull					; alias from Sonic 1/2 (Hivebrain/GitHub)
 SolidObject_Always					= SolidObjectFull2					; alias from Sonic 2 (GitHub)
+CollectRing							= GiveRing						; alias from Sonic 1/2 (Hivebrain/GitHub)
 ReactToItem							= TouchResponse					; alias from Sonic 1 (GitHub)
 HurtSonic							= HurtCharacter					; alias from Sonic 1 (Hivebrain/GitHub)
 KillSonic								= Kill_Character					; alias from Sonic 1 (Hivebrain/GitHub)

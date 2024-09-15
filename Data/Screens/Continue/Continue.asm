@@ -957,8 +957,8 @@ Credits_LoadText:
 
 Credits_DrawSmallText:
 		moveq	#0,d0
-		move.b	(a1)+,d0												; 1 (A)
-		beq.s	.exit
+		move.b	(a1)+,d0
+		beq.s	.exit													; if zero, exit
 
 		; load small letter (8x16)
 		cmpi.b	#' ',d0
@@ -1004,8 +1004,8 @@ Credits_DrawSmallText:
 
 Credits_DrawLargeText:
 		moveq	#0,d0
-		move.b	(a1)+,d0												; 1 (A)
-		beq.s	Credits_DrawSmallText.exit
+		move.b	(a1)+,d0
+		beq.s	Credits_DrawSmallText.exit							; if zero, exit
 
 		; load large letter
 		cmpi.b	#' ',d0
@@ -1077,10 +1077,10 @@ Credits_DrawLargeText:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_919A6:		subObjData Map_EggRoboBadnik, $500, 0, 1, $280, 40/2, 48/2, 1, 6
-ObjDat3_919BE:		subObjData3 $280, 24/2, 32/2, 6, 0
-ObjDat3_919C4:		subObjData3 $280, 32/2, 24/2, 2, 0
-ObjDat3_919CA:		subObjData3 $280, 64/2, 8/2, 7, 0
+ObjDat_919A6:		subObjData Map_EggRoboBadnik, $500, 0, 1, $280, 40, 48, 1, 6
+ObjDat3_919BE:		subObjData3 $280, 24, 32, 6, 0
+ObjDat3_919C4:		subObjData3 $280, 32, 24, 2, 0
+ObjDat3_919CA:		subObjData3 $280, 64, 8, 7, 0
 
 ChildObjDat_Continue_Tails_tails_Icons:
 		dc.w 1-1

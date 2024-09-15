@@ -183,11 +183,11 @@ loc_EAB8:
 
 loc_EABE:
 		btst	#Status_LtngShield,status_secondary(a0)						; does Sonic have a Lightning Shield?
-		bne.s	Test_Ring_Collisions_AttractRing						; if not, branch
+		bne.s	Test_Ring_Collisions_AttractRing						; if yes, branch
 
 loc_EAC6:
 		move.w	#bytes_to_word(6,(CMap_Ring_Spark-CMap_Ring)/2),(a4)
-		bsr.w	GiveRing
+		bsr.s	GiveRing
 		lea	(Ring_consumption_list).w,a3
 
 .find
@@ -221,47 +221,83 @@ Test_Ring_Collisions_AttractRing:
 		movea.l	a3,a1												; return ROM address
 		bra.s	loc_EAC6
 
+; ---------------------------------------------------------------------------
+; Give ring to player
+; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
+
+GiveRing:
+		move.w	#999,d0												; max rings
+		addq.w	#1,(Ring_count).w										; add 1 to rings
+		cmp.w	(Ring_count).w,d0									; does the player 1 have 999 or less rings?
+		bhs.s	.skip												; if yes, branch
+		move.w	d0,(Ring_count).w									; set max rings
+
+.skip
+		ori.b	#1,(Update_HUD_ring_count).w						; update the rings counter
+		cmpi.w	#100,(Ring_count).w									; does the player 1 have less than 100 rings?
+		blo.s		.sfx													; if yes, play the ring sound
+		bset	#1,(Extra_life_flags).w										; test and set the flag for the first extra life
+		beq.s	.add													; if it was clear before, branch
+		cmpi.w	#200,(Ring_count).w									; does the player 1 have less than 200 rings?
+		blo.s		.sfx													; if yes, play the ring sound
+		bset	#2,(Extra_life_flags).w										; test and set the flag for the second extra life
+		bne.s	.sfx													; if it was set before, play the ring sound
+
+.add
+		addq.b	#1,(Life_count).w										; add 1 to the life count
+		addq.b	#1,(Update_HUD_life_count).w							; add 1 to the displayed life count
+		music	mus_ExtraLife,1										; play the 1up song
+; ---------------------------------------------------------------------------
+
+.sfx
+		sfx	sfx_RingRight,1											; play ring sound
+
+; ---------------------------------------------------------------------------
+; Render rings
+; ---------------------------------------------------------------------------
+
 ; =============== S U B R O U T I N E =======================================
 
 Render_Rings:
 		movea.l	(Ring_start_addr_ROM).w,a0
 		move.l	(Ring_end_addr_ROM).w,d2
-		sub.l	a0,d2
-		beq.s	locret_EBEC
+		sub.l	a0,d2												; are there any rings on-screen?
+		beq.s	.return												; if not, branch
 		movea.w	(Ring_start_addr_RAM).w,a4
-		lea	CMap_Ring(pc),a1
 		move.w	4(a3),d4												; Camera_Y_pos_copy
-		move.w	#$F0,d5
+		move.w	#256-16,d5
 		move.w	(Screen_Y_wrap_value).w,d3
 
-loc_EBA6:
-		tst.w	(a4)+
-		bmi.s	loc_EBE6
-		move.w	2(a0),d1
-		sub.w	d4,d1
+.loop
+		tst.w	(a4)+												; has this ring been consumed?
+		bmi.s	.next												; if it has, branch
+		move.w	2(a0),d1												; get ring ypos
+		sub.w	d4,d1												; subtract camera ypos
 		addq.w	#8,d1
 		and.w	d3,d1
 		cmp.w	d5,d1
-		bhs.s	loc_EBE6
-		move.w	(a0),d0
-		sub.w	(a3),d0												; Camera_X_pos_copy
+		bhs.s	.next
+		move.w	(a0),d0												; get ring xpos
+		sub.w	(a3),d0												; subtract camera xpos
 		move.b	-1(a4),d6
-		add.w	d6,d6												; 2 bytes
-		addi.w	#$70,d1												; add ypos
+		add.w	d6,d6												; multiply by 2
+		addi.w	#128-16,d1											; add ypos
 		move.w	d1,(a6)+												; set ypos
 		move.b	#5,(a6)												; set size of the sprite
 		addq.w	#2,a6												; skip link parameter
-		move.w	(a1,d6.w),(a6)+										; VRAM
-		addi.w	#$78,d0												; add xpos
+		move.w	CMap_Ring(pc,d6.w),(a6)+								; VRAM
+		addi.w	#128-8,d0											; add xpos
 		move.w	d0,(a6)+												; set xpos
-		subq.w	#1,d7
+		subq.w	#1,d7												; subtract sprite count
 
-loc_EBE6:
-		addq.w	#4,a0
+.next
+		addq.w	#4,a0												; next
 		subq.w	#4,d2
-		bne.s	loc_EBA6
+		bne.s	.loop
 
-locret_EBEC:
+.return
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -275,69 +311,32 @@ locret_EBEC:
 CMap_Ring:
 
 		; frame1
-		dc.w $0000+make_art_tile(ArtTile_Ring,1,0)
+		dc.w make_art_tile(ArtTile_Ring,1,0)
 
 
 CMap_Ring_Spark:
 
 		; frame2
-		dc.w $0000+make_art_tile(ArtTile_Ring_Sparks,1,0)
+		dc.w make_art_tile(ArtTile_Ring_Sparks,1,0)
 
 		; frame3
-		dc.w $1800+make_art_tile(ArtTile_Ring_Sparks,1,0)
+		dc.w flip_x+flip_y+make_art_tile(ArtTile_Ring_Sparks,1,0)
 
 		; frame4
-		dc.w $0800+make_art_tile(ArtTile_Ring_Sparks,1,0)
+		dc.w flip_x+make_art_tile(ArtTile_Ring_Sparks,1,0)
 
 		; frame5
-		dc.w $1000+make_art_tile(ArtTile_Ring_Sparks,1,0)
+		dc.w flip_y+make_art_tile(ArtTile_Ring_Sparks,1,0)
 
 CMap_Ring_end
-
-; =============== S U B R O U T I N E =======================================
-
-AddRings:
-		add.w	d0,(Ring_count).w
-		ori.b	#1,(Update_HUD_ring_count).w						; update ring counter
-		rts
-
-; =============== S U B R O U T I N E =======================================
-
-GiveRing:
-CollectRing:
-		addq.w	#1,(Ring_count).w										; add 1 to rings
-		move.w	#999,d0
-		cmp.w	(Ring_count).w,d0									; does the player 1 have 999 or less rings?
-		bhs.s	.skip												; if yes, branch
-		move.w	d0,(Ring_count).w									; set max rings
-
-.skip
-		ori.b	#1,(Update_HUD_ring_count).w						; update the rings counter
-		cmpi.w	#100,(Ring_count).w									; does the player 1 have less than 100 rings?
-		blo.s		JmpTo_Play_SFX										; if yes, play the ring sound
-		bset	#1,(Extra_life_flags).w										; test and set the flag for the first extra life
-		beq.s	loc_1A5D8											; if it was clear before, branch
-		cmpi.w	#200,(Ring_count).w									; does the player 1 have less than 200 rings?
-		blo.s		JmpTo_Play_SFX										; if yes, play the ring sound
-		bset	#2,(Extra_life_flags).w										; test and set the flag for the second extra life
-		bne.s	JmpTo_Play_SFX										; if it was set before, play the ring sound
-
-loc_1A5D8:
-		addq.b	#1,(Life_count).w										; add 1 to the life count
-		addq.b	#1,(Update_HUD_life_count).w							; add 1 to the displayed life count
-		music	mus_ExtraLife,1										; play the 1up song
-; ---------------------------------------------------------------------------
-
-JmpTo_Play_SFX:
-		sfx	sfx_RingRight,1											; play ring sound
 
 ; =============== S U B R O U T I N E =======================================
 
 Clear_SpriteRingMem:
 
 		; objects
-		lea	(Dynamic_object_RAM).w,a1								; start address for object RAM
-		moveq	#((Dynamic_object_RAM_end-Dynamic_object_RAM)/object_size)-1,d1
+		lea	(Dynamic_object_RAM-next_object).w,a1					; start address for object RAM
+		moveq	#bytesToXcnt(Dynamic_object_RAM_end-Dynamic_object_RAM,object_size),d1
 
 .findos
 		lea	next_object(a1),a1											; next object slot

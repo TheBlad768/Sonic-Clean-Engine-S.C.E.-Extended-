@@ -1023,11 +1023,7 @@ loc_1156C:
 		move.w	d0,ground_vel(a0)
 
 loc_11570:
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_11578
-		neg.w	d0
-
-loc_11578:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$80,d0
 		bhs.s	loc_115C6
 		tst.b	spin_dash_flag(a0)
@@ -1279,11 +1275,7 @@ SonicKnux_Roll:
 		bne.s	locret_1177E
 		btst	#button_down,(Ctrl_1_logical).w				; is down being pressed?
 		beq.s	loc_11780								; if not, branch
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_1176A
-		neg.w	d0
-
-loc_1176A:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$100,d0								; is Sonic moving at $100 speed or faster?
 		bhs.s	loc_11790								; if so, branch
 
@@ -1702,11 +1694,7 @@ locret_11DDA:
 ; ---------------------------------------------------------------------------
 
 loc_11DDC:
-		move.w	d0,d1
-		bpl.s	loc_11DE2
-		neg.w	d1
-
-loc_11DE2:
+		mvabs.w	d0,d1
 		cmpi.w	#$D,d1
 		blo.s		locret_11DDA
 		add.w	d0,ground_vel(a0)
@@ -1764,11 +1752,7 @@ Player_SlopeRepel:
 		add.b	angle(a0),d0
 		cmpi.b	#$30,d0
 		blo.s		locret_11E6E
-		move.w	ground_vel(a0),d0
-		bpl.s	loc_11E4E
-		neg.w	d0
-
-loc_11E4E:
+		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$280,d0
 		bhs.s	locret_11E6E
 		move.w	#30,move_lock(a0)
@@ -2557,11 +2541,7 @@ loc_126DC:
 		bne.w	SAnim_Push
 		lsr.b	#4,d0
 		andi.b	#6,d0
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_12700
-		neg.w	d2
-
-loc_12700:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		tst.b	status_secondary(a0)
 		bpl.s	loc_1270A
@@ -2811,11 +2791,7 @@ loc_12A2A:
 		or.b	d1,render_flags(a0)
 		subq.b	#1,anim_frame_timer(a0)
 		bpl.w	SAnim_Delay
-		move.w	ground_vel(a0),d2
-		bpl.s	loc_12A4C
-		neg.w	d2
-
-loc_12A4C:
+		mvabs.w	ground_vel(a0),d2
 		add.w	(Camera_H_scroll_shift).w,d2
 		lea	(SonAni_Roll2).l,a1 	; use roll 2 animation
 		cmpi.w	#$600,d2
