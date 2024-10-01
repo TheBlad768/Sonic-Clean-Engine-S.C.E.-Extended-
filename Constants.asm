@@ -223,7 +223,7 @@ AniIDKnuxAni_Carry2 =				id(ptr_KnuxAni_Carry2)			; 26
 ; Levels
 ; ---------------------------------------------------------------------------
 
-LevelID_DEZ:							equ 0							; DEATH EGG
+LevelID_DEZ:							equ 0							; Death Egg
 LevelID_NULL:						equ $FF							; NULL
 
 ; ---------------------------------------------------------------------------
