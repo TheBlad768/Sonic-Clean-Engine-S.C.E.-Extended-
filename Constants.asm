@@ -223,12 +223,7 @@ AniIDKnuxAni_Carry2 =				id(ptr_KnuxAni_Carry2)			; 26
 ; Levels
 ; ---------------------------------------------------------------------------
 
-LevelID_GHZ:						equ 0							; Green Hill Zone
-LevelID_MZ:							equ 1							; Marble Zone
-LevelID_SYZ:							equ 2							; Spring Yard Zone
-LevelID_LZ:							equ 3							; Labyrinth Zone
-LevelID_SLZ:							equ 4							; Star Light Zone
-LevelID_SBZ:							equ 5							; Scrap Brain Zone
+LevelID_DEZ:							equ 0							; DEATH EGG
 LevelID_NULL:						equ $FF							; NULL
 
 ; ---------------------------------------------------------------------------
@@ -497,6 +492,19 @@ sub9_mapframe						= objoff_47
 next_subspr							= 6								; size
 
 ; ---------------------------------------------------------------------------
+; Sprite priority
+; ---------------------------------------------------------------------------
+
+priority_0							= 0
+priority_1							= 1<<7
+priority_2							= 2<<7
+priority_3							= 3<<7
+priority_4							= 4<<7
+priority_5							= 5<<7
+priority_6							= 6<<7
+priority_7							= 7<<7
+
+; ---------------------------------------------------------------------------
 ; Bits 3-6 of an object's status after a SolidObject call is a
 ; bitfield with the following meaning:
 ; ---------------------------------------------------------------------------
@@ -631,6 +639,8 @@ cMagenta:							equ cBlue+cRed					; colour magenta
 
 flip_x								= (1<<11)
 flip_y								= (1<<12)
+flip_bit_x							= 3
+flip_bit_y							= 4
 palette_bit_0							= 5
 palette_bit_1							= 6
 palette_line0							= (0<<13)

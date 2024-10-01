@@ -154,11 +154,11 @@ zStartupCodeEndLoc:
 		padding off												; unfortunately our flags got reset so we have to set them again...
 Z80StartupCode_end
 
-		dc.w	$8104												; value for VDP display mode
-		dc.w	$8F02												; value for VDP increment
+		dc.w $8104												; value for VDP display mode
+		dc.w $8F02												; value for VDP increment
 		dc.l vdpComm(0,CRAM,WRITE)								; value for CRAM write mode
 		dc.l vdpComm(0,VSRAM,WRITE)							; value for VSRAM write mode
 
 PSGInitValues:
-		dc.b	$9F,$BF,$DF,$FF										; values for PSG channel volumes
+		dc.b $9F,$BF,$DF,$FF										; values for PSG channel volumes
 PSGInitValues_end

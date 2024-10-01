@@ -268,8 +268,8 @@ LevResults_DisplayScore:
 		bsr.s	LevResults_GetDecimalScore
 		rol.l	#4,d1
 		lea	sub2_x_pos(a0),a1
-		move.w	x_pos(a0),d2
-		subi.w	#56,d2
+		moveq	#-56,d2
+		add.w	x_pos(a0),d2
 		move.w	y_pos(a0),d3
 		moveq	#0,d4
 		moveq	#7-1,d5
@@ -354,9 +354,9 @@ LevResults_GetDecimalScore:
 		addi.w	#0,d0												; clear carry bit for extend
 ;		move	#0,ccr												; "
 
+	rept 3	; 3 bytes
 		abcd	-(a1),-(a2)
-		abcd	-(a1),-(a2)
-		abcd	-(a1),-(a2)
+	endr
 
 .next
 		dbf	d2,.loop

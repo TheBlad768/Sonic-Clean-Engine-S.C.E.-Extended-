@@ -41,20 +41,20 @@ namespace SCECustomLayout
 			for (int la = 0; la < MaxSize.Height; la++)
 			{
 				if (la < fgh)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(0x88 + (la * fgw * 2))));
+					tmp.AddRange(ByteConverter.GetBytes((ushort)(0x88 + (la * fgw))));
 				else
 					tmp.AddRange(new byte[2]);
 				if (la < bgh)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(0x88 + (fgh * fgw * 2) + (la * bgw * 2))));
+					tmp.AddRange(ByteConverter.GetBytes((ushort)(0x88 + (fgh * fgw) + (la * bgw))));
 				else
 					tmp.AddRange(new byte[2]);
 			}
 			for (int y = 0; y < fgh; y++)
 				for (int x = 0; x < fgw; x++)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(layout.FGLayout[x, y])));
+					tmp.Add((byte)layout.FGLayout[x, y]);
 			for (int y = 0; y < bgh; y++)
 				for (int x = 0; x < bgw; x++)
-					tmp.AddRange(ByteConverter.GetBytes((ushort)(layout.BGLayout[x, y])));
+					tmp.Add((byte)layout.BGLayout[x, y]);
 			rawdata = tmp.ToArray();
 		}
 

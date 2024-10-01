@@ -6,6 +6,8 @@
 
 Obj_Spikebonker:
 		jsr	(Obj_WaitOffscreen).w
+
+		; mapping
 		lea	ObjDat_Spikebonker(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#.main,address(a0)
@@ -207,6 +209,7 @@ Obj_Spikebonker_SpikeBall:
 
 ; =============== S U B R O U T I N E =======================================
 
+; mapping
 ObjDat_Spikebonker:				subObjData Map_Spikebonker, $500, 0, 1, $280, 40, 40, 0, $1A
 ObjDat3_Spikebonker_SpikeBall:	subObjData3 $200, 32, 32, 1, $1A|$80
 

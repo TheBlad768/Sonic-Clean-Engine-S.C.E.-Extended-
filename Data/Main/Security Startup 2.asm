@@ -56,7 +56,7 @@ Game_Program:
 		jsr	(Init_VDP).w
 		jsr	(SoundDriverLoad).w
 		jsr	(Init_Controllers).w
-		move.b	#GameModeID_LevelSelectScreen,(Game_mode).w	; set Game Mode
+		move.b	#GameModeID_LevelSelectScreen,(Game_mode).w	; set screen mode to Level Select (SCE)
 
 .loop
 		moveq	#$7C,d0											; limit Game Mode value to $7C max
