@@ -87,7 +87,7 @@ loc_1F66C:
 		andi.b	#p1_touch_side,d0
 		beq.s	loc_1F6A0
 		lea	(Player_1).w,a1								; a1=character
-		bsr.w	sub_1F734
+		bsr.s	sub_1F734
 
 loc_1F6A0:
 		andi.b	#p2_touch_side,d6
