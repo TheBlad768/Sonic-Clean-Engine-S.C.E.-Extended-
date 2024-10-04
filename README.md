@@ -4,11 +4,11 @@ Source code with the returned the Sonic & Tails, Tails and Knuckles characters, 
 
 If you are interested in the source code with the Z80 Sound Driver:
 
-[https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-Extended-Flamedriver-](https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-Extended-/tree/flamedriver)
+- [https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-Extended-Flamedriver-](https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-Extended-/tree/flamedriver)
 
 Main source code:
 
-https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-
+- https://github.com/TheBlad768/Sonic-Clean-Engine-S.C.E.-
 
 Current issues:
 
