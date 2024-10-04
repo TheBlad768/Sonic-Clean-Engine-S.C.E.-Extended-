@@ -1,4 +1,5 @@
 SONIC-CLEAN-ENGINE-S.C.E.-EXTENDED-
+---
 
 Source code with the returned the Sonic & Tails, Tails and Knuckles characters, Life/Continue count, Continue screen.
 
