@@ -59,14 +59,16 @@ LevelScreen:
 		move.w	(H_int_counter_command).w,VDP_control_port-VDP_control_port(a6)	; warning: don't overwrite a6
 
 		; load player palette
-		moveq	#PalID_Sonic,d0
-		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
-		bne.s	.notknux
-		moveq	#PalID_Knuckles,d0
+		lea	(Level_data_addr_RAM.Spal).w,a1										; load Sonic palette
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w							; is Knuckles?
+		blo.s		.notknux															; if not, branch
+		addq.w	#1,a1															; load Knuckles palette
 
 .notknux
+		moveq	#0,d0
+		move.b	(a1),d0															; player palette
 		move.w	d0,d1
-		jsr	(LoadPalette).w														; load Player's palette
+		jsr	(LoadPalette).w														; load player's palette
 		move.w	d1,d0
 		jsr	(LoadPalette_Immediate).w
 
@@ -98,7 +100,9 @@ LevelScreen:
 		move.w	#$8014,VDP_control_port-VDP_control_port(a6)						; H-int enabled	; last use a6 here
 
 .notwater
-		lea	(Level_data_addr_RAM.Music).w,a1										; load music playlist
+
+		; get level music id
+		lea	(Level_data_addr_RAM.Music).w,a1										; load music
 		moveq	#0,d0
 		move.b	(a1),d0
 		move.w	d0,(Current_music).w
@@ -142,6 +146,7 @@ LevelScreen:
 		move.w	d0,(Ctrl_1).w
 		move.w	d0,(Ctrl_2).w
 		move.b	d0,(HUD_RAM.status).w											; clear HUD flag
+		move.b	d0,(Update_HUD_timer).w											; clear time counter update flag
 		tst.b	(Last_star_post_hit).w													; are you starting from a starpost?
 		bne.s	.starpost															; if yes, branch
 		move.w	d0,(Ring_count).w												; clear rings
@@ -158,13 +163,12 @@ LevelScreen:
 		move.b	d0,(Ctrl_2_locked).w
 		move.b	d0,(Update_HUD_score).w											; update score counter
 		move.b	d0,(Update_HUD_ring_count).w									; update rings counter
-		move.b	d0,(Update_HUD_timer).w											; update time counter
 		move.b	d0,(Level_started_flag).w
 		move.l	#Load_Sprites_Init,(Object_load_addr_RAM).w
 		move.l	#Load_Rings_Init,(Rings_manager_addr_RAM).w
 		tst.b	(Water_flag).w
 		beq.s	.notwater2
-		move.l	#Obj_WaterWave,(WaterWave+address).w
+		move.l	#Obj_WaveSplash,(Wave_Splash+address).w
 
 .notwater2
 		bsr.w	SpawnLevelMainSprites

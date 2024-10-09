@@ -2004,9 +2004,8 @@ loc_17732:
 		move.w	#$300,d2
 
 loc_1775C:
-		moveq	#0,d0
-		move.b	angle(a0),d0
-		subi.b	#$40,d0
+		moveq	#-$40,d0
+		add.b	angle(a0),d0
 		jsr	(GetSineCosine).w
 		muls.w	d2,d1
 		asr.l	#8,d1

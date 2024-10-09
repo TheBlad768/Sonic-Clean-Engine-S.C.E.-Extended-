@@ -2013,7 +2013,7 @@ Tails_RollSpeed:
 		asl.w	d6
 		move.w	Acceleration_P2-Max_speed_P2(a4),d5
 		asr.w	d5
-		move.w	#$20,d4
+		moveq	#$20,d4
 		tst.b	spin_dash_flag(a0)
 		bmi.w	loc_14DF0
 		tst.b	status_secondary(a0)
@@ -2315,9 +2315,8 @@ loc_15024:
 		move.w	#$380,d2
 
 loc_1504C:
-		moveq	#0,d0
-		move.b	angle(a0),d0
-		subi.b	#$40,d0
+		moveq	#-$40,d0
+		add.b	angle(a0),d0
 		jsr	(GetSineCosine).w
 		muls.w	d2,d1
 		asr.l	#8,d1

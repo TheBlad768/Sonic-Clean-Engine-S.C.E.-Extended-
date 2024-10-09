@@ -15,7 +15,6 @@ HScroll_Deform:
 
 .next
 		movem.w	(a2)+,d2/d5/a1							; get velocity parameter, deformation size, deformation buffer
-		ext.l	d2
 		asl.l	#8,d2											; shift velocity to line up with the middle 16 bits of the 32-bit position
 
 .loop
@@ -39,7 +38,7 @@ HScroll_Deform:
 VScroll_Deform:
 		lea	(VDP_data_port).l,a6
 		lea	VDP_control_port-VDP_data_port(a6),a5
-		move.l	#vdpComm($0000,VSRAM,WRITE),VDP_control_port-VDP_control_port(a5)
+		move.l	#vdpComm(0,VSRAM,WRITE),VDP_control_port-VDP_control_port(a5)
 		moveq	#bytesToXcnt((320*2),16),d6
 
 .loop

@@ -243,8 +243,8 @@ loc_18218:
 		move.w	d0,x_pos(a0)
 		bsr.w	AirCountdown_ShowNumber
 		jsr	(MoveSprite2).w
-		tst.b	render_flags(a0)
-		bpl.s	AirCountdown_Delete
+		tst.b	render_flags(a0)									; object visible on the screen?
+		bpl.s	AirCountdown_Delete							; if not, branch
 		jmp	(Draw_Sprite).w
 
 ; ---------------------------------------------------------------------------
@@ -289,8 +289,8 @@ AirCountdown_Display2:
 		tst.b	routine(a0)
 		bne.s	AirCountdown_Delete
 		bsr.s	AirCountdown_Load_Art
-		tst.b	render_flags(a0)
-		bpl.s	AirCountdown_Delete
+		tst.b	render_flags(a0)									; object visible on the screen?
+		bpl.s	AirCountdown_Delete							; if not, branch
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
@@ -355,7 +355,7 @@ AirCountdown_Load_Art:
 		move.w	#tiles_to_bytes(ArtTile_DashDust_P2),d2		; 2P
 
 .notp2
-		moveq	#$C0/2,d3
+		moveq	#$C0/2,d3									; division by 2
 		jmp	(Add_To_DMA_Queue).w
 
 ; ----------------------------------------------------------------------------

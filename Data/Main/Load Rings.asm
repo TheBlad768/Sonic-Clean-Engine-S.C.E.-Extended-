@@ -121,10 +121,10 @@ Test_Ring_Collisions:
 		movea.w	(Ring_start_addr_RAM).w,a4
 		btst	#Status_LtngShield,status_secondary(a0)						; does Sonic have a Lightning Shield?
 		beq.s	Test_Ring_Collisions_NoAttraction						; if not, branch
-		move.w	x_pos(a0),d2
-		move.w	y_pos(a0),d3
-		subi.w	#$40,d2
-		subi.w	#$40,d3
+		moveq	#-64,d2
+		add.w	x_pos(a0),d2
+		moveq	#-64,d3
+		add.w	y_pos(a0),d3
 		moveq	#6,d1
 		moveq	#$C,d6
 		move.w	#$80,d4
@@ -206,7 +206,7 @@ loc_EADA:
 ; =============== S U B R O U T I N E =======================================
 
 Test_Ring_Collisions_AttractRing:
-		movea.l	a1,a3												; save ROM address
+		lea	(a1),a3													; save ROM address
 		bsr.w	Create_New_Sprite
 		bne.s	.notfree
 		move.l	#Obj_Attracted_Ring,address(a1)
@@ -218,7 +218,7 @@ Test_Ring_Collisions_AttractRing:
 ; ---------------------------------------------------------------------------
 
 .notfree
-		movea.l	a3,a1												; return ROM address
+		lea	(a3),a1													; return ROM address
 		bra.s	loc_EAC6
 
 ; ---------------------------------------------------------------------------

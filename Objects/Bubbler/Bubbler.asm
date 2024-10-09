@@ -6,6 +6,7 @@
 
 Obj_Bubbler:
 
+		; set
 		moveq	#$7F,d0
 		and.b	subtype(a0),d0
 		move.b	d0,objoff_32(a0)
@@ -26,8 +27,8 @@ loc_2FA50:
 		move.w	(Water_level).w,d0
 		cmp.w	y_pos(a0),d0
 		bhs.w	loc_2FB5C
-		tst.b	render_flags(a0)
-		bpl.w	loc_2FB5C
+		tst.b	render_flags(a0)									; object visible on the screen?
+		bpl.w	loc_2FB5C									; if not, branch
 		subq.w	#1,objoff_38(a0)
 		bpl.w	loc_2FB50
 		move.w	#1,objoff_36(a0)
@@ -178,8 +179,8 @@ Bubbler_Bubbles_Display:
 		jsr	(Animate_Sprite).w
 		tst.b	routine(a0)
 		bne.s	Bubbler_Delete
-		tst.b	render_flags(a0)
-		bpl.s	Bubbler_Delete
+		tst.b	render_flags(a0)									; object visible on the screen?
+		bpl.s	Bubbler_Delete								; if not, branch
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
@@ -198,8 +199,8 @@ loc_2F9E2:
 
 loc_2FA14:
 		jsr	(MoveSprite2).w
-		tst.b	render_flags(a0)
-		bpl.w	Bubbler_Delete
+		tst.b	render_flags(a0)									; object visible on the screen?
+		bpl.w	Bubbler_Delete								; if not, branch
 		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================

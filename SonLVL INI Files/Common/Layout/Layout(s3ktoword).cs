@@ -19,11 +19,11 @@ namespace SCECustomLayout
 				ushort lfp = ByteConverter.ToUInt16(rawdata, 8 + la);
 				if (lfp != 0)
 					for (int laf = 0; laf < fgw; laf++)
-						layout.FGLayout[laf, la / 4] = ByteConverter.ToUInt16(rawdata, lfp + laf * 2);
+						layout.FGLayout[laf, la / 4] = rawdata[lfp - StartAddress + laf];
 				ushort lbp = ByteConverter.ToUInt16(rawdata, 8 + la + 2);
 				if (lbp != 0)
 					for (int lab = 0; lab < bgw; lab++)
-						layout.BGLayout[lab, la / 4] = ByteConverter.ToUInt16(rawdata, lbp + lab * 2);
+						layout.BGLayout[lab, la / 4] = rawdata[lbp - StartAddress + lab];
 			}
 		}
 
@@ -63,5 +63,7 @@ namespace SCECustomLayout
 		public override System.Drawing.Size MaxSize { get { return new System.Drawing.Size(200, 32); } }
 
 		public override System.Drawing.Size DefaultSize { get { return new System.Drawing.Size(128, 16); } }
+
+		public virtual ushort StartAddress { get { return 0x8000; } }
     }
 }
