@@ -1,4 +1,4 @@
-# SONIC-CLEAN-ENGINE-S.C.E.-
+# SONIC-CLEAN-ENGINE-S.C.E.-EXTENDED-
 
 ## Disclaimer
 
