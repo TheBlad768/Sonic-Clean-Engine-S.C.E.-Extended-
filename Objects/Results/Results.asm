@@ -158,6 +158,18 @@ Obj_LevelResults:
 		sub.w	d1,(Ring_bonus_countdown).w							; get 100 points from the ring bonus
 
 .skiprb
+
+		; check buttons
+		moveq	#btnABC,d1											; are buttons A, B, or C being pressed?
+		and.b	(Ctrl_1_pressed).w,d1
+		beq.s	.skipr												; if not, branch
+
+		; skip countdown
+		add.w	(Time_bonus_countdown).w,d0
+		add.w	(Ring_bonus_countdown).w,d0
+		clr.l	(Time_bonus_countdown).w								; clear time and ring bonus countdown
+
+.skipr
 		add.w	d0,(Total_bonus_countup).w							; add to total score for level
 		tst.w	d0
 		beq.s	.finish												; branch once score has finished counting down

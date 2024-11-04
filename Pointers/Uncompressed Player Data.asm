@@ -2,6 +2,8 @@
 ; Uncompressed player graphics
 ; ===========================================================================
 
+	align $8000	; for DMA...
+
 ArtUnc_Sonic:						binclude "Objects/Sonic/Uncompressed Art/Sonic.unc"
 	even
 ArtUnc_Sonic_Extra:					binclude "Objects/Sonic/Uncompressed Art/Sonic Extra.unc"

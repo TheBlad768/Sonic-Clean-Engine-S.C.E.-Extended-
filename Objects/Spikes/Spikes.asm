@@ -27,13 +27,15 @@ Spikes_InitData:			; height, width
 ; ---------------------------------------------------------------------------
 
 Obj_Spikes:
-		ori.b	#4,render_flags(a0)
-		move.w	#$200,priority(a0)
+
+		; init
+		ori.b	#4,render_flags(a0)										; use screen coordinates
+		move.w	#priority_4,priority(a0)
 		move.b	subtype(a0),d0
 		andi.w	#$F0,d0
 		lsr.w	#3,d0
 		move.w	Spikes_InitData(pc,d0.w),height_pixels(a0)					; set height and width
-		move.l	#sub_24090,address(a0)									;  face up or down
+		move.l	#sub_24090,address(a0)									; face up or down
 		move.l	#Map_Spikes,mappings(a0)
 		move.w	#make_art_tile(ArtTile_SpikesSprings+8,0,0),art_tile(a0)
 		lsr.w	d0
@@ -46,10 +48,10 @@ Obj_Spikes:
 loc_23FE8:
 		move.b	status(a0),d0
 		tst.b	(Reverse_gravity_flag).w
-		beq.s	loc_23FF6
+		beq.s	.notgrav
 		eori.b	#2,d0
 
-loc_23FF6:
+.notgrav
 		andi.b	#2,d0
 		beq.s	loc_24002
 		move.l	#sub_2413E,address(a0)
@@ -170,6 +172,8 @@ Obj_Spikes_end
 Touch_ChkHurt3:
 		tst.w	(Debug_placement_mode).w								; is debug mode on?
 		bne.s	.return													; if yes, branch
+		tst.b	object_control(a1)
+		bmi.s	.return
 		btst	#Status_Invincible,status_secondary(a1)							; is character invincible?
 		bne.s	.return													; if yes, branch
 		tst.b	invulnerability_timer(a1)										; is character invulnerable?

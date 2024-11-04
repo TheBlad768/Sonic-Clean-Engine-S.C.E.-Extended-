@@ -24,7 +24,7 @@ Obj_EggCapsule:
 		lea	PLC_EggCapsule(pc),a5
 		jsr	(LoadPLC_Raw_KosPlusM).w
 
-		; mapping
+		; init
 		lea	ObjDat_EggCapsule(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#.main,address(a0)
@@ -255,8 +255,8 @@ Check_SonicEndPose:
 		lea	(Player_1).w,a1								; a1=character
 		btst	#7,status(a1)
 		bne.s	.return
-		btst	#Status_InAir,status(a1)
-		bne.s	.return
+		btst	#Status_InAir,status(a1)						; is the player in the air?
+		bne.s	.return									; if yes, branch
 		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
 		bhs.s	.return									; if yes, branch
 		move.l	d0,objoff_34(a0)							; set routine
@@ -278,8 +278,8 @@ Check_TailsEndPose:
 		lea	(Player_2).w,a1								; a1=character
 		btst	#7,status(a1)
 		bne.s	Check_SonicEndPose.return
-		btst	#Status_InAir,status(a1)
-		bne.s	Check_SonicEndPose.return
+		btst	#Status_InAir,status(a1)						; is the player in the air?
+		bne.s	Check_SonicEndPose.return				; if yes, branch
 		cmpi.b	#PlayerID_Death,routine(a1)				; has player just died?
 		bhs.s	Check_SonicEndPose.return				; if yes, branch
 		bset	#7,objoff_38(a0)
@@ -322,7 +322,7 @@ Check_SonicEndPose_MGZ:
 
 Obj_EggCapsule_Button:
 
-		; mapping
+		; init
 		lea	ObjDat_EggCapsule_Button(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
@@ -367,7 +367,7 @@ Obj_EggCapsule_Button:
 
 Obj_EggCapsule_FlippedButton:
 
-		; mapping
+		; init
 		lea	ObjDat_EggCapsule_Button(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		bset	#1,render_flags(a0)							; set flipy flag
@@ -426,7 +426,7 @@ Obj_EggCapsule_FlippedButton:
 
 Obj_EggCapsule_Pieces:
 
-		; mapping
+		; init
 		lea	ObjDat_EggCapsule_Pieces(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#Obj_FlickerMove,address(a0)
@@ -456,7 +456,7 @@ Obj_EggCapsule_Pieces:
 
 Obj_EggCapsule_Propeller:
 
-		; mapping
+		; init
 		lea	ObjDat3_EggCapsule_Propeller(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
@@ -484,7 +484,7 @@ ecapa_yvel				= objoff_3E	; .w
 
 Obj_EggCapsule_Animals:
 
-		; mapping
+		; init
 		lea	ObjDat_EggCapsule_Animals(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.normal,address(a0)
@@ -499,7 +499,7 @@ Obj_EggCapsule_Animals:
 		subq.w	#1,objoff_2E(a0)
 		bpl.s	.draw
 		move.l	#.jump,address(a0)
-		move.w	#$80,priority(a0)
+		move.w	#priority_1,priority(a0)
 
 .draw
 		jmp	(Sprite_CheckDelete).w
@@ -560,7 +560,7 @@ Obj_EggCapsule_Animals_Flipped:
 		subq.w	#1,objoff_2E(a0)
 		bpl.s	.draw
 		move.l	#.move,address(a0)
-		move.w	#$80,priority(a0)
+		move.w	#priority_1,priority(a0)
 
 .draw
 		jmp	(Sprite_CheckDelete).w
@@ -707,11 +707,11 @@ EggCapsule_Animals_Load:
 ; =============== S U B R O U T I N E =======================================
 
 ; mapping
-ObjDat_EggCapsule:				subObjData Map_EggCapsule, $494, 0, 1, $200, 64, 64, 0, 0
-ObjDat_EggCapsule_Button:		subObjData3 $200, 32, 16, 5, 0
-ObjDat3_EggCapsule_Propeller:		subObjData3 $200, 40, 8, 6, 0
-ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $494, 0, 1, $180, 24, 24, 0, 0
-ObjDat_EggCapsule_Animals:		subObjData3 $280, 16, 24, 2, 0
+ObjDat_EggCapsule:				subObjData Map_EggCapsule, $494, 0, 1, 64, 64, 4, 0, 0
+ObjDat_EggCapsule_Button:		subObjData3 16, 32, 4, 5, 0
+ObjDat3_EggCapsule_Propeller:		subObjData3 8, 40, 4, 6, 0
+ObjDat_EggCapsule_Pieces:		subObjData Map_EggCapsule, $494, 0, 1, 24, 24, 3, 0, 0
+ObjDat_EggCapsule_Animals:		subObjData3 24, 16, 5, 2, 0
 
 Child6_EggCapsule:
 		dc.w 1-1
@@ -742,9 +742,8 @@ Child1_EggCapsule_Pieces:
 		dc.b -24, -8
 		dc.l Obj_EggCapsule_Pieces
 		dc.b 24, -8
-
 Child1_EggCapsule_Animals:
-		dc.w 9-1			; why not 15-1?
+		dc.w 9-1
 		dc.l Obj_EggCapsule_Animals
 		dc.b 0, -4
 		dc.l Obj_EggCapsule_Animals
@@ -764,25 +763,9 @@ Child1_EggCapsule_Animals:
 		dc.l Obj_EggCapsule_Animals
 		dc.b 4, -4
 
-
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b 12, -4
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b -12, -4
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b -20, -4
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b 20, -4
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b 28, -4
-;		dc.l Obj_EggCapsule_Animals
-;		dc.b -28, -4
-
-
-
 PLC_EggCapsule: plrlistheader
 		plreq $494, ArtKosPM_EggCapsule
-		plreq $5A0, ArtKosPM_Explosion
+		plreq ArtTile_Explosion, ArtKosPM_Explosion
 PLC_EggCapsule_end
 ; ---------------------------------------------------------------------------
 

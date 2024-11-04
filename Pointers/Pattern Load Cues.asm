@@ -54,7 +54,7 @@ PLC1_Knuckles_end
 PLC2_Sonic: plrlistheader
 		plreq ArtTile_SpikesSprings, ArtKosPM_SpikesSprings		; spikes and normal spring
 		plreq ArtTile_Monitors, ArtKosPM_Monitors				; monitors
-		plreq $5A0, ArtKosPM_Explosion						; explosion
+		plreq ArtTile_Explosion, ArtKosPM_Explosion				; explosion
 PLC2_Sonic_end
 
 ; ===========================================================================

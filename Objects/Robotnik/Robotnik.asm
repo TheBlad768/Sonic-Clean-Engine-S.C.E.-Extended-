@@ -20,9 +20,11 @@ RobotnikHead3_Index: offsetTable
 ; ---------------------------------------------------------------------------
 
 Obj_RobotnikHead3Init:
+
+		; init
 		lea	ObjDat_RobotnikHead(pc),a1
 		jsr	(SetUp_ObjAttributes).w
-		move.l	#AniRaw_RobotnikHead,$30(a0)
+		move.l	#AniRaw_RobotnikHead,objoff_30(a0)
 		cmpi.b	#PlayerID_Knuckles,(Player_1+character_id).w
 		bne.s	loc_67C76
 		bsr.w	sub_67B14
@@ -111,6 +113,8 @@ loc_67CFE:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_RobotnikShipFlame:
+
+		; init
 		lea	ObjDat2_RoboShipFlame(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#RobotnikShipFlame_Main,address(a0)
@@ -132,7 +136,7 @@ sub_67B14:
 		move.l	#Map_EggRoboHead,mappings(a0)			; if player is Knuckles, use Egg Robo head
 
 loc_67B1C:
-		move.l	#AniRaw_EggRoboHead,$30(a0)
+		move.l	#AniRaw_EggRoboHead,objoff_30(a0)
 		lea	(ArtKosPM_EggRoboHead).l,a1
 		move.w	#tiles_to_bytes($52E),d2
 		jmp	(Queue_KosPlus_Module).w
@@ -144,6 +148,8 @@ loc_67B1C:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_RobotnikShipPieces:
+
+		; init
 		lea	ObjDat_RobotnikShipPieces(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.l	#Obj_FlickerMove,address(a0)
@@ -155,11 +161,12 @@ Obj_RobotnikShipPieces:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_RobotnikShip:			subObjData Map_RobotnikShip, $52E, 0, 0, $200, 64, 64, $C, $F
-ObjDat_RobotnikShip_Glass:	subObjData Map_RobotnikShip, $52E, 0, 0, $200, 64, 64, 7, $F
-ObjDat_RobotnikHead:		subObjData Map_RobotnikShip, $52E, 0, 0, $280, 32, 16, 0, 0
-ObjDat2_RoboShipFlame:		subObjData3 $280, 16, 8, 8, 0
-ObjDat_RobotnikShipPieces:	subObjData Map_RobotnikShipPieces, $52E, 0, 1, 0, 64, 64, 0, 0
+; mapping
+ObjDat_RobotnikShip:			subObjData Map_RobotnikShip, $52E, 0, 0, 64, 64, 4, $C, $F
+ObjDat_RobotnikShip_Glass:	subObjData Map_RobotnikShip, $52E, 0, 0, 64, 64, 4, 7, $F
+ObjDat_RobotnikHead:		subObjData Map_RobotnikShip, $52E, 0, 0, 16, 32, 5, 0, 0
+ObjDat2_RoboShipFlame:		subObjData3 8, 16, 5, 8, 0
+ObjDat_RobotnikShipPieces:	subObjData Map_RobotnikShipPieces, $52E, 0, 1, 64, 64, 0, 0, 0
 
 AniRaw_RobotnikHead:
 		dc.b 5, 0, 1, arfEnd

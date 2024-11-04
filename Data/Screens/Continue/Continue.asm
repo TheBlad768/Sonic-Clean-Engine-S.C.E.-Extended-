@@ -51,8 +51,6 @@ ContinueScreen:
 		; clear
 		move.b	d0,(Water_full_screen_flag).w
 		move.b	d0,(Water_flag).w
-		move.w	d0,(Continue_countdown).w
-		move.b	d0,(Continue_routine).w
 
 		; load main art
 		lea	PLC_Continue(pc),a5
@@ -144,12 +142,12 @@ ContinueScreen:
 		beq.s	.back
 
 		; exit to Sega screen
-		move.b	#GameModeID_LevelSelectScreen,(Game_mode).w				; load Sega screen
+		move.b	#GameModeID_LevelSelectScreen,(Game_mode).w				; set screen mode to Sega
 		rts
 ; ---------------------------------------------------------------------------
 
 .back
-		move.b	#GameModeID_LevelScreen,(Game_mode).w						; load Level screen
+		move.b	#GameModeID_LevelScreen,(Game_mode).w						; set screen mode to Level
 
 		; set
 		move.b	#3,(Life_count).w
@@ -255,10 +253,11 @@ Continue_LoadNumbers:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_SonicWTails:
+
+		; init
 		move.l	#Map_ContinueSprites,mappings(a0)
 		move.w	#make_art_tile($8C,0,0),art_tile(a0)
-		move.w	#$280,priority(a0)
-		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)					; set height and width
+		move.l	#bytes_word_to_long(40/2,24/2,priority_5),height_pixels(a0)	; set height, width and priority
 		move.w	#$80+((320/2)-8),x_pos(a0)
 		move.w	#$80+((224/2)+48),y_pos(a0)
 		move.l	#.main,address(a0)
@@ -363,10 +362,11 @@ Obj_Continue_SonicWTails:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_SonicAlone:
+
+		; init
 		move.l	#Map_Sonic,mappings(a0)
 		move.w	#make_art_tile(ArtTile_Player_1,0,0),art_tile(a0)
-		move.w	#$280,priority(a0)
-		move.w	#bytes_to_word(40/2,24/2),height_pixels(a0)					; set height and width
+		move.l	#bytes_word_to_long(40/2,24/2,priority_5),height_pixels(a0)	; set height, width and priority
 		move.w	#$80+(320/2),x_pos(a0)
 		move.w	#$80+((224/2)+48),y_pos(a0)
 		move.l	#.main,address(a0)
@@ -420,10 +420,11 @@ Obj_Continue_SonicAlone:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_TailsWSonic:
+
+		; init
 		move.l	#Map_ContinueSprites,mappings(a0)
 		move.w	#make_art_tile($8C,0,0),art_tile(a0)
-		move.w	#$200,priority(a0)
-		move.w	#bytes_to_word(40/2,32/2),height_pixels(a0)						; set height and width
+		move.l	#bytes_word_to_long(40/2,32/2,priority_4),height_pixels(a0)	; set height, width and priority
 		move.w	#$80+((320/2)+12),x_pos(a0)
 		move.w	#$80+((224/2)+48),y_pos(a0)
 		move.l	#.waitstart,address(a0)
@@ -458,8 +459,7 @@ Obj_Continue_TailsWSonic:
 .main
 		move.l	#.wait,address(a0)
 		move.l	#Map_Tails,mappings(a0)
-		move.w	#make_art_tile(ArtTile_Player_2,0,0),art_tile(a0)
-		move.w	#$280,priority(a0)
+		move.l	#words_to_long(priority_5,make_art_tile(ArtTile_Player_2,0,0)),priority(a0)	; set priority and art_tile
 		clr.b	(Player_prev_frame_P2).w
 		move.w	#bytes_to_word(5,0),anim(a0)									; set anim and prev_anim
 		move.w	#bytes_to_word($AD,0),mapping_frame(a0)						; set frame and clear anim_frame
@@ -512,8 +512,10 @@ Obj_Continue_Tails_tails_Fix:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Knuckles:
+
+		; check
 		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w						; is Knuckles?
-		beq.s	.setknux														; if yes, branch
+		bhs.s	.setknux														; if yes, branch
 
 		; for Sonic and Tails
 		move.w	#$80-64,x_pos(a0)
@@ -525,10 +527,11 @@ Obj_Continue_Knuckles:
 ; ---------------------------------------------------------------------------
 
 .setknux
+
+		; init
 		move.l	#Map_ContinueSprites,mappings(a0)
 		move.w	#make_art_tile($8C,3,0),art_tile(a0)
-		move.w	#$200,priority(a0)
-		move.w	#bytes_to_word(48/2,32/2),height_pixels(a0)						; set height and width
+		move.l	#bytes_word_to_long(48/2,32/2,priority_4),height_pixels(a0)	; set height, width and priority
 		move.w	#$80+((320/2)-4),x_pos(a0)
 		move.w	#$80+((224/2)+48),y_pos(a0)
 		move.l	#.waitstart,address(a0)
@@ -560,9 +563,8 @@ Obj_Continue_Knuckles:
 		move.l	#.waitstart2,address(a0)
 		move.l	#Map_Knuckles,mappings(a0)
 		move.w	#make_art_tile(ArtTile_CutsceneKnuckles,3,0),art_tile(a0)
-		move.w	#$80,priority(a0)
+		move.l	#bytes_word_to_long(96/2,64/2,priority_1),height_pixels(a0)	; set height, width and priority
 		move.b	#7,mapping_frame(a0)
-		move.w	#bytes_to_word(96/2,64/2),height_pixels(a0)						; set height and width
 		clr.b	anim_frame_timer(a0)
 		clr.b	anim_frame(a0)
 		bra.s	.draw
@@ -652,6 +654,8 @@ Knuckles_Load_PLC_Continue:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_EggRobo:
+
+		; init
 		lea	ObjDat_919A6(pc),a1
 		jsr	(SetUp_ObjAttributes).w
 		move.b	#1,render_flags(a0)											; flipx
@@ -660,7 +664,7 @@ Obj_Continue_EggRobo:
 		move.w	#$80+(224/2),y_pos(a0)
 		move.w	#$600,x_vel(a0)
 		jsr	(Swing_Setup1).w
-		lea	ChildObjDat_EggRobo_Misc(pc),a2
+		lea	Child1_EggRobo_Misc(pc),a2
 		jsr	(CreateChild1_Normal).w
 
 		; load egg robo badnik art
@@ -689,13 +693,15 @@ Obj_Continue_EggRobo:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_EggRobo_Legs:
+
+		; init
 		lea	ObjDat3_919BE(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
 		movea.w	parent3(a0),a1
-		btst	#2,render_flags(a1)
-		bne.s	.main
-		bclr	#2,render_flags(a0)
+		btst	#2,render_flags(a1)												; is parent uses screen coordinates flag?
+		bne.s	.main														; if yes, branch
+		bclr	#2,render_flags(a0)												; clear screen coordinates flag
 
 .main
 		jsr	(Refresh_ChildPositionAdjusted).w
@@ -718,13 +724,15 @@ Obj_Continue_EggRobo_Legs:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_EggRobo_Gun:
+
+		; init
 		lea	ObjDat3_919C4(pc),a1
 		jsr	(SetUp_ObjAttributes3).w
 		move.l	#.main,address(a0)
 		movea.w	parent3(a0),a1
-		btst	#2,render_flags(a1)
-		bne.s	.main
-		bclr	#2,render_flags(a0)
+		btst	#2,render_flags(a1)												; is parent uses screen coordinates flag?
+		bne.s	.main														; if yes, branch
+		bclr	#2,render_flags(a0)												; clear screen coordinates flag
 
 .main
 		pea	(Child_Draw_Sprite).w
@@ -772,15 +780,19 @@ Refresh_ChildPositionAdjusted_Continue:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Stars:
+
+		; init
 		move.l	#Map_ContinueSprites,mappings(a0)
 		move.w	#make_art_tile($8C,1,0),art_tile(a0)
-		move.w	#$380,priority(a0)
+		move.l	#bytes_word_to_long(16/2,16/2,priority_7),height_pixels(a0)	; set height, width and priority
 		move.b	#7,mapping_frame(a0)
-		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)						; set height and width
 		move.w	#$80+(320/2),x_pos(a0)
 		move.w	#($80+(224/2))+5,y_pos(a0)
-		move.l	#Draw_Sprite,address(a0)
-		jmp	(Draw_Sprite).w
+
+		; draw
+		lea	(Draw_Sprite).w,a1
+		move.l	a1,address(a0)
+		jmp	(a1)
 
 ; ---------------------------------------------------------------------------
 ; Load icons
@@ -819,10 +831,11 @@ Continue_LoadIcons:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Tails_tails_Icons:
+
+		; init
 		move.l	#Map_ContinueIcons,mappings(a0)
 		move.w	#make_art_tile($D9,0,0),art_tile(a0)
-		move.w	#$280,priority(a0)
-		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)						; set height and width
+		move.l	#bytes_word_to_long(16/2,16/2,priority_5),height_pixels(a0)	; set height, width and priority
 		move.l	#.main,address(a0)
 
 .main
@@ -837,6 +850,8 @@ Obj_Continue_Tails_tails_Icons:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Continue_Icons:
+
+		; init
 		move.l	#Map_ContinueIcons,mappings(a0)
 		move.w	#make_art_tile($D9,0,0),art_tile(a0)							; for Sonic and Tails
 		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w
@@ -844,8 +859,7 @@ Obj_Continue_Icons:
 		ori.w	#palette_line_3,art_tile(a0)									; for Knuckles
 
 .notknux
-		move.w	#$380,priority(a0)
-		move.w	#bytes_to_word(16/2,16/2),height_pixels(a0)						; set height and width
+		move.l	#bytes_word_to_long(16/2,16/2,priority_7),height_pixels(a0)	; set height, width and priority
 		bsr.s	Continue_Icons_GetPos
 		move.w	#$80+((224/2)-24),y_pos(a0)
 		move.l	#.main,address(a0)
@@ -890,7 +904,7 @@ Continue_Icons_LoadAnim:
 		bne.s	.nottails														; if not, branch
 
 		; create tails tails icons
-		lea	ChildObjDat_Continue_Tails_tails_Icons(pc),a2
+		lea	Child6_Continue_Tails_tails_Icons(pc),a2
 		jsr	(CreateChild6_Simple).w
 
 .nottails
@@ -1077,15 +1091,16 @@ Credits_DrawLargeText:
 
 ; =============== S U B R O U T I N E =======================================
 
-ObjDat_919A6:		subObjData Map_EggRoboBadnik, $500, 0, 1, $280, 40, 48, 1, 6
-ObjDat3_919BE:		subObjData3 $280, 24, 32, 6, 0
-ObjDat3_919C4:		subObjData3 $280, 32, 24, 2, 0
-ObjDat3_919CA:		subObjData3 $280, 64, 8, 7, 0
+; mapping
+ObjDat_919A6:		subObjData Map_EggRoboBadnik, $500, 0, 1, 48, 40, 5, 1, 6
+ObjDat3_919BE:		subObjData3 32, 24, 5, 6, 0
+ObjDat3_919C4:		subObjData3 24, 32, 5, 2, 0
+ObjDat3_919CA:		subObjData3 8, 64, 5, 7, 0
 
-ChildObjDat_Continue_Tails_tails_Icons:
+Child6_Continue_Tails_tails_Icons:
 		dc.w 1-1
 		dc.l Obj_Continue_Tails_tails_Icons
-ChildObjDat_EggRobo_Misc:
+Child1_EggRobo_Misc:
 		dc.w 2-1
 		dc.l Obj_Continue_EggRobo_Legs
 		dc.b -12, 28

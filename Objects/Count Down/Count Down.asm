@@ -5,6 +5,8 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_AirCountdown:
+
+		; init
 		move.l	#Map_Bubbler,mappings(a0)					; 1P
 		tst.b	parent+1(a0)
 		beq.s	.notp2
@@ -13,8 +15,7 @@ Obj_AirCountdown:
 .notp2
 		move.w	#make_art_tile($348,0,0),art_tile(a0)
 		move.b	#$84,render_flags(a0)
-		move.w	#$80,priority(a0)
-		move.w	#bytes_to_word(32/2,32/2),height_pixels(a0)		; set height and width
+		move.l	#bytes_word_to_long(32/2,32/2,priority_1),height_pixels(a0)	; set height, width and priority
 		move.b	#1,objoff_37(a0)
 		move.l	#.countdown,address(a0)
 
@@ -344,10 +345,10 @@ AirCountdown_Load_Art:
 		beq.s	AirCountdown_ShowNumber.return
 		move.b	d1,objoff_32(a0)
 		subi.w	#9,d1
-		move.w	d1,d0
+		move.w	d1,d0										; multiply by $C0/2
 		add.w	d1,d1
 		add.w	d0,d1
-		lsl.w	#5,d1											; multiply by $20
+		lsl.w	#5,d1
 		addi.l	#dmaSource(ArtUnc_AirCountDown),d1
 		move.w	#tiles_to_bytes(ArtTile_DashDust),d2			; 1P
 		tst.b	parent+1(a0)
@@ -355,7 +356,7 @@ AirCountdown_Load_Art:
 		move.w	#tiles_to_bytes(ArtTile_DashDust_P2),d2		; 2P
 
 .notp2
-		moveq	#$C0/2,d3									; division by 2
+		moveq	#tiles_to_bytes(dmaLength(6)),d3				; size of art (in words)	; we only need one frame
 		jmp	(Add_To_DMA_Queue).w
 
 ; ----------------------------------------------------------------------------

@@ -12,12 +12,11 @@ Obj_Bubbler:
 		move.b	d0,objoff_32(a0)
 		move.b	d0,objoff_33(a0)
 
-		; mapping
+		; init
 		move.l	#Map_Bubbler,mappings(a0)
 		move.w	#make_art_tile($348,0,0),art_tile(a0)
-		move.b	#$84,render_flags(a0)
-		move.w	#bytes_to_word(32/2,32/2),height_pixels(a0)		; set height and width
-		move.w	#$80,priority(a0)
+		move.b	#$80+4,render_flags(a0)
+		move.l	#bytes_word_to_long(32/2,32/2,priority_1),height_pixels(a0)	; set height, width and priority
 		move.b	#8,anim(a0)
 		move.l	#loc_2FA50,address(a0)
 

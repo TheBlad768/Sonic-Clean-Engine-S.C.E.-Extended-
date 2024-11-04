@@ -7,11 +7,12 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Invisible_KillBlock:
+
+		; init
 		move.l	#Map_InvisibleBlock,mappings(a0)
-		move.w	#make_art_tile(ArtTile_Monitors,0,1),art_tile(a0)
-		ori.b	#4,render_flags(a0)
-		move.w	#$200,priority(a0)
-		bset	#7,status(a0)									; player balance anim off
+		ori.b	#4,render_flags(a0)						; use screen coordinates
+		move.l	#words_to_long(priority_4,make_art_tile(ArtTile_Monitors,0,1)),priority(a0)	; set priority and art_tile
+		bset	#7,status(a0)									; disable player's balance animation
 		move.b	subtype(a0),d0
 		move.b	d0,d1
 		andi.w	#$F0,d0
@@ -65,9 +66,9 @@ loc_1F63C:
 		bsr.w	sub_1F734
 
 loc_1F64A:
-		out_of_xrange.w	loc_1EBAA
-		tst.w	(Debug_placement_mode).w
-		beq.s	locret_1F5FE
+		out_of_xrange.w	Obj_Invisible_SolidBlock.offscreen
+		tst.w	(Debug_placement_mode).w				; is debug mode on?
+		beq.s	locret_1F5FE								; if not, branch
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
@@ -96,9 +97,9 @@ loc_1F6A0:
 		bsr.s	sub_1F734
 
 loc_1F6AE:
-		out_of_xrange.w	loc_1EBAA
-		tst.w	(Debug_placement_mode).w
-		beq.s	locret_1F742
+		out_of_xrange.w	Obj_Invisible_SolidBlock.offscreen
+		tst.w	(Debug_placement_mode).w				; is debug mode on?
+		beq.s	locret_1F742								; if not, branch
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
@@ -127,9 +128,9 @@ loc_1F704:
 		bsr.s	sub_1F734
 
 loc_1F712:
-		out_of_xrange.w	loc_1EBAA
-		tst.w	(Debug_placement_mode).w
-		beq.s	locret_1F742
+		out_of_xrange.w	Obj_Invisible_SolidBlock.offscreen
+		tst.w	(Debug_placement_mode).w				; is debug mode on?
+		beq.s	locret_1F742								; if not, branch
 		jmp	(Draw_Sprite).w
 
 ; =============== S U B R O U T I N E =======================================

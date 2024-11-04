@@ -14,10 +14,9 @@
 Obj_StartNewLevel:
 
 		; init
+		bset	#rbCoord,render_flags(a0)						; use screen coordinates
 		move.l	#Map_InvisibleBlock,mappings(a0)
-		move.w	#make_art_tile(ArtTile_Monitors,0,1),art_tile(a0)
-		ori.b	#4,render_flags(a0)
-		move.w	#$200,priority(a0)
+		move.l	#words_to_long(priority_4,make_art_tile(ArtTile_Monitors,0,1)),priority(a0)	; set priority and art_tile
 		move.l	#.main,address(a0)
 
 		; get xydata
@@ -44,8 +43,8 @@ Obj_StartNewLevel:
 
 .chkdel
 		out_of_xrange.w	.offscreen
-		tst.w	(Debug_placement_mode).w
-		beq.s	.return
+		tst.w	(Debug_placement_mode).w				; is debug mode on?
+		beq.s	.return									; if not, branch
 		jmp	(Draw_Sprite).w
 ; ---------------------------------------------------------------------------
 
