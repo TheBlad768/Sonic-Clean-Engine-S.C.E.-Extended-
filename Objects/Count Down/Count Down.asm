@@ -7,15 +7,15 @@
 Obj_AirCountdown:
 
 		; init
-		move.l	#Map_Bubbler,mappings(a0)					; 1P
+		move.l	#Map_Bubbler,d0								; 1P
 		tst.b	parent+1(a0)
 		beq.s	.notp2
-		move.l	#Map_Bubbler2,mappings(a0)					; 2P
+		move.l	#Map_Bubbler2,d0							; 2P
 
 .notp2
-		move.w	#make_art_tile($348,0,0),art_tile(a0)
-		move.b	#$84,render_flags(a0)
-		move.l	#bytes_word_to_long(32/2,32/2,priority_1),height_pixels(a0)	; set height, width and priority
+		move.l	d0,mappings(a0)
+		move.l	#bytes_to_long(rfCoord+rfOnscreen,0,32/2,32/2),render_flags(a0)	; set screen coordinates, on-screen flag and height and width
+		move.l	#words_to_long(priority_1,make_art_tile($348,0,0)),priority(a0)	; set priority and art_tile
 		move.b	#1,objoff_37(a0)
 		move.l	#.countdown,address(a0)
 
