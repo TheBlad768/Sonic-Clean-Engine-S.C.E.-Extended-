@@ -99,7 +99,7 @@ LevelSelectScreen:
 		jsr	(Wait_VSync).w
 		jsr	(Process_KosPlus_Module_Queue).w
 		tst.w	(KosPlus_modules_left).w
-		bne.s	.waitplc
+		bne.s	.waitplc												; wait for KosPlusM queue to clear
 		move.b	#VintID_LevelSelect,(V_int_routine).w
 		jsr	(Wait_VSync).w
 		enableScreen
@@ -403,14 +403,16 @@ LevelSelect_MarkFields:
 		adda.w	d0,a2
 
 		; load line
-		moveq	#(64/8)-1,d2
+		moveq	#bytesToXcnt(64,8),d2
 
 .copy
+
 	rept 8
 		move.w	(a1)+,d0
 		add.w	d3,d0												; VRAM shift
 		move.w	d0,(a2)+
 	endr
+
 		dbf	d2,.copy
 
 	if LevelSelect_VRAM<>0
@@ -557,7 +559,7 @@ LevelSelect_LoadMainText:
 LevelSelect_LoadText:
 		lea	LevelSelect_MappingOffsets(pc),a0
 		lea	(LevelSelect_buffer).l,a1
-		lea	LevelSelect_Text(pc),a2
+		lea	LevelSelect_MainText(pc),a2
 
 	if LevelSelect_VRAM=0
 		moveq	#0,d3
@@ -654,7 +656,7 @@ LevelSelect_LoadAct4:			levselstr "ACT 4"
 LevelSelect_HeaderText:		levselstr "SONIC TEST GAME - *** DEBUG MODE ***                            "
 
 ; main text
-LevelSelect_Text:
+LevelSelect_MainText:
 		levselstr "   DEATH EGG          - ACT 1"
 		levselstr "   UNKNOWN LEVEL      - UNKNOWN"
 		levselstr "   UNKNOWN LEVEL      - UNKNOWN"

@@ -5,11 +5,12 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_Spring:
+
+		; init
 		move.l	#Map_Spring,mappings(a0)
 		move.w	#make_art_tile(ArtTile_SpikesSprings+$10,0,0),art_tile(a0)	; set red
-		ori.b	#4,render_flags(a0)
-		move.w	#bytes_to_word(32/2,32/2),height_pixels(a0)					; set height and width
-		move.w	#$200,priority(a0)
+		ori.b	#4,render_flags(a0)										; use screen coordinates
+		move.l	#bytes_word_to_long(32/2,32/2,priority_4),height_pixels(a0)	; set height, width and priority
 		move.w	x_pos(a0),objoff_32(a0)
 		move.w	y_pos(a0),objoff_34(a0)
 		move.b	subtype(a0),d0
@@ -165,7 +166,7 @@ sub_22F98:
 		beq.s	loc_23020
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 		clr.b	flips_remaining(a1)
 		move.b	#4,flip_speed(a1)
 		btst	#1,d0
@@ -264,7 +265,7 @@ loc_231BE:
 		move.w	x_vel(a1),ground_vel(a1)
 		btst	#Status_Roll,status(a1)
 		bne.s	loc_231D8
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 
 loc_231D8:
 		move.b	subtype(a0),d0
@@ -272,7 +273,7 @@ loc_231D8:
 		beq.s	loc_23224
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0
@@ -319,17 +320,17 @@ sub_2326C:
 loc_2328E:
 		move.w	y_pos(a0),d2
 		move.w	d2,d3
-		subi.w	#$18,d2
-		addi.w	#$18,d3
+		subi.w	#24,d2
+		addi.w	#24,d3
 		lea	(Player_1).w,a1												; a1=character
 		tst.b	object_control(a1)
 		bmi.s	loc_232E2
 		cmpi.b	#PlayerID_Death,routine(a1)								; has player just died?
 		bhs.s	loc_232E2												; if yes, branch
-		tst.w	(Debug_placement_mode).w
-		bne.s	loc_232E2
-		btst	#Status_InAir,status(a1)
-		bne.s	loc_232E2
+		tst.w	(Debug_placement_mode).w								; is debug mode on?
+		bne.s	loc_232E2												; if yes, branch
+		btst	#Status_InAir,status(a1)										; is the player in the air?
+		bne.s	loc_232E2												; if yes, branch
 		move.w	ground_vel(a1),d4
 		btst	#0,status(a0)
 		beq.s	loc_232B6
@@ -358,8 +359,8 @@ loc_232E2:
 		bmi.s	locret_23324
 		cmpi.b	#PlayerID_Death,routine(a1)								; has player just died?
 		bhs.s	locret_23324												; if yes, branch
-		btst	#Status_InAir,status(a1)
-		bne.s	locret_23324
+		btst	#Status_InAir,status(a1)										; is the player in the air?
+		bne.s	locret_23324												; if yes, branch
 		move.w	ground_vel(a1),d4
 		btst	#0,status(a0)
 		beq.s	loc_232FC
@@ -435,7 +436,7 @@ loc_233F8:
 		beq.s	loc_23444
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 		clr.b	flips_remaining(a1)
 		move.b	#4,flip_speed(a1)
 		btst	#1,d0
@@ -545,7 +546,7 @@ loc_23542:
 		beq.s	loc_235A2
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0
@@ -632,7 +633,7 @@ loc_23660:
 		beq.s	loc_236BA
 		move.w	#1,ground_vel(a1)
 		move.b	#1,flip_angle(a1)
-		clr.b	anim(a1)														; id_Walk
+		clr.b	anim(a1)														; AniIDSonAni_Walk
 		move.b	#1,flips_remaining(a1)
 		move.b	#8,flip_speed(a1)
 		btst	#1,d0

@@ -1,3 +1,6 @@
+; ---------------------------------------------------------------------------
+; Knuckles (Object)
+; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -12,8 +15,8 @@ Obj_Knuckles:
 		lea	(Dust).w,a6
 
 	if GameDebug
-		tst.w	(Debug_placement_mode).w
-		beq.s	Knuckles_Normal
+		tst.w	(Debug_placement_mode).w									; is debug mode on?
+		beq.s	Knuckles_Normal												; if not, branch
 
 		; debug only code
 		cmpi.b	#1,(Debug_placement_type).w									; are Knuckles in debug object placement mode?
@@ -63,9 +66,8 @@ Knuckles_Init:												; Routine 0
 		move.w	#bytes_to_word(38/2,18/2),y_radius(a0)			; set y_radius and x_radius	; this sets Knuckles's collision height (2*pixels)
 		move.w	y_radius(a0),default_y_radius(a0)				; set default_y_radius and default_x_radius
 		move.l	#Map_Knuckles,mappings(a0)
-		move.w	#$100,priority(a0)
-		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
-		move.b	#4,render_flags(a0)
+		move.l	#bytes_word_to_long(48/2,48/2,priority_2),height_pixels(a0)	; set height, width and priority
+		move.b	#4,render_flags(a0)							; use screen coordinates
 		move.b	#PlayerID_Knuckles,character_id(a0)
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
@@ -194,7 +196,7 @@ Knuckles_Display:
 		move.b	invulnerability_timer(a0),d0
 		beq.s	.draw
 		subq.b	#1,invulnerability_timer(a0)
-		lsr.b	#3,d0
+		lsr.b	#3,d0									; division by 8
 		bhs.s	Knux_ChkInvin
 
 .draw
@@ -517,8 +519,8 @@ Knuckles_Gliding_HitWall:
 		bne.s	.reverseGravity
 ; loc_16A14:
 .checkFloorCommon:
-		move.w	y_pos(a0),d2
-		subi.w	#11,d2
+		moveq	#-11,d2
+		add.w	y_pos(a0),d2
 		jsr	(ChkFloorEdge_Part3).w
 
 		tst.w	d1
@@ -733,8 +735,8 @@ Knuckles_Wall_Climb:
 		bne.w	.climbingUp_ReverseGravity
 
 		; Get Knuckles' distance from the wall in 'd1'.
-		move.w	y_pos(a0),d2
-		subi.w	#11,d2
+		moveq	#-11,d2
+		add.w	y_pos(a0),d2
 		bsr.w	GetDistanceFromWall
 
 		; If the wall is far away from Knuckles, then we must have reached a
@@ -803,8 +805,8 @@ Knuckles_Wall_Climb:
 
 .skip3:
 		; Get Knuckles' distance from the wall in 'd1'.
-		move.w	y_pos(a0),d2
-		subi.w	#11,d2
+		moveq	#-11,d2
+		add.w	y_pos(a0),d2
 		bsr.w	GetDistanceFromWall
 
 		; If Knuckles is no longer against the wall (he has climbed off the
@@ -814,8 +816,8 @@ Knuckles_Wall_Climb:
 
 		; Get Knuckles' distance from the floor in 'd1'.
 		move.b	top_solid_bit(a0),d5
-		move.w	y_pos(a0),d2
-		subi.w	#9,d2
+		moveq	#-9,d2
+		add.w	y_pos(a0),d2
 		move.w	x_pos(a0),d3
 		bsr.w	CheckCeilingDist_WithRadius
 
@@ -999,7 +1001,7 @@ Knuckles_Wall_Climb:
 		; Only animate every 4 frames.
 		subq.b	#1,double_jump_property(a0)
 		bpl.s	.notMoving
-		move.b	#3,double_jump_property(a0)
+		addq.b	#3+1,double_jump_property(a0)
 
 		; Add delta to animation frame.
 		add.b	mapping_frame(a0),d1
@@ -1426,14 +1428,14 @@ loc_17174:
 ; ---------------------------------------------------------------------------
 
 loc_171D0:
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		bne.s	loc_171E2
 		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
 loc_171E2:
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
 		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
@@ -1441,14 +1443,14 @@ loc_171E2:
 ; ---------------------------------------------------------------------------
 
 loc_171FE:
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		beq.s	loc_17210
 		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
 loc_17210:
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
 		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
@@ -1462,14 +1464,14 @@ loc_1722C:
 		blt.s		loc_172A8
 		cmpi.b	#3,next_tilt(a0)
 		bne.s	loc_17272
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		bne.s	loc_17256
 		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
 loc_17256:
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
 		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
@@ -1479,14 +1481,14 @@ loc_17256:
 loc_17272:
 		cmpi.b	#3,tilt(a0)
 		bne.s	loc_172A8
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		beq.s	loc_1728C
 		move.b	#AniIDSonAni_Balance,anim(a0)
 		bra.w	loc_1731C
 ; ---------------------------------------------------------------------------
 
 loc_1728C:
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		clr.b	anim_frame_timer(a0)
 		move.b	#4,anim_frame(a0)
 		move.w	#bytes_to_word(AniIDSonAni_Balance,AniIDSonAni_Balance),anim(a0)
@@ -1622,7 +1624,7 @@ loc_173B0:
 		beq.s	loc_17402
 		add.w	d1,x_vel(a0)
 		clr.w	ground_vel(a0)
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		bne.s	locret_17400
 		bset	#Status_Push,status(a0)
 
@@ -1638,7 +1640,7 @@ loc_17402:
 loc_17408:
 		sub.w	d1,x_vel(a0)
 		clr.w	ground_vel(a0)
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		beq.s	locret_17400
 		bset	#Status_Push,status(a0)
 		rts
@@ -1658,7 +1660,7 @@ sub_17428:
 loc_17430:
 		tst.w	(Camera_H_scroll_shift).w
 		bne.s	loc_17444
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		bne.s	loc_17444
 		bclr	#Status_Push,status(a0)
 		move.b	#AniIDSonAni_Run,prev_anim(a0)
@@ -1697,7 +1699,7 @@ loc_1746A:
 		bmi.s	locret_174B2
 		sfx	sfx_Skid
 		move.b	#AniIDSonAni_Stop,anim(a0)
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_174B2							; if less than 12, branch
 		move.l	#DashDust_CheckSkid,address(a6)		; Dust
@@ -1711,7 +1713,7 @@ locret_174B2:
 sub_174B4:
 		move.w	ground_vel(a0),d0
 		bmi.s	loc_174E8
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		beq.s	loc_174CE
 		bclr	#Status_Push,status(a0)
 		move.b	#AniIDSonAni_Run,prev_anim(a0)
@@ -1748,7 +1750,7 @@ loc_174F0:
 		bmi.s	locret_17538
 		sfx	sfx_Skid
 		move.b	#AniIDSonAni_Stop,anim(a0)
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		cmpi.b	#12,air_left(a0)						; check air remaining
 		blo.s		locret_17538							; if less than 12, branch
 		move.l	#DashDust_CheckSkid,address(a6)		; Dust
@@ -1826,7 +1828,7 @@ loc_175E0:
 
 loc_175E6:
 		move.w	#$400,ground_vel(a0)
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		beq.s	loc_175F8
 		neg.w	ground_vel(a0)
 
@@ -1869,7 +1871,7 @@ sub_1763A:
 		bpl.s	loc_17650
 
 loc_17642:
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -1888,7 +1890,7 @@ loc_17658:
 sub_1765E:
 		move.w	ground_vel(a0),d0
 		bmi.s	loc_17672
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		move.b	#AniIDSonAni_Roll,anim(a0)
 		rts
 ; ---------------------------------------------------------------------------
@@ -1914,7 +1916,7 @@ Knux_ChgJumpDir:
 		move.w	x_vel(a0),d0
 		btst	#button_left,(Ctrl_1_logical).w
 		beq.s	loc_176B4
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 		sub.w	d5,d0
 		move.w	d6,d1
 		neg.w	d1
@@ -1928,7 +1930,7 @@ Knux_ChgJumpDir:
 loc_176B4:
 		btst	#button_right,(Ctrl_1_logical).w
 		beq.s	loc_176D0
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		add.w	d5,d0
 		cmp.w	d6,d0
 		blt.s		loc_176D0
@@ -2089,7 +2091,7 @@ loc_17898:
 		moveq	#0,d1
 		move.w	#$400,d0
 		move.w	d0,ground_vel(a0)
-		btst	#0,status(a0)
+		btst	#Status_Facing,status(a0)
 		beq.s	loc_178AE
 		neg.w	d0
 		moveq	#-$80,d1
@@ -2112,8 +2114,7 @@ Knux_DoLevelCollision_CheckRet:
 
 loc_17952:
 		move.b	lrb_solid_bit(a0),d5
-		move.w	x_vel(a0),d1
-		move.w	y_vel(a0),d2
+		movem.w	x_vel(a0),d1-d2	; load xy speed
 		jsr	(GetArcTan).w
 		subi.b	#$20,d0
 		andi.b	#$C0,d0
@@ -2404,15 +2405,15 @@ loc_17C3C:
 		movem.l	a4-a6,-(sp)
 		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,a4-a6
-		btst	#Status_InAir,status(a0)
-		bne.s	locret_17C80
+		btst	#Status_InAir,status(a0)						; is the player in the air?
+		bne.s	locret_17C80								; if yes, branch
 		moveq	#0,d0
 		move.l	d0,x_vel(a0)
 		move.w	d0,ground_vel(a0)
 		move.b	d0,object_control(a0)
-		move.b	d0,anim(a0)		; AniIDKnuxAni_Walk
+		move.b	d0,anim(a0)								; AniIDKnuxAni_Walk
 		move.b	d0,spin_dash_flag(a0)
-		move.w	#$100,priority(a0)
+		move.w	#priority_2,priority(a0)
 		move.b	#PlayerID_Control,routine(a0)
 		move.b	#2*60,invulnerability_timer(a0)
 

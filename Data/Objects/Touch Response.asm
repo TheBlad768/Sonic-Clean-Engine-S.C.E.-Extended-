@@ -17,12 +17,12 @@ TouchResponse:
 		cmpi.b	#1,double_jump_flag(a0)					; is the Insta-Shield currently in its 'attacking' mode?
 		bne.s	.Touch_NoInstaShield						; if not, branch
 		bset	#Status_Invincible,status_secondary(a0)			; make the player invincible
-		move.w	x_pos(a0),d2								; get player's x_pos
-		move.w	y_pos(a0),d3								; get player's y_pos
-		subi.w	#$18,d2									; subtract width of Insta-Shield
-		subi.w	#$18,d3									; subtract height of Insta-Shield
-		moveq	#$30,d4									; player's width
-		moveq	#$30,d5									; player's height
+		moveq	#-24,d2									; subtract width of Insta-Shield
+		add.w	x_pos(a0),d2								; get player's x_pos
+		moveq	#-24,d3									; subtract height of Insta-Shield
+		add.w	y_pos(a0),d3								; get player's y_pos
+		moveq	#48,d4									; player's width
+		moveq	#48,d5									; player's height
 		bsr.s	.Touch_Process
 		bclr	#Status_Invincible,status_secondary(a0)			; make the player vulnerable again
 
@@ -228,8 +228,8 @@ Touch_Monitor:
 		beq.s	.checkdestroy								; if not, branch
 		btst	#1,render_flags(a1)							; is the monitor upside down?
 		bne.s	.monitorupsidedown						; if so, branch
-		move.w	y_pos(a0),d0								; get player's y_pos
-		subi.w	#16,d0									; subtract height of monitor from it
+		moveq	#-16,d0									; subtract height of monitor from it
+		add.w	y_pos(a0),d0								; get player's y_pos
 		cmp.w	y_pos(a1),d0
 		blo.s		.locret									; if new value is lower than monitor's y_pos, return
 		bra.s	.monitorfall
@@ -320,12 +320,18 @@ Touch_Enemy:
 		neg.w	x_vel(a0)								; bounce player directly off boss
 		neg.w	y_vel(a0)
 		neg.w	ground_vel(a0)
-		move.b	collision_flags(a1),collision_saved_flags(a1)	; save current collision
+		move.b	collision_flags(a1),boss_backup_collision(a1)	; save current collision
 		move.w	a0,d0									; save value of RAM address of which player hit the boss
 		move.b	d0,objoff_1C(a1)							; $00 for main character, $4A for sidekick
 		clr.b	collision_flags(a1)
+
+	if BossDebug
+		clr.b	boss_hitcount2(a1)
+	else
 		subq.b	#1,boss_hitcount2(a1)
 		bne.s	.bossnotdefeated
+	endif
+
 		bset	#7,status(a1)
 
 .bossnotdefeated
@@ -337,10 +343,10 @@ Touch_Enemy:
 		move.b	#$21,anim(a0)							; put Knuckles in his falling animation
 
 		; decide which direction to make Knuckles face
-		bclr	#0,status(a0)
+		bclr	#Status_Facing,status(a0)
 		tst.w	x_vel(a0)
 		bmi.s	.directiondecided
-		bset	#0,status(a0)
+		bset	#Status_Facing,status(a0)
 
 .directiondecided
 		move.w	default_y_radius(a0),y_radius(a0)			; set default_y_radius and default_x_radius
@@ -432,7 +438,7 @@ Touch_ChkHurt_NoPowerUp:
 		bne.s	Touch_ChkHurt2							; if not, branch
 
 Touch_ChkHurt_HaveShield:
-		moveq	#8,d0									; should the object be bounced away by a shield?
+		moveq	#1<<3,d0								; should the object be bounced away by a shield?
 		and.b	shield_reaction(a1),d0
 		beq.s	Touch_ChkHurt2							; if not, branch
 
@@ -605,12 +611,12 @@ ShieldTouchResponse:
 		moveq	#$71,d0									; does the player have any shields?
 		and.b	status_secondary(a0),d0
 		beq.s	ShieldTouch_Return
-		move.w	x_pos(a0),d2								; get player's x_pos
-		move.w	y_pos(a0),d3								; get player's y_pos
-		subi.w	#$18,d2									; subtract width of shield
-		subi.w	#$18,d3									; subtract height of shield
-		moveq	#$30,d4									; player's width
-		moveq	#$30,d5									; player's height
+		moveq	#-24,d2									; subtract width of shield
+		add.w	x_pos(a0),d2								; get player's x_pos
+		moveq	#-24,d3									; subtract height of shield
+		add.w	y_pos(a0),d3								; get player's y_pos
+		moveq	#48,d4									; player's width
+		moveq	#48,d5									; player's height
 		lea	(Collision_response_list).w,a4
 		move.w	(a4)+,d6									; get number of objects queued
 		beq.s	ShieldTouch_Return						; if there are none, return

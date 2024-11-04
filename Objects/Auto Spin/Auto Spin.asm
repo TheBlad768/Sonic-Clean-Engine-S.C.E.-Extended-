@@ -5,11 +5,12 @@
 ; =============== S U B R O U T I N E =======================================
 
 Obj_AutoSpin:
+
+		; init
 		move.l	#Map_PathSwap,mappings(a0)
 		move.w	#make_art_tile(ArtTile_Ring,0,0),art_tile(a0)
-		ori.b	#4,render_flags(a0)
-		move.w	#$280,priority(a0)
-		move.w	#bytes_to_word(256/2,256/2),height_pixels(a0)		; set height and width
+		ori.b	#4,render_flags(a0)								; use screen coordinates
+		move.l	#bytes_word_to_long(256/2,256/2,priority_5),height_pixels(a0)	; set height, width and priority
 		move.b	subtype(a0),d0
 		btst	#2,d0
 		beq.s	AutoSpin_CheckX
@@ -63,8 +64,8 @@ loc_1E890:
 ; =============== S U B R O U T I N E =======================================
 
 AutoSpin_MainX:
-		tst.w	(Debug_placement_mode).w
-		bne.s	loc_1E8C0
+		tst.w	(Debug_placement_mode).w						; is debug mode on?
+		bne.s	loc_1E8C0										; if yes, branch
 		move.w	x_pos(a0),d1
 		lea	objoff_34(a0),a2
 		lea	(Player_1).w,a1										; a1=character
@@ -101,8 +102,8 @@ sub_1E8C6:
 		bhs.w	locret_1E9B4
 		btst	#5,subtype(a0)
 		beq.s	loc_1E908
-		btst	#Status_InAir,status(a1)
-		bne.w	locret_1E9B4
+		btst	#Status_InAir,status(a1)								; is the player in the air?
+		bne.w	locret_1E9B4										; if yes, branch
 
 loc_1E908:
 		btst	#0,render_flags(a0)
@@ -143,8 +144,8 @@ AutoSpin_MainX_Alt:
 		bhs.s	locret_1E9B4
 		btst	#5,subtype(a0)
 		beq.s	loc_1E97C
-		btst	#Status_InAir,status(a1)
-		bne.s	locret_1E9B4
+		btst	#Status_InAir,status(a1)								; is the player in the air?
+		bne.s	locret_1E9B4										; if yes, branch
 
 loc_1E97C:
 		btst	#0,render_flags(a0)
@@ -187,8 +188,8 @@ loc_1E9C0:
 ; =============== S U B R O U T I N E =======================================
 
 AutoSpin_MainY:
-		tst.w	(Debug_placement_mode).w
-		bne.s	loc_1EA0E
+		tst.w	(Debug_placement_mode).w						; is debug mode on?
+		bne.s	loc_1EA0E										; if yes, branch
 		move.w	y_pos(a0),d1
 		lea	objoff_34(a0),a2
 		lea	(Player_1).w,a1										; a1=character
@@ -225,8 +226,8 @@ sub_1EA14:
 		bhs.s	locret_1EAAE
 		btst	#5,subtype(a0)
 		beq.s	loc_1EA58
-		btst	#Status_InAir,status(a1)
-		bne.s	locret_1EAAE
+		btst	#Status_InAir,status(a1)								; is the player in the air?
+		bne.s	locret_1EAAE										; if yes, branch
 
 loc_1EA58:
 		btst	#0,render_flags(a0)
@@ -276,8 +277,8 @@ AutoSpin_MainY_Alt:
 		bhs.s	locret_1EB30
 		btst	#5,subtype(a0)
 		beq.s	loc_1EAE8
-		btst	#Status_InAir,status(a1)
-		bne.s	locret_1EB30
+		btst	#Status_InAir,status(a1)								; is the player in the air?
+		bne.s	locret_1EB30										; if yes, branch
 
 loc_1EAE8:
 		btst	#0,render_flags(a0)

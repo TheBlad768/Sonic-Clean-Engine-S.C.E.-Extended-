@@ -1,3 +1,6 @@
+; ---------------------------------------------------------------------------
+; Sonic (Object)
+; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -12,8 +15,8 @@ Obj_Sonic:
 		lea	(Dust).w,a6
 
 	if GameDebug
-		tst.w	(Debug_placement_mode).w
-		beq.s	Sonic_Normal
+		tst.w	(Debug_placement_mode).w							; is debug mode on?
+		beq.s	Sonic_Normal										; if not, branch
 
 		; debug only code
 		cmpi.b	#1,(Debug_placement_type).w							; are Sonic in debug object placement mode?
@@ -59,9 +62,8 @@ Sonic_Init:													; Routine 0
 		move.w	#bytes_to_word(38/2,18/2),y_radius(a0)			; set y_radius and x_radius	; this sets Sonic's collision height (2*pixels)
 		move.w	y_radius(a0),default_y_radius(a0)				; set default_y_radius and default_x_radius
 		move.l	#Map_Sonic,mappings(a0)
-		move.w	#$100,priority(a0)
-		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)		; set height and width
-		move.b	#4,render_flags(a0)
+		move.l	#bytes_word_to_long(48/2,48/2,priority_2),height_pixels(a0)	; set height, width and priority
+		move.b	#4,render_flags(a0)							; use screen coordinates
 		clr.b	character_id(a0)									; PlayerID_Sonic
 		move.w	#$600,Max_speed-Max_speed(a4)
 		move.w	#$C,Acceleration-Max_speed(a4)
@@ -152,7 +154,7 @@ loc_10C26:
 		move.b	(Secondary_Angle).w,tilt(a0)
 		tst.b	(WindTunnel_flag).w
 		beq.s	.anim
-		tst.b	anim(a0)							; id_Walk
+		tst.b	anim(a0)							; AniIDSonAni_Walk
 		bne.s	.anim
 		move.b	prev_anim(a0),anim(a0)
 
@@ -193,7 +195,7 @@ Sonic_Display:
 		move.b	invulnerability_timer(a0),d0
 		beq.s	.draw
 		subq.b	#1,invulnerability_timer(a0)
-		lsr.b	#3,d0
+		lsr.b	#3,d0									; division by 8
 		bhs.s	Sonic_ChkInvin
 
 .draw
@@ -253,6 +255,7 @@ Sonic_RecordPos:
 		cmpa.w	#Player_1,a0				; is Sonic the sidekick?
 		bne.s	.return					; if so, branch
 
+		; record
 		move.w	(Pos_table_index).w,d0
 		lea	(Pos_table).w,a1
 		adda.w	d0,a1
@@ -274,6 +277,7 @@ Reset_Player_Position_Array:
 		cmpa.w	#Player_1,a0				; is object player 1?
 		bne.s	.return					; if not, branch
 
+		; copy
 		lea	(Pos_table).w,a1
 		lea	(Stat_table).w,a2
 		moveq	#$3F,d0
@@ -555,7 +559,7 @@ Sonic_ChgFallAnim:
 ; =============== S U B R O U T I N E =======================================
 
 Sonic_Move:
-		move.w	Max_speed-Max_speed(a4),d6		; set Max_speed
+		move.w	Max_speed-Max_speed(a4),d6	; set Max_speed
 		move.w	Acceleration-Max_speed(a4),d5	; set Acceleration
 		move.w	Deceleration-Max_speed(a4),d4	; set Deceleration
 		tst.b	status_secondary(a0)				; is bit 7 set? (Infinite inertia)
@@ -1390,6 +1394,7 @@ Sonic_JumpHeight:
 		tst.b	jumping(a0)									; is Sonic jumping?
 		beq.s	Sonic_UpVelCap							; if not, branch
 
+		; check
 		move.w	#-$400,d1
 		btst	#Status_Underwater,status(a0)					; is Sonic underwater?
 		beq.s	loc_118D2								; if not, branch
@@ -1856,15 +1861,13 @@ locret_11EEA:
 
 ; =============== S U B R O U T I N E =======================================
 
-; Sonic_Floor:
 SonicKnux_DoLevelCollision:
 		move.l	(Primary_collision_addr).w,(Collision_addr).w
 		cmpi.b	#$C,top_solid_bit(a0)
 		beq.s	+
 		move.l	(Secondary_collision_addr).w,(Collision_addr).w
 +		move.b	lrb_solid_bit(a0),d5
-		move.w	x_vel(a0),d1
-		move.w	y_vel(a0),d2
+		movem.w	x_vel(a0),d1-d2	; load xy speed
 		jsr	(GetArcTan).w
 		subi.b	#$20,d0
 		andi.b	#$C0,d0
@@ -2134,7 +2137,7 @@ Player_TouchFloor:
 Sonic_TouchFloor_Check_Spindash:
 		tst.b	spin_dash_flag(a0)
 		bne.s	loc_121D8
-		clr.b	anim(a0)									; id_Walk
+		clr.b	anim(a0)									; AniIDSonAni_Walk
 
 Sonic_TouchFloor:
 		move.b	y_radius(a0),d0
@@ -2142,7 +2145,7 @@ Sonic_TouchFloor:
 		btst	#Status_Roll,status(a0)
 		beq.s	loc_121D8
 		bclr	#Status_Roll,status(a0)
-		clr.b	anim(a0)									; id_Walk
+		clr.b	anim(a0)									; AniIDSonAni_Walk
 		sub.b	default_y_radius(a0),d0
 		ext.w	d0
 		tst.b	(Reverse_gravity_flag).w
@@ -2193,9 +2196,8 @@ BubbleShield_Bounce:
 		btst	#Status_Underwater,status(a0)
 		beq.s	+
 		move.w	#$400,d2
-+		moveq	#0,d0
-		move.b	angle(a0),d0
-		subi.b	#$40,d0
++		moveq	#-$40,d0
+		add.b	angle(a0),d0
 		jsr	(GetSineCosine).w
 		muls.w	d2,d1
 		asr.l	#8,d1
@@ -2280,15 +2282,15 @@ loc_12344:
 		movem.l	a4-a6,-(sp)
 		bsr.w	SonicKnux_DoLevelCollision
 		movem.l	(sp)+,a4-a6
-		btst	#Status_InAir,status(a0)
-		bne.s	locret_12388
+		btst	#Status_InAir,status(a0)						; is the player in the air?
+		bne.s	locret_12388								; if yes, branch
 		moveq	#0,d0
 		move.l	d0,x_vel(a0)
 		move.w	d0,ground_vel(a0)
 		move.b	d0,object_control(a0)
-		move.b	d0,anim(a0)								; id_Walk
+		move.b	d0,anim(a0)								; AniIDSonAni_Walk
 		move.b	d0,spin_dash_flag(a0)
-		move.w	#$100,priority(a0)
+		move.w	#priority_2,priority(a0)
 		move.b	#PlayerID_Control,routine(a0)
 		move.b	#2*60,invulnerability_timer(a0)
 

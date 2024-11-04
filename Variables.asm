@@ -98,17 +98,17 @@ Camera_X_pos:						ds.l 1
 Camera_Y_pos:						ds.l 1
 Camera_X_pos_copy:					ds.l 1
 Camera_Y_pos_copy:					ds.l 1
-Camera_X_pos_rounded:				ds.w 1						; rounded down to the nearest block boundary ($10th pixel)
-Camera_Y_pos_rounded:				ds.w 1						; rounded down to the nearest block boundary ($10th pixel)
+Camera_X_pos_rounded:				ds.w 1						; rounded down to the nearest block boundary (16th pixel)
+Camera_Y_pos_rounded:				ds.w 1						; rounded down to the nearest block boundary (16th pixel)
 Camera_X_pos_BG_copy:				ds.l 1
 Camera_Y_pos_BG_copy:				ds.l 1
-Camera_X_pos_BG_rounded:			ds.w 1						; rounded down to the nearest block boundary ($10th pixel)
-Camera_Y_pos_BG_rounded:			ds.w 1						; rounded down to the nearest block boundary ($10th pixel)
+Camera_X_pos_BG_rounded:			ds.w 1						; rounded down to the nearest block boundary (16th pixel)
+Camera_Y_pos_BG_rounded:			ds.w 1						; rounded down to the nearest block boundary (16th pixel)
 Camera_X_pos_coarse:				ds.w 1						; rounded down to the nearest chunk boundary (128th pixel)
 Camera_Y_pos_coarse:				ds.w 1						; rounded down to the nearest chunk boundary (128th pixel)
 Camera_X_pos_coarse_back:			ds.w 1						; Camera_X_pos_coarse - $80
 Camera_Y_pos_coarse_back:			ds.w 1						; Camera_Y_pos_coarse - $80
-Plane_double_update_flag:				ds.b 1						; set when two block are to be updated instead of one (i.e. the camera's scrolled by more than $10 pixels)
+Plane_double_update_flag:				ds.b 1						; set when two block are to be updated instead of one (i.e. the camera's scrolled by more than 16 pixels)
 Special_V_int_routine:				ds.b 1
 Camera_H_scroll_shift:				ds.w 3
 
@@ -134,7 +134,7 @@ Events_fg:							ds.b $18						; various flags used by foreground events
 Draw_delayed_position:				ds.w 1						; position to redraw screen from. Screen is reloaded 1 row at a time to avoid game lag
 Draw_delayed_rowcount:				ds.w 1						; number of rows for screen redrawing. Screen is reloaded 1 row at a time to avoid game lag
 Events_bg:							ds.b $18						; various flags used by background events
-Boss_events:							ds.b $10
+Boss_events:							ds.b $20
 Plane_buffer_2_addr:					ds.l 1						; the address of the second plane buffer to process, if applicable
 Ring_start_addr_ROM:				ds.l 1						; address in the ring layout of the first ring whose X position is >= camera X position - 8
 Ring_end_addr_ROM:					ds.l 1						; address in the ring layout of the first ring whose X position is >= camera X position + 328
@@ -331,7 +331,7 @@ Level_data_addr_RAM:				= *
 .Kpal								ds.b 1
 .WaterSpal							ds.b 1
 .WaterKpal							ds.b 1
-.Location								ds.l 1
+.Location								ds.l 1						; players start location (xypos)
 .Debug								ds.l 1
 Level_data_addr_RAM_end			= *
 
@@ -375,6 +375,7 @@ Target_palette_line_4:					ds.b palette_line_size
 
 ; oscillating variables
 Oscillating_variables:					= *
+Oscillating_table:						= *
 Oscillating_Numbers:					= *
 Oscillation_Control:					ds.w 1
 Oscillating_Data:						ds.b $40

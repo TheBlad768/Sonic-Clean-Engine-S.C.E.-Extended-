@@ -1,3 +1,6 @@
+; ---------------------------------------------------------------------------
+; Tails tail (Object)
+; ---------------------------------------------------------------------------
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -6,15 +9,13 @@ Obj_Tails_Tail:
 		; init
 		move.l	#Map_Tails_Tail,mappings(a0)
 		move.w	#make_art_tile(ArtTile_Player_2_Tail,0,0),art_tile(a0)
-		move.b	#4,render_flags(a0)
-		move.w	#$100,priority(a0)
-		move.w	#bytes_to_word(48/2,48/2),height_pixels(a0)				; set height and width
+		move.l	#bytes_to_long(rfCoord,0,48/2,48/2),render_flags(a0)		; set screen coordinates flag and height and width
 		move.l	#.main,address(a0)
 
 .main
 
 		; here, several SSTs are inheritied from the parent, normally Tails
-		movea.w	objoff_30(a0),a2										; is parent in S2
+		movea.w	objoff_30(a0),a2										; a2=character
 		move.b	angle(a2),angle(a0)
 		move.b	status(a2),status(a0)
 		move.w	x_pos(a2),x_pos(a0)
@@ -22,40 +23,40 @@ Obj_Tails_Tail:
 		move.w	priority(a2),priority(a0)
 		andi.w	#drawing_mask,art_tile(a0)
 		tst.w	art_tile(a2)
-		bpl.s	loc_16106
+		bpl.s	.nothighpriority
 		ori.w	#high_priority,art_tile(a0)
 
-loc_16106:
+.nothighpriority
 		moveq	#0,d0
 		move.b	anim(a2),d0
 		btst	#Status_Push,status(a2)
-		beq.s	loc_1612C
+		beq.s	.check
 		tst.b	(WindTunnel_flag_P2).w
-		bne.s	loc_1612C
+		bne.s	.check
 
 		; this is checking if parent (Tails) is in its pushing animation
 		cmpi.b	#$A9,mapping_frame(a2)
-		blo.s		loc_1612C
+		blo.s		.check
 		cmpi.b	#$AC,mapping_frame(a2)
-		bhi.s	loc_1612C
+		bhi.s	.check
 		moveq	#4,d0
 
-loc_1612C:
-		cmp.b	objoff_34(a0),d0									; has the input parent anim changed since last check?
-		beq.s	loc_1613C										; if not, branch and skip setting a matching Tails' Tails anim
-		move.b	d0,objoff_34(a0)									; store d0 for the above comparision
-		move.b	Obj_Tails_Tail_AniSelection(pc,d0.w),anim(a0)		; load anim relative to parent's
+.check
+		cmp.b	objoff_34(a0),d0										; has the input parent anim changed since last check?
+		beq.s	.prev												; if not, branch and skip setting a matching Tails' Tails anim
+		move.b	d0,objoff_34(a0)										; store d0 for the above comparision
+		move.b	.aniselection(pc,d0.w),anim(a0)							; load anim relative to parent's
 
-loc_1613C:
+.prev
 		lea	(AniTails_Tail).l,a1
 		bsr.w	Animate_Tails_Part2
 		tst.b	(Reverse_gravity_flag).w
-		beq.s	loc_1615A
-		cmpi.b	#3,anim(a0)										; is this the Directional animation?
-		beq.s	loc_1615A										; if so, skip the mirroring
-		eori.b	#2,render_flags(a0)								; reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
+		beq.s	.dplc
+		cmpi.b	#3,anim(a0)											; is this the Directional animation?
+		beq.s	.dplc												; if so, skip the mirroring
+		eori.b	#2,render_flags(a0)									; reverse the vertical mirror render_flag bit (On if Off beforehand and vice versa)
 
-loc_1615A:
+.dplc
 		bsr.w	Tails_Tail_Load_PLC
 		jmp	(Draw_Sprite).w
 
@@ -64,7 +65,7 @@ loc_1615A:
 ; chooses which animation script to run depending on what Tails is doing
 ; ---------------------------------------------------------------------------
 
-Obj_Tails_Tail_AniSelection:
+.aniselection
 		dc.b 0		; TailsAni_Walk		->					; 0
 		dc.b 0		; Run				->					; 1
 		dc.b 3		; TailsAni_Roll		-> Directional			; 2
