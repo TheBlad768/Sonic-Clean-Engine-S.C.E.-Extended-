@@ -486,7 +486,7 @@ Knuckles_Gliding_HitWall:
 		bclr	#Status_Facing,status(a0)
 		bsr.w	CheckRightCeilingDist
 		or.w	d0,d1
-		bne.w	.checkFloorRight
+		bne.s	.checkFloorRight
 
 .success:
 		sfx	sfx_Grab
