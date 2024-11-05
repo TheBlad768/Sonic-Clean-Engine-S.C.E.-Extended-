@@ -262,7 +262,7 @@ GiveRing:
 
 AddRings:
 		move.w	#999,d1												; max rings
-		add.w	d0,(Ring_count).w									; add 1 to rings
+		add.w	d0,(Ring_count).w									; add to rings
 		cmp.w	(Ring_count).w,d1										; does the player 1 have 999 or less rings?
 		bhs.s	.skip												; if yes, branch
 		move.w	d1,(Ring_count).w										; set max rings
