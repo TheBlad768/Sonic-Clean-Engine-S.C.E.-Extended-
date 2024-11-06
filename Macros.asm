@@ -699,6 +699,17 @@ CreateNewSprite macro obj, terminate
       endif
     endm
 
+CreateNewSprite3 macro obj, terminate
+		jsr	(Create_New_Sprite3).w
+		bne.s	.skip
+		move.l	#obj,address(a1)
+
+.skip
+      if ("terminate"<>"")
+	rts
+      endif
+    endm
+
 ; ---------------------------------------------------------------------------
 ; macro for marking the boundaries of an object layout file
 ; ---------------------------------------------------------------------------
