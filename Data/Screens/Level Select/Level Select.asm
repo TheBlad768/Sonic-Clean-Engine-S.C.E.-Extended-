@@ -76,7 +76,7 @@ LevelSelectScreen:
 		; load text
 		bsr.w	LevelSelect_LoadText
 		move.w	#palette_line_1+LevelSelect_VRAM,d3
-		bsr.w	LevelSelect_LoadMainText
+		bsr.w	LevelSelect_LoadHeaderText
 		move.w	#palette_line_0+LevelSelect_VRAM,d3
 		bsr.w	LevelSelect_LoadCharacter
 		move.w	#palette_line_0+LevelSelect_VRAM,d3
@@ -462,7 +462,7 @@ LevelSelect_MarkFields:
 
 .drawnumbers
 		move.w	d0,d2
-		move.w	d0,-(sp)
+		move.w	d0,-(sp)												; division by $100
 		clr.w	d0
 		move.b	(sp)+,d0
 		bsr.s	.getnumber
@@ -473,9 +473,9 @@ LevelSelect_MarkFields:
 
 .getnumber
 		andi.w	#$F,d0
-		cmpi.b	#10,d0
-		blo.s		.skipsymbols
-		addq.b	#6,d0
+		cmpi.b	#10,d0												; is digit $A-$F?
+		blo.s		.skipsymbols											; if not, branch
+		addq.b	#6,d0												; use alpha characters
 
 .skipsymbols
 		addq.b	#1,d0
@@ -502,7 +502,7 @@ LevelSelect_LoadCharacter:
 
 .notMiles
 		adda.w	(a0,d0.w),a0
-		bra.s	LevelSelect_LoadMainText.loadtext
+		bra.s	LevelSelect_LoadAct.loadtext
 
 ; ---------------------------------------------------------------------------
 ; Draw act
@@ -527,13 +527,6 @@ LevelSelect_LoadAct:
 		add.w	d1,d0
 		lea	LevelSelect_ActTextIndex(pc),a0
 		adda.w	(a0,d0.w),a0
-		bra.s	LevelSelect_LoadMainText.loadtext
-
-; =============== S U B R O U T I N E =======================================
-
-LevelSelect_LoadMainText:
-		lea	(LevelSelect_buffer2+planeLoc(64,0,1)).l,a5
-		lea	LevelSelect_HeaderText(pc),a0
 
 .loadtext
 		moveq	#0,d6
@@ -546,6 +539,13 @@ LevelSelect_LoadMainText:
 		move.w	d0,(a5)+
 		dbf	d6,.tcopy
 		rts
+
+; =============== S U B R O U T I N E =======================================
+
+LevelSelect_LoadHeaderText:
+		lea	(LevelSelect_buffer2+planeLoc(64,0,1)).l,a5
+		lea	LevelSelect_HeaderText(pc),a0
+		bra.s	LevelSelect_LoadAct.loadtext
 
 ; ---------------------------------------------------------------------------
 ; Load text
