@@ -2241,41 +2241,41 @@ Tails_Roll:
 
 		tst.w	(Camera_H_scroll_shift).w
 		bne.s	locret_14FA8
-		moveq	#btnLR,d0
+		moveq	#btnLR,d0								; is left/right being pressed?
 		and.b	(Ctrl_2_logical).w,d0
 		bne.s	locret_14FA8
-		btst	#button_down,(Ctrl_2_logical).w
-		beq.s	loc_14FAA
+		btst	#button_down,(Ctrl_2_logical).w				; is down being pressed?
+		beq.s	Tails_ChkWalk							; if not, branch
 		mvabs.w	ground_vel(a0),d0
-		cmpi.w	#$100,d0
-		bhs.s	loc_14FBA
+		cmpi.w	#$100,d0								; is Tails moving at $100 speed or faster?
+		bhs.s	Tails_ChkRoll								; if so, branch
 
-;		btst	#Status_OnObj,status(a0)			; is Tails stand on object?
-;		bne.s	locret_14FA8					; if yes, branch
+;		btst	#Status_OnObj,status(a0)						; is Tails stand on object?
+;		bne.s	locret_14FA8								; if yes, branch
 
-		move.b	#AniIDSonAni_Duck,anim(a0)
+		move.b	#AniIDSonAni_Duck,anim(a0)				; enter ducking animation
 
 locret_14FA8:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_14FAA:
-		cmpi.b	#AniIDSonAni_Duck,anim(a0)
+Tails_ChkWalk:
+		cmpi.b	#AniIDSonAni_Duck,anim(a0)				; is Tails ducking?
 		bne.s	locret_14FA8
-		clr.b	anim(a0)			; AniIDSonAni_Walk
+		clr.b	anim(a0)									; if so, enter walking animation
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_14FBA:
-		btst	#Status_Roll,status(a0)
-		beq.s	loc_14FC4
+Tails_ChkRoll:
+		btst	#Status_Roll,status(a0)						; is Tails already rolling?
+		beq.s	Tails_DoRoll								; if not, branch
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_14FC4:
+Tails_DoRoll:
 		bset	#Status_Roll,status(a0)
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#AniIDSonAni_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)				; enter roll animation
 		addq.w	#1,y_pos(a0)
 		tst.b	(Reverse_gravity_flag).w
 		beq.s	loc_14FEA

@@ -1277,10 +1277,10 @@ SonicKnux_Roll:
 		and.b	(Ctrl_1_logical).w,d0
 		bne.s	locret_1177E
 		btst	#button_down,(Ctrl_1_logical).w				; is down being pressed?
-		beq.s	loc_11780								; if not, branch
+		beq.s	SonicKnux_ChkWalk						; if not, branch
 		mvabs.w	ground_vel(a0),d0
 		cmpi.w	#$100,d0								; is Sonic moving at $100 speed or faster?
-		bhs.s	loc_11790								; if so, branch
+		bhs.s	SonicKnux_ChkRoll						; if so, branch
 
 ;		btst	#Status_OnObj,status(a0)						; is Sonic/Knux stand on object?
 ;		bne.s	locret_1177E								; if yes, branch
@@ -1291,20 +1291,20 @@ locret_1177E:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_11780:
+SonicKnux_ChkWalk:
 		cmpi.b	#AniIDSonAni_Duck,anim(a0)				; is Sonic ducking?
 		bne.s	locret_1177E
 		clr.b	anim(a0)									; if so, enter walking animation
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_11790:
+SonicKnux_ChkRoll:
 		btst	#Status_Roll,status(a0)						; is Sonic already rolling?
-		beq.s	loc_1179A								; if not, branch
+		beq.s	SonicKnux_DoRoll						; if not, branch
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_1179A:
+SonicKnux_DoRoll:
 		bset	#Status_Roll,status(a0)
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
 		move.b	#AniIDSonAni_Roll,anim(a0)				; enter roll animation
