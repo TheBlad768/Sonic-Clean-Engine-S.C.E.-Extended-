@@ -26,7 +26,7 @@
                     },
                     "dplcs": {
                         "enabled": true,
-                        "path": "Objects/Sonic/Object Data/Sonic pattern load cues.asm",
+                        "path": "Objects/Sonic/Object Data/DPLC - Sonic.asm",
                         "label": ""
                     },
                     "uuid": "da472ab9-f363-45e6-8ee3-a83fd70d6d9c"
@@ -51,7 +51,7 @@
                     },
                     "dplcs": {
                         "enabled": true,
-                        "path": "Objects/Tails/Object Data/Tails pattern load cues.asm",
+                        "path": "Objects/Tails/Object Data/DPLC - Tails.asm",
                         "label": ""
                     },
                     "uuid": "55b9745b-aae7-4573-aae0-0fff4cffee27"
@@ -76,7 +76,7 @@
                     },
                     "dplcs": {
                         "enabled": true,
-                        "path": "Objects/Tails/Object Data/Tails pattern load cues.asm",
+                        "path": "Objects/Tails/Object Data/DPLC - Tails.asm",
                         "label": ""
                     },
                     "uuid": "5baae795-736a-400f-bf4c-ffee27d32c98"
@@ -101,7 +101,7 @@
                     },
                     "dplcs": {
                         "enabled": true,
-                        "path": "Objects/Tails/Object Data/Tails tails pattern load cues.asm",
+                        "path": "Objects/Tails/Object Data/DPLC - Tails tails.asm",
                         "label": ""
                     },
                     "uuid": "745baae7-9573-4ae0-8fff-4cffee27d32c"
@@ -126,7 +126,7 @@
                     },
                     "dplcs": {
                         "enabled": true,
-                        "path": "Objects/Knuckles/Object Data/Knuckles pattern load cues.asm",
+                        "path": "Objects/Knuckles/Object Data/DPLC - Knuckles.asm",
                         "label": ""
                     },
                     "uuid": "b9745baa-e795-436a-a00f-ff4cffee27d3"
