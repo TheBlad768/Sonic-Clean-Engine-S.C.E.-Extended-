@@ -476,7 +476,7 @@ Knuckles_Gliding_HitWall:
 
 ;.left:
 		bset	#Status_Facing,status(a0)
-		bsr.w	CheckLeftCeilingDist
+		jsr	(CheckLeftCeilingDist).w
 		or.w	d0,d1
 		bne.s	.checkFloorLeft
 		addq.w	#1,x_pos(a0)
@@ -485,7 +485,7 @@ Knuckles_Gliding_HitWall:
 
 .right:
 		bclr	#Status_Facing,status(a0)
-		bsr.w	CheckRightCeilingDist
+		jsr	(CheckRightCeilingDist).w
 		or.w	d0,d1
 		bne.s	.checkFloorRight
 
@@ -754,7 +754,7 @@ Knuckles_Wall_Climb:
 		move.w	y_pos(a0),d2
 		subq.w	#8,d2
 		move.w	x_pos(a0),d3
-		bsr.w	CheckCeilingDist_WithRadius
+		jsr	(CheckCeilingDist_WithRadius).w
 
 		; Check if Knuckles has room above him.
 		tst.w	d1
