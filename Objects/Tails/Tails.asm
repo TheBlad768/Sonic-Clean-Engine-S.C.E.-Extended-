@@ -1119,7 +1119,6 @@ loc_14428:
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a1)					; set y_radius and x_radius
 		move.b	#AniIDSonAni_Roll,anim(a1)
 		bset	#Status_Roll,status(a1)
-		bclr	#Status_RollJump,status(a1)
 		rts
 ; ---------------------------------------------------------------------------
 
@@ -1257,7 +1256,6 @@ sub_1459E:
 		clr.b	anim_frame(a1)
 		move.b	#3,object_control(a1)
 		bset	#Status_InAir,status(a1)
-		bclr	#Status_RollJump,status(a1)
 		clr.b	spin_dash_flag(a1)
 		andi.b	#-4,render_flags(a1)
 		andi.b	#-2,status(a1)
@@ -2159,8 +2157,6 @@ Tails_InputAcceleration_Freespace:
 		move.w	Max_speed_P2-Max_speed_P2(a4),d6
 		move.w	Acceleration_P2-Max_speed_P2(a4),d5
 		asl.w	d5
-		btst	#Status_RollJump,status(a0)
-		bne.s	loc_14ECC
 		move.w	x_vel(a0),d0
 		btst	#button_left,(Ctrl_2_logical).w
 		beq.s	loc_14EAC
@@ -2415,7 +2411,6 @@ loc_15188:
 		add.w	d1,y_pos(a0)
 
 loc_1518C:
-		bclr	#Status_RollJump,status(a0)
 		move.b	#1,double_jump_flag(a0)
 		move.b	#(8*60)/2,double_jump_property(a0)
 		bra.w	Tails_Set_Flying_Animation
@@ -2874,7 +2869,6 @@ loc_15658:
 loc_1565E:
 		bclr	#Status_InAir,status(a0)
 		bclr	#Status_Push,status(a0)
-		bclr	#Status_RollJump,status(a0)
 		moveq	#0,d0
 		move.b	d0,jumping(a0)
 
