@@ -1911,8 +1911,6 @@ Knux_ChgJumpDir:
 		move.w	Max_speed-Max_speed(a4),d6
 		move.w	Acceleration-Max_speed(a4),d5
 		asl.w	d5
-		btst	#Status_RollJump,status(a0)
-		bne.s	loc_176D4
 		move.w	x_vel(a0),d0
 		btst	#button_left,(Ctrl_1_logical).w
 		beq.s	loc_176B4
@@ -2081,7 +2079,6 @@ Knux_Test_For_Glide:
 		beq.s	locret_1782C
 		bclr	#Status_Roll,status(a0)
 		move.w	#bytes_to_word(20/2,20/2),y_radius(a0)	; set y_radius and x_radius
-		bclr	#Status_RollJump,status(a0)
 		move.b	#1,double_jump_flag(a0)
 		addi.w	#$200,y_vel(a0)
 		bpl.s	loc_17898
@@ -2329,7 +2326,6 @@ loc_17B64:
 loc_17B6A:
 		bclr	#Status_InAir,status(a0)
 		bclr	#Status_Push,status(a0)
-		bclr	#Status_RollJump,status(a0)
 		moveq	#0,d0
 		move.b	d0,jumping(a0)
 		move.w	d0,(Chain_bonus_counter).w
