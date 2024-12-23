@@ -12,21 +12,18 @@ dashdust_tails				= objoff_38	; .b
 Obj_DashDust:
 
 		; init
-		move.l	#Map_DashDust,mappings(a0)
-		move.b	#rfCoord,render_flags(a0)								; use screen coordinates
-		move.l	#bytes_word_to_long(32/2,32/2,priority_1),height_pixels(a0)	; set height, width and priority
-		move.l	#.main,address(a0)
-		move.w	#ArtTile_DashDust,art_tile(a0)
-		move.w	#Player_1,parent(a0)
-		move.w	#tiles_to_bytes(ArtTile_DashDust),vram_art(a0)
+		movem.l	ObjDat_DashDust(pc),d0-d3							; copy data to d0-d3
+		movem.l	d0-d3,address(a0)										; set data from d0-d3 to current object
+		move.l	#words_to_long(tiles_to_bytes(ArtTile_DashDust),Player_1),vram_art(a0)
+
+		; check Tails
 		cmpa.w	#Dust,a0
 		beq.s	.main
 		st	dashdust_tails(a0)										; Tails flag
 		cmpi.w	#PlayerModeID_Tails,(Player_mode).w					; is Tails?
 		beq.s	.main												; if yes, branch
-		move.w	#ArtTile_DashDust_P2,art_tile(a0)
-		move.w	#Player_2,parent(a0)
-		move.w	#tiles_to_bytes(ArtTile_DashDust_P2),vram_art(a0)
+		move.w	#make_art_tile(ArtTile_DashDust_P2,0,0),art_tile(a0)
+		move.l	#words_to_long(tiles_to_bytes(ArtTile_DashDust_P2),Player_2),vram_art(a0)
 
 .main
 		movea.w	parent(a0),a2											; a2=character
@@ -254,6 +251,11 @@ Obj_DashDust_SkidDust:
 
 .delete
 		jmp	(Delete_Current_Sprite).w
+
+; =============== S U B R O U T I N E =======================================
+
+; mapping
+ObjDat_DashDust:	subObjMainData2 Obj_DashDust.main, rfCoord, 0, 32, 32, 1, ArtTile_DashDust, 0, 0, Map_DashDust
 ; ---------------------------------------------------------------------------
 
 		include "Objects/Spin Dust/Object Data/Anim - Dash Splash Drown.asm"
