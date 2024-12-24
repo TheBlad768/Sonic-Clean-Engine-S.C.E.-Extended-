@@ -9,8 +9,10 @@ Obj_AutoSpin:
 		; init
 		move.l	#Map_PathSwap,mappings(a0)
 		move.w	#make_art_tile(ArtTile_Ring,0,0),art_tile(a0)
-		ori.b	#4,render_flags(a0)								; use screen coordinates
+		ori.b	#rfCoord,render_flags(a0)							; use screen coordinates
 		move.l	#bytes_word_to_long(256/2,256/2,priority_5),height_pixels(a0)	; set height, width and priority
+
+		; check
 		move.b	subtype(a0),d0
 		btst	#2,d0
 		beq.s	AutoSpin_CheckX
@@ -22,14 +24,16 @@ Obj_AutoSpin:
 		move.w	y_pos(a0),d1
 		lea	(Player_1).w,a1										; a1=character
 		cmp.w	y_pos(a1),d1
-		bhs.s	+
+		bhs.s	loc_1E83A
 		move.b	#1,objoff_34(a0)
-+
+
+loc_1E83A:
 		lea	(Player_2).w,a1										; a1=character
 		cmp.w	y_pos(a1),d1
-		bhs.s	+
+		bhs.s	loc_1E84A
 		move.b	#1,objoff_35(a0)
-+
+
+loc_1E84A:
 		move.l	#AutoSpin_MainY,address(a0)
 		bra.w	AutoSpin_MainY
 ; ---------------------------------------------------------------------------
