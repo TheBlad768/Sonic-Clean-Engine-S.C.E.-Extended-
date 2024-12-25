@@ -7,17 +7,14 @@
 Obj_AirCountdown:
 
 		; init
-		move.l	#Map_Bubbler,d0								; 1P
-		tst.b	parent+1(a0)
-		beq.s	.notp2
-		move.l	#Map_Bubbler2,d0							; 2P
-
-.notp2
-		move.l	d0,mappings(a0)
-		move.l	#bytes_to_long(rfCoord+rfOnscreen,0,32/2,32/2),render_flags(a0)	; set screen coordinates, on-screen flag and height and width
-		move.l	#words_to_long(priority_1,make_art_tile($348,0,0)),priority(a0)	; set priority and art_tile
+		movem.l	ObjDat_AirCountdown(pc),d0-d3				; copy data to d0-d3
+		movem.l	d0-d3,address(a0)								; set data from d0-d3 to current object
 		move.b	#1,objoff_37(a0)
-		move.l	#.countdown,address(a0)
+
+		; check player
+		tst.b	parent+1(a0)
+		beq.s	.countdown
+		move.l	#Map_Bubbler2,mappings(a0)					; 2P
 
 .countdown
 		movea.w	parent(a0),a2									; a2=character
@@ -200,7 +197,7 @@ loc_18676:
 
 Obj_AirCountdown_Bubbles:
 		move.b	subtype(a0),anim(a0)
-		move.b	#$84,render_flags(a0)
+		move.b	#rfCoord+rfOnscreen,render_flags(a0)			; use screen coordinates
 		move.w	x_pos(a0),objoff_34(a0)
 		move.w	#-$100,y_vel(a0)
 		move.l	#.animate,address(a0)
@@ -392,6 +389,11 @@ Player_ResetAirTimer:
 
 AirCountdown_WobbleData:	binclude "Objects/Count Down/Object Data/Wobble Data.bin"
 	even
+
+; =============== S U B R O U T I N E =======================================
+
+; mapping
+ObjDat_AirCountdown:		subObjMainData2 Obj_AirCountdown.countdown, rfCoord+rfOnscreen, 0, 32, 32, 1, $348, 0, 0, Map_Bubbler
 ; ---------------------------------------------------------------------------
 
 		include "Objects/Count Down/Object Data/Anim - Air Countdown.asm"
