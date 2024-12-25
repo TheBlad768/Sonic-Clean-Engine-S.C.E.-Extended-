@@ -1413,7 +1413,7 @@ Tails_MdAir:
 	endif
 
 		bsr.w	Tails_JumpHeight
-		bsr.w	Tails_InputAcceleration_Freespace
+		bsr.w	Tails_ChgJumpDir
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
 		btst	#Status_Underwater,status(a0)		; is Tails underwater?
@@ -1433,7 +1433,7 @@ loc_147DE:
 
 Tails_FlyingSwimming:
 		bsr.s	Tails_Move_FlySwim
-		bsr.w	Tails_InputAcceleration_Freespace
+		bsr.w	Tails_ChgJumpDir
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite2_TestGravity).w
 		bsr.w	Player_JumpAngle
@@ -1647,7 +1647,7 @@ Tails_MdJump:
 
 loc_149BA:
 		bsr.w	Tails_JumpHeight
-		bsr.w	Tails_InputAcceleration_Freespace
+		bsr.w	Tails_ChgJumpDir
 		bsr.w	Player_LevelBound
 		jsr	(MoveSprite_TestGravity).w
 		btst	#Status_Underwater,status(a0)		; is Tails underwater?
@@ -2152,59 +2152,63 @@ loc_14E72:
 		move.w	d0,ground_vel(a0)
 		rts
 
+; ---------------------------------------------------------------------------
+; Subroutine for moving Tails left or right when he's in the air
+; ---------------------------------------------------------------------------
+
 ; =============== S U B R O U T I N E =======================================
 
-Tails_InputAcceleration_Freespace:
+Tails_ChgJumpDir:
 		move.w	Max_speed_P2-Max_speed_P2(a4),d6
 		move.w	Acceleration_P2-Max_speed_P2(a4),d5
 		asl.w	d5
 		move.w	x_vel(a0),d0
 		btst	#button_left,(Ctrl_2_logical).w
-		beq.s	loc_14EAC
+		beq.s	loc_14EAC								; if not holding left, branch
 		bset	#Status_Facing,status(a0)
-		sub.w	d5,d0
+		sub.w	d5,d0									; add acceleration to the left
 		move.w	d6,d1
 		neg.w	d1
-		cmp.w	d1,d0
-		bgt.s	loc_14EAC
-		add.w	d5,d0
-		cmp.w	d1,d0
-		ble.s		loc_14EAC
+		cmp.w	d1,d0									; compare new speed with top speed
+		bgt.s	loc_14EAC								; if new speed is less than the maximum, branch
+		add.w	d5,d0									; remove this frame's acceleration change
+		cmp.w	d1,d0									; compare speed with top speed
+		ble.s		loc_14EAC								; if speed was already greater than the maximum, branch
 		move.w	d1,d0
 
 loc_14EAC:
 		btst	#button_right,(Ctrl_2_logical).w
-		beq.s	loc_14EC8
+		beq.s	loc_14EC8								; if not holding right, branch
 		bclr	#Status_Facing,status(a0)
-		add.w	d5,d0
-		cmp.w	d6,d0
-		blt.s		loc_14EC8
-		sub.w	d5,d0
-		cmp.w	d6,d0
-		bge.s	loc_14EC8
+		add.w	d5,d0									; accelerate right in the air
+		cmp.w	d6,d0									; compare new speed with top speed
+		blt.s		loc_14EC8								; if new speed is less than the maximum, branch
+		sub.w	d5,d0									; remove this frame's acceleration change
+		cmp.w	d6,d0									; compare speed with top speed
+		bge.s	loc_14EC8								; if speed was already greater than the maximum, branch
 		move.w	d6,d0
 
 loc_14EC8:
 		move.w	d0,x_vel(a0)
 
-loc_14ECC:
-		cmpi.w	#$60,(a5)
-		beq.s	loc_14ED8
-		bhs.s	loc_14ED6
-		addq.w	#4,(a5)
+Tails_Jump_ResetScr:
+		cmpi.w	#$60,(a5)								; is screen in its default position?
+		beq.s	Tails_JumpPeakDecelerate					; if yes, branch
+		bhs.s	loc_14ED6								; depending on the sign of the difference
+		addq.w	#2+2,(a5)								; either add 2
 
 loc_14ED6:
-		subq.w	#2,(a5)
+		subq.w	#2,(a5)									; or subtract 2
 
-loc_14ED8:
-		cmpi.w	#-$400,y_vel(a0)
-		blo.s		locret_14F06
+Tails_JumpPeakDecelerate:
+		cmpi.w	#-$400,y_vel(a0)							; is Sonic moving faster than -$400 upwards?
+		blo.s		locret_14F06								; if yes, return
 		move.w	x_vel(a0),d0
 		move.w	d0,d1
-		asr.w	#5,d1
-		beq.s	locret_14F06
-		bmi.s	loc_14EFA
-		sub.w	d1,d0
+		asr.w	#5,d1									; d1 = x_velocity / 32
+		beq.s	locret_14F06								; return if d1 is 0
+		bmi.s	Tails_JumpPeakDecelerateLeft				; branch if moving left
+		sub.w	d1,d0									; reduce x velocity by d1
 		bhs.s	loc_14EF4
 		moveq	#0,d0
 
@@ -2213,8 +2217,8 @@ loc_14EF4:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_14EFA:
-		sub.w	d1,d0
+Tails_JumpPeakDecelerateLeft:
+		sub.w	d1,d0									; reduce x velocity by d1
 		blo.s		loc_14F02
 		moveq	#0,d0
 
@@ -2333,7 +2337,7 @@ loc_1504C:
 		btst	#Status_Roll,status(a0)
 		bne.s	locret_150D0
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#AniIDSonAni_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)				; use "jumping" animation
 		bset	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		sub.b	default_y_radius(a0),d0
