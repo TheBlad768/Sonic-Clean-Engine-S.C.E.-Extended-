@@ -818,7 +818,7 @@ Knuckles_Wall_Climb:
 		moveq	#-9,d2
 		add.w	y_pos(a0),d2
 		move.w	x_pos(a0),d3
-		bsr.w	CheckCeilingDist_WithRadius
+		jsr	(CheckCeilingDist_WithRadius).w
 
 		; Check if Knuckles has room below him.
 		tst.w	d1
@@ -1903,60 +1903,63 @@ loc_1767A:
 		move.w	d0,ground_vel(a0)
 		rts
 
+; ---------------------------------------------------------------------------
+; Subroutine for moving Knuckles left or right when he's in the air
+; ---------------------------------------------------------------------------
+
 ; =============== S U B R O U T I N E =======================================
 
-; sub_17680:
 Knux_ChgJumpDir:
 		move.w	Max_speed-Max_speed(a4),d6
 		move.w	Acceleration-Max_speed(a4),d5
 		asl.w	d5
 		move.w	x_vel(a0),d0
 		btst	#button_left,(Ctrl_1_logical).w
-		beq.s	loc_176B4
+		beq.s	loc_176B4								; if not holding left, branch
 		bset	#Status_Facing,status(a0)
-		sub.w	d5,d0
+		sub.w	d5,d0									; add acceleration to the left
 		move.w	d6,d1
 		neg.w	d1
-		cmp.w	d1,d0
-		bgt.s	loc_176B4
-		add.w	d5,d0
-		cmp.w	d1,d0
-		ble.s		loc_176B4
+		cmp.w	d1,d0									; compare new speed with top speed
+		bgt.s	loc_176B4								; if new speed is less than the maximum, branch
+		add.w	d5,d0									; remove this frame's acceleration change
+		cmp.w	d1,d0									; compare speed with top speed
+		ble.s		loc_176B4								; if speed was already greater than the maximum, branch
 		move.w	d1,d0
 
 loc_176B4:
 		btst	#button_right,(Ctrl_1_logical).w
-		beq.s	loc_176D0
+		beq.s	loc_176D0								; if not holding right, branch
 		bclr	#Status_Facing,status(a0)
-		add.w	d5,d0
-		cmp.w	d6,d0
-		blt.s		loc_176D0
-		sub.w	d5,d0
-		cmp.w	d6,d0
-		bge.s	loc_176D0
+		add.w	d5,d0									; accelerate right in the air
+		cmp.w	d6,d0									; compare new speed with top speed
+		blt.s		loc_176D0								; if new speed is less than the maximum, branch
+		sub.w	d5,d0									; remove this frame's acceleration change
+		cmp.w	d6,d0									; compare speed with top speed
+		bge.s	loc_176D0								; if speed was already greater than the maximum, branch
 		move.w	d6,d0
 
 loc_176D0:
 		move.w	d0,x_vel(a0)
 
-loc_176D4:
-		cmpi.w	#$60,(a5)
-		beq.s	loc_176E0
-		bhs.s	loc_176DE
-		addq.w	#4,(a5)
+Knux_Jump_ResetScr:
+		cmpi.w	#$60,(a5)								; is screen in its default position?
+		beq.s	Knux_JumpPeakDecelerate					; if yes, branch
+		bhs.s	loc_176DE								; depending on the sign of the difference
+		addq.w	#2+2,(a5)								; either add 2
 
 loc_176DE:
-		subq.w	#2,(a5)
+		subq.w	#2,(a5)									; or subtract 2
 
-loc_176E0:
-		cmpi.w	#-$400,y_vel(a0)
-		blo.s		locret_1770E
+Knux_JumpPeakDecelerate:
+		cmpi.w	#-$400,y_vel(a0)							; is Sonic moving faster than -$400 upwards?
+		blo.s		locret_1770E								; if yes, return
 		move.w	x_vel(a0),d0
 		move.w	d0,d1
-		asr.w	#5,d1
-		beq.s	locret_1770E
-		bmi.s	loc_17702
-		sub.w	d1,d0
+		asr.w	#5,d1									; d1 = x_velocity / 32
+		beq.s	locret_1770E								; return if d1 is 0
+		bmi.s	Knux_JumpPeakDecelerateLeft				; branch if moving left
+		sub.w	d1,d0									; reduce x velocity by d1
 		bhs.s	loc_176FC
 		moveq	#0,d0
 
@@ -1965,8 +1968,8 @@ loc_176FC:
 		rts
 ; ---------------------------------------------------------------------------
 
-loc_17702:
-		sub.w	d1,d0
+Knux_JumpPeakDecelerateLeft:
+		sub.w	d1,d0									; reduce x velocity by d1
 		blo.s		loc_1770A
 		moveq	#0,d0
 
@@ -2022,7 +2025,7 @@ loc_1775C:
 		btst	#Status_Roll,status(a0)
 		bne.s	locret_177E0
 		move.w	#bytes_to_word(28/2,14/2),y_radius(a0)		; set y_radius and x_radius
-		move.b	#AniIDSonAni_Roll,anim(a0)
+		move.b	#AniIDSonAni_Roll,anim(a0)				; use "jumping" animation
 		bset	#Status_Roll,status(a0)
 		move.b	y_radius(a0),d0
 		sub.b	default_y_radius(a0),d0
