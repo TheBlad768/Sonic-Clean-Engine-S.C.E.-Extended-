@@ -34,8 +34,11 @@ loc_1CD06:
 		move.b	#1,objoff_35(a0)
 
 loc_1CD16:
-		move.l	#loc_1CEF2,address(a0)
-		bra.w	loc_1CEF2
+
+		; next
+		lea	sub_1CEF2(pc),a1
+		move.l	a1,address(a0)
+		jmp	(a1)
 ; ---------------------------------------------------------------------------
 
 word_1CD34:
@@ -64,6 +67,8 @@ loc_1CD60:
 
 loc_1CD70:
 		move.l	#loc_1CD8A,address(a0)
+
+; =============== S U B R O U T I N E =======================================
 
 loc_1CD8A:
 		tst.w	(Debug_placement_mode).w					; is debug mode on?
@@ -114,12 +119,10 @@ loc_1CE26:
 		bhs.s	locret_1CE6A
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CE54
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 		btst	#3,d0
 		beq.s	loc_1CE54
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_1CE54:
 		andi.w	#drawing_mask,art_tile(a1)
@@ -129,7 +132,8 @@ loc_1CE54:
 
 locret_1CE6A:
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 loc_1CE6C:
 		cmp.w	x_pos(a1),d1
@@ -161,12 +165,10 @@ loc_1CEB2:
 		bhs.s	locret_1CEF0
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CEDE
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 		btst	#4,d0
 		beq.s	loc_1CEDE
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_1CEDE:
 		andi.w	#drawing_mask,art_tile(a1)
@@ -176,9 +178,10 @@ loc_1CEDE:
 
 locret_1CEF0:
 		rts
-; ---------------------------------------------------------------------------
 
-loc_1CEF2:
+; =============== S U B R O U T I N E =======================================
+
+sub_1CEF2:
 		tst.w	(Debug_placement_mode).w					; is debug mode on?
 		bne.s	loc_1CF14									; if yes, branch
 		move.w	y_pos(a0),d1
@@ -227,12 +230,10 @@ loc_1CF8E:
 		bhs.s	locret_1CFD2
 		btst	#0,render_flags(a0)
 		bne.s	loc_1CFBC
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 		btst	#3,d0
 		beq.s	loc_1CFBC
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_1CFBC:
 		andi.w	#drawing_mask,art_tile(a1)
@@ -242,7 +243,8 @@ loc_1CFBC:
 
 locret_1CFD2:
 		rts
-; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
 
 loc_1CFD4:
 		cmp.w	y_pos(a1),d1
@@ -274,12 +276,10 @@ loc_1D01A:
 		bhs.s	locret_1D058
 		btst	#0,render_flags(a0)
 		bne.s	loc_1D046
-		move.b	#$C,top_solid_bit(a1)
-		move.b	#$D,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($C,$D),top_solid_bit(a1)
 		btst	#4,d0
 		beq.s	loc_1D046
-		move.b	#$E,top_solid_bit(a1)
-		move.b	#$F,lrb_solid_bit(a1)
+		move.w	#bytes_to_word($E,$F),top_solid_bit(a1)
 
 loc_1D046:
 		andi.w	#drawing_mask,art_tile(a1)
