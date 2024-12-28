@@ -34,8 +34,11 @@ loc_1E83A:
 		move.b	#1,objoff_35(a0)
 
 loc_1E84A:
-		move.l	#AutoSpin_MainY,address(a0)
-		bra.w	AutoSpin_MainY
+
+		; next
+		lea	AutoSpin_MainY(pc),a1
+		move.l	a1,address(a0)
+		jmp	(a1)
 ; ---------------------------------------------------------------------------
 
 word_1E854:
@@ -92,7 +95,7 @@ sub_1E8C6:
 		tst.b	(a2)+
 		bne.s	AutoSpin_MainX_Alt
 		cmp.w	x_pos(a1),d1
-		bhi.w	locret_1E9B4
+		bhi.s	locret_1E942
 		move.b	#1,-1(a2)
 		move.w	y_pos(a0),d2
 		move.w	d2,d3
@@ -101,13 +104,13 @@ sub_1E8C6:
 		add.w	d4,d3
 		move.w	y_pos(a1),d4
 		cmp.w	d2,d4
-		blo.w	locret_1E9B4
+		blo.s		locret_1E942
 		cmp.w	d3,d4
-		bhs.w	locret_1E9B4
+		bhs.s	locret_1E942
 		btst	#5,subtype(a0)
 		beq.s	loc_1E908
 		btst	#Status_InAir,status(a1)								; is the player in the air?
-		bne.w	locret_1E9B4										; if yes, branch
+		bne.s	locret_1E942										; if yes, branch
 
 loc_1E908:
 		btst	#0,render_flags(a0)
@@ -128,6 +131,8 @@ loc_1E934:
 		btst	#4,subtype(a0)
 		bne.s	locret_1E9B4
 		clr.b	spin_dash_flag(a1)
+
+locret_1E942:
 		rts
 
 ; =============== S U B R O U T I N E =======================================
@@ -267,7 +272,7 @@ locret_1EAAE:
 
 AutoSpin_MainY_Alt:
 		cmp.w	y_pos(a1),d1
-		bls.s		locret_1EAAE
+		bls.s		locret_1EB30
 		clr.b	-1(a2)
 		move.w	x_pos(a0),d2
 		move.w	d2,d3
