@@ -16,7 +16,7 @@ Get_LevelSizeStart:
 		move.l	d0,(Camera_target_min_Y_pos).w
 
 		; set
-		moveq	#$60,d0
+		moveq	#(224/2)-16,d0
 		move.w	d0,(Distance_from_top).w
 		move.w	d0,(Distance_from_top_P2).w
 
