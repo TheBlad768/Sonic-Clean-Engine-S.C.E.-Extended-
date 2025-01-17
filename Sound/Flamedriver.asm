@@ -5104,6 +5104,8 @@ Sound_21_Ptr:	offsetBankTableEntry.w Sound_21
 Sound_22_Ptr:	offsetBankTableEntry.w Sound_22
 Sound_23_Ptr:	offsetBankTableEntry.w Sound_23
 Sound_24_Ptr:	offsetBankTableEntry.w Sound_24
+Sound_25_Ptr:	offsetBankTableEntry.w Sound_25
+Sound_26_Ptr:	offsetBankTableEntry.w Sound_26
 
 Sound_End_Ptr
 ; ---------------------------------------------------------------------------
@@ -5146,6 +5148,8 @@ Sound_21:	include "Sound/SFX/Snd - FlyTired.asm"
 Sound_22:	include "Sound/SFX/Snd - GlideLand.asm"
 Sound_23:	include "Sound/SFX/Snd - GroundSlide.asm"
 Sound_24:	include "Sound/SFX/Snd - Laser.asm"
+Sound_25:	include "Sound/SFX/Snd - Super Transform.asm"
+Sound_26:	include "Sound/SFX/Snd - Thump.asm"
 
 	finishBank
 

@@ -20,6 +20,23 @@ Pal_WaterDEZ:		bincludeEntry "Levels/DEZ/Palettes/Water Death Egg Zone.pal"
 	even
 
 ; ===========================================================================
+; Animated palette player data
+; ===========================================================================
+
+PalCycle_SuperSonic:					bincludeEntry "Objects/Sonic/Palettes/Animated/Super.pal"
+	even
+PalCycle_HyperSonic:					bincludeEntry "Objects/Sonic/Palettes/Animated/Hyper.pal"
+	even
+PalCycle_SuperSonicUnderwater:		bincludeEntry "Objects/Sonic/Palettes/Animated/Underwater.pal"
+	even
+PalCycle_SuperTails:					bincludeEntry "Objects/Tails/Palettes/Animated/Super.pal"
+	even
+PalCycle_SuperHyperKnuckles:			bincludeEntry "Objects/Knuckles/Palettes/Animated/Super and Hyper.pal"
+	even
+PalCycle_SuperHyperKnucklesRevert:	bincludeEntry "Objects/Knuckles/Palettes/Animated/Revert.pal"
+	even
+
+; ===========================================================================
 ; Animated palette Level screen data
 ; ===========================================================================
 

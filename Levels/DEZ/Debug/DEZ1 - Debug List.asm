@@ -12,6 +12,7 @@ Debug_DEZ1: dbglistheader
 	dbglistobj Obj_Monitor, Map_Monitor, 6, 7, ArtTile_Monitors, 0, 0
 	dbglistobj Obj_Monitor, Map_Monitor, 7, 8, ArtTile_Monitors, 0, 0
 	dbglistobj Obj_Monitor, Map_Monitor, 8, 9, ArtTile_Monitors, 0, 0
+	dbglistobj Obj_Monitor, Map_Monitor, 9, $A, ArtTile_Monitors, 0, 0
 	dbglistobj Obj_PathSwap, Map_PathSwap, 9, 1, ArtTile_Ring, 1, 0
 	dbglistobj Obj_PathSwap, Map_PathSwap, $D, 5, ArtTile_Ring, 1, 0
 	dbglistobj Obj_Spring, Map_Spring, $81, 0, $494, 0, 0

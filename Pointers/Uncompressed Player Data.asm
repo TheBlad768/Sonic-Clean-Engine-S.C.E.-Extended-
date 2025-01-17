@@ -6,8 +6,6 @@
 
 ArtUnc_Sonic:						binclude "Objects/Sonic/Uncompressed Art/Sonic.unc"
 	even
-ArtUnc_Sonic_Extra:					binclude "Objects/Sonic/Uncompressed Art/Sonic Extra.unc"
-	even
 ArtUnc_Tails:						binclude "Objects/Tails/Uncompressed Art/Tails.unc"
 	even
 ArtUnc_Tails_Extra:					binclude "Objects/Tails/Uncompressed Art/Tails Extra.unc"
@@ -31,7 +29,12 @@ ArtUnc_FireShield:					binclude "Objects/Shields/Uncompressed Art/Fire Shield.un
 ArtUnc_LightningShield:				binclude "Objects/Shields/Uncompressed Art/Lightning Shield.unc"
 	even
 ArtUnc_LightningShield_Sparks:		binclude "Objects/Shields/Uncompressed Art/Sparks.unc"
-ArtUnc_LightningShield_Sparks_end
 	even
 ArtUnc_BubbleShield:					binclude "Objects/Shields/Uncompressed Art/Bubble Shield.unc"
+	even
+ArtUnc_SuperSonic_Stars:				binclude "Objects/Transform/Uncompressed Art/Super Sonic Stars.unc"
+	even
+ArtUnc_HyperSonicStars:				binclude "Objects/Transform/Uncompressed Art/Hyper Sonic Stars.unc"
+	even
+ArtUnc_SuperTailsBirds:				binclude "Objects/Transform/Uncompressed Art/Super Tails birds.unc"
 	even

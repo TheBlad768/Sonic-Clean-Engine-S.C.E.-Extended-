@@ -85,6 +85,8 @@ sfx_FlyTired				ds.b 1		; $21
 sfx_GlideLand			ds.b 1		; $22
 sfx_GroundSlide			ds.b 1		; $23
 sfx_Laser				ds.b 1		; $24
+sfx_SuperTransform		ds.b 1		; $25
+sfx_Thump				ds.b 1		; $26
 
 ; Continuous
 sfx__FirstContinuous =	*			; ID of the first continuous sound effect

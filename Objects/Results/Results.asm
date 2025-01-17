@@ -140,6 +140,7 @@ Obj_LevelResults:
 		moveq	#30,d0
 		move.b	d0,(Player_1+air_left).w								; reset air
 		move.b	d0,(Player_2+air_left).w								; reset air
+		st	(Music_results_flag).w
 		music	mus_GotThrough,1									; play level complete theme
 ; ---------------------------------------------------------------------------
 
@@ -202,6 +203,7 @@ Obj_LevelResults:
 ; ---------------------------------------------------------------------------
 
 .endr
+		clr.b	(Music_results_flag).w
 		clr.b	(Level_results_flag).w
 		tst.b	(Last_act_end_flag).w
 		bne.s	.skiptc

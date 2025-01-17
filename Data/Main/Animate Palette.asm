@@ -13,6 +13,9 @@ Animate_Palette:
 ; ---------------------------------------------------------------------------
 
 .load
+		bsr.w	SuperHyper_PalCycle
+
+		; load
 		lea	(Level_data_addr_RAM.AnimatePalette).w,a0
 
 		; check
