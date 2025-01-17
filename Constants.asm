@@ -117,7 +117,6 @@ PlayerModeID_SonicTails				equ 0
 PlayerModeID_Sonic					equ 1
 PlayerModeID_Tails					equ 2
 PlayerModeID_Knuckles				equ 3
-PlayerModeID_KnucklesTails			equ 4
 
 ; ---------------------------------------------------------------------------
 ; Player routines (Sonic)
@@ -206,7 +205,8 @@ offset :=	AniTails
 ptrsize :=	2
 idstart :=	0
 
-AniIDTailsAni_Run2 =					id(ptr_TailsAni_Run2)				; 1F
+AniIDTailsAni_Run2 =					id(ptr_TailsAni_Run2)					; 1F
+AniIDTailsAni_Transform =			id(ptr_TailsAni_Transform)			; 29
 
 ; ---------------------------------------------------------------------------
 ; Knuckles animation IDs

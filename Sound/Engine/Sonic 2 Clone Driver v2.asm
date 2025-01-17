@@ -933,13 +933,28 @@ Sound_PlayCDA:
 ; ===========================================================================
 
 PlayCD_Index:
+
+	; flag, loop time
+
+	; Levels
 	dc.l _MCD_PlayTrack<<24|$00000000			; $01 (DEZ)
+
+	; Bosses
 	dc.l _MCD_PlayTrack<<24|$00000000			; $02 (Mid Boss)
 	dc.l _MCD_PlayTrack<<24|$00000000			; $03 (Boss)
+
+	; Main
 	dc.l _MCD_PlayTrack<<24|$00000000			; $04 (Invincible)
+
+	; End
 	dc.l _MCD_PlayTrack_Once<<24|$00000000	; $05 (Act Clear)
 	dc.l _MCD_PlayTrack_Once<<24|$00000000	; $06 (Countdown)
-	dc.l _MCD_PlayTrack<<24|$00000000			; $07 (Speedup)
+	dc.l _MCD_PlayTrack_Once<<24|$00000000	; $07 (Game Over)
+	dc.l _MCD_PlayTrack_Once<<24|$00000000	; $08 (Extra Life)
+	dc.l _MCD_PlayTrack<<24|$00000000			; $09 (Continue)
+
+	; Extra
+	dc.l _MCD_PlayTrack<<24|$00000000			; $0A (Speedup)
 	even
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||

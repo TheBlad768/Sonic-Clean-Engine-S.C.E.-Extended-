@@ -977,3 +977,16 @@ Offset_ObjectsDuringTransition:
 		lea	next_object(a1),a1										; next slot
 		dbf	d2,.check
 		rts
+
+; =============== S U B R O U T I N E =======================================
+
+Offset_SomeObjectsDuringTransition:
+		tst.b	(Super_Tails_flag).w									; is Tails Super?
+		bne.s	.super											; if so, branch
+		rts
+; ---------------------------------------------------------------------------
+
+.super
+		lea	(Invincibility_stars).w,a1								; load Super Flickies object
+		moveq	#bytesToXcnt(Invincibility_stars_end-Invincibility_stars,object_size),d2
+		bra.s	Offset_ObjectsDuringTransition.check

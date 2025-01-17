@@ -440,6 +440,10 @@ Obj_Invincibility:
 		move.b	#4,objoff_34(a0)
 
 .main
+		tst.b	(Super_Sonic_Knux_flag).w							; is Sonic Super/Hyper?
+		bne.s	.delete											; if so, branch
+		tst.b	(Super_Tails_flag).w									; is Tails Super?
+		bne.s	.delete											; if so, branch
 		movea.w	parent(a0),a1										; a1=character
 		btst	#Status_Invincible,status_secondary(a1)					; should the player still have a invincible?
 		beq.s	.delete											; if not, delete
@@ -488,6 +492,10 @@ Obj_Invincibility:
 ; =============== S U B R O U T I N E =======================================
 
 Obj_188E8:
+		tst.b	(Super_Sonic_Knux_flag).w							; is Sonic Super/Hyper?
+		bne.s	Obj_Invincibility.delete							; if so, branch
+		tst.b	(Super_Tails_flag).w									; is Tails Super?
+		bne.s	Obj_Invincibility.delete							; if so, branch
 		movea.w	parent(a0),a1										; a1=character
 		btst	#Status_Invincible,status_secondary(a1)					; should the player still have a invincible?
 		beq.s	Obj_Invincibility.delete							; if not, delete

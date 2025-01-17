@@ -22,6 +22,18 @@ FILE "Countdown.wav" WAVE
   TRACK 06 AUDIO
     INDEX 01 00:00:00
 
+FILE "Game Over.wav" WAVE
+  TRACK 06 AUDIO
+    INDEX 01 00:00:00
+
+FILE "Extra Life.wav" WAVE
+  TRACK 07 AUDIO
+    INDEX 01 00:00:00
+
+FILE "Continue.wav" WAVE
+  TRACK 07 AUDIO
+    INDEX 01 00:00:00
+
 FILE "Speedup.wav" WAVE
   TRACK 07 AUDIO
     INDEX 01 00:00:00

@@ -33,6 +33,20 @@ ShakeScreen_Setup:
 
 ; =============== S U B R O U T I N E =======================================
 
+ShakeScreen_BG:
+		move.w	(Glide_screen_shake).w,d0
+		beq.s	.return
+		subq.w	#1,d0
+		move.w	d0,(Glide_screen_shake).w
+		move.b	ScreenShakeArray(pc,d0.w),d0
+		ext.w	d0
+		add.w	d0,(Camera_X_pos_copy).w
+
+.return
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
 ScreenShakeArray:
 		dc.b 1, -1, 1, -1, 2, -2, 2, -2, 3, -3, 3, -3, 4, -4, 4, -4, 5, -5, 5, -5
 ScreenShakeArray2:

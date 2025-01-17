@@ -18,13 +18,14 @@ Dynamic_object_RAM_end				= *
 									ds.b object_size				; unused
 Breathing_bubbles:					ds.b object_size				; for the main character
 Breathing_bubbles_P2:				ds.b object_size				; for Tails in a Sonic and Tails game
-									ds.b object_size				; unused
+Super_stars:							ds.b object_size				; for Super Sonic and Super Knuckles
 Tails_tails:							ds.b object_size				; Tails' tails
 Dust:								ds.b object_size				; for the main character
 Dust_P2:							ds.b object_size				; for Tails in a Sonic and Tails game
 Shield:								ds.b object_size
 									ds.b object_size				; unused
 Invincibility_stars:					ds.b object_size*4				; 4 objects
+Invincibility_stars_end					= *
 									ds.b object_size*3				; unused
 Wave_Splash:						ds.b object_size				; Obj_WaveSplash is loaded here
 									ds.b $34						; unused
@@ -124,6 +125,7 @@ Scroll_force_positions:					ds.b 1						; if this is set scrolling will be based
 									ds.b 1						; even
 Scroll_forced_X_pos:					ds.l 1						; replace player xpos
 Scroll_forced_Y_pos:					ds.l 1						; replace player ypos
+Glide_screen_shake:					ds.w 1						; alternate screen shaking flag only used when hyper knuckles hits a wall after gliding
 Screen_shaking_flag:					ds.w 1						; flag for enabling screen shake. Negative values cause screen to shake infinitely, positive values make the screen shake for a short amount of time
 Screen_shaking_offset:					ds.w 1						; vertical offset when screen_shaking_flag is enabled. This is added to camera position later
 Screen_shaking_last_offset:			ds.w 1						; value of Screen_shaking_offset for the previous frame
@@ -241,12 +243,20 @@ Signpost_addr:						ds.w 1
 Render_sprite_last_RAM:				ds.l 1
 _unkFAAC:							ds.b 1
 									ds.b 1						; even
-Palette_cycle_counters:				ds.b $10
+Palette_cycle_counters:				ds.b $40
+Palette_frame:						ds.w 1
+Palette_timer:						ds.b 1
+Super_palette_status:					ds.b 1						; appears to be a flag for the palette's current status: '0' for 'off', '1' for 'fading', -1 for 'fading done'
+Palette_frame_Tails:					ds.b 1						; Tails would use Palette_frame and Palette_timer, but they're reserved for his Super Flickies
+Palette_timer_Tails:					ds.b 1
 Pal_fade_delay:						ds.w 1
 Pal_fade_delay2:						ds.w 1
+Super_frame_count:					ds.w 1
+Music_results_flag:					ds.b 1
+Super_Sonic_Knux_flag:				ds.b 1
+Super_Tails_flag:						ds.b 1
 Hyper_Sonic_flash_timer:				ds.b 1
 Negative_flash_timer:					ds.b 1
-									ds.b 1						; even
 Palette_rotation_disable:				ds.b 1
 Palette_rotation_custom:				ds.l 1
 Palette_rotation_data:					ds.w 9
@@ -270,7 +280,9 @@ _unkF74A:							ds.b 1
 _unkF74B:							ds.b 1
 _unkF74C:							ds.w 1
 Tails_CPU_star_post_flag:				ds.b 1						; copy of Last_star_post_hit, sets Tails' starting behavior in a Sonic and Tails game
+_unkF66C:							ds.b 1
 									ds.b 1						; even
+Knuckles_saved_frame:				ds.b 1
 Gliding_collision_flags:				ds.b 1
 Disable_wall_grab:					ds.b 1						; if set, disables Knuckles wall grab
 Lag_frame_count_end					= *
@@ -412,6 +424,9 @@ Player_mode:							ds.w 1						; 0 = Sonic and Tails, 1 = Sonic alone, 2 = Tails
 Player_option:						ds.w 1
 Life_count:							ds.b 1
 Continue_count:						ds.b 1
+Emerald_counts:						 = *							; both chaos and super emeralds
+Chaos_emerald_count:					ds.b 1
+									ds.b 1						; even
 Next_extra_life_score:					ds.l 1
 Debug_saved_mappings:				ds.l 1						; player 1 mappings before entering debug mode
 Debug_saved_priority:					ds.w 1						; player 1 priority before entering debug mode

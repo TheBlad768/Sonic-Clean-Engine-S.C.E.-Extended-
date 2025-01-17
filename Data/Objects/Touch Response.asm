@@ -562,6 +562,23 @@ Kill_Character:
 		move.l	priority(a0),(Debug_saved_priority).w		; save priority and art_tile
 		clr.w	priority(a0)
 
+		; check super
+		tst.b	(Super_Tails_flag).w
+		bne.s	.speed
+		tst.b	(Super_Sonic_Knux_flag).w
+		beq.s	.notp1
+
+.speed
+		pea	(a4)
+		lea	(Max_speed).w,a4
+		cmpi.b	#PlayerID_Tails,character_id(a0)					; is player Tails?
+		bne.s	.revert											; if not, branch
+		lea	(Max_speed_P2).w,a4
+
+.revert
+		bsr.w	SonicKnux_SuperHyper.revertToNormal
+		movea.l	(sp)+,a4
+
 .notp1
 		bset	#high_priority_bit,art_tile(a0)
 		jsr	(Play_SFX).w
@@ -694,4 +711,105 @@ ShieldTouch_Height:
 		asr.l	#8,d0
 		move.w	d0,y_vel(a1)
 		clr.b	collision_flags(a1)
+		rts
+
+; ---------------------------------------------------------------------------
+; It seems this is used by Hyper Sonic & Hyper Knuckles for their screen-nukes
+; (Hyper Dash, and Hyper Knuckles gliding into a wall)
+; ---------------------------------------------------------------------------
+
+; =============== S U B R O U T I N E =======================================
+
+HyperAttackTouchResponse:
+		movem.l	a2-a4,-(sp)
+		lea	(Collision_response_list).w,a4
+		move.w	(a4)+,d6									; get number of objects queued
+		beq.s	HyperTouch_Exit							; if there are none, branch
+
+HyperTouch_Loop:
+		movea.w	(a4)+,a1									; get address of first object's RAM
+		move.b	collision_flags(a1),d0						; get its collision_flags
+		beq.s	HyperTouch_NextObj						; if it doesn't have collision, branch
+		bsr.s	HyperTouch_ChkValue						; else, process object
+
+HyperTouch_NextObj:
+		subq.w	#2,d6									; count the object as done
+		bne.s	HyperTouch_Loop							; if there are still objects left, loop
+		moveq	#0,d0
+
+HyperTouch_Exit:
+		movem.l	(sp)+,a2-a4
+		rts
+
+; =============== S U B R O U T I N E =======================================
+
+HyperTouch_ChkValue:
+		tst.b	render_flags(a1)								; is object on-screen?
+		bpl.s	.return									; if not, return (screen-nuke only affects what's on-screen)
+		andi.b	#$C0,d0									; get collision_flags type data
+		beq.s	HyperTouch_Enemy						; if 00, enemy, branch
+		cmpi.b	#$C0,d0
+		beq.s	HyperTouch_Special						; if 11, "special thing for starpole", branch
+		tst.b	d0
+		bmi.s	HyperTouch_Harmful						; if 10, "harmful", branch
+
+.return
+		rts
+; ---------------------------------------------------------------------------
+
+HyperTouch_Enemy:
+		tst.b	collision_property(a1)							; is this a special enemy?
+		beq.s	HyperTouch_DestroyEnemy				; if not, branch
+		rts
+; ---------------------------------------------------------------------------
+
+; Similar to other enemy destruction subroutines, but this one doesn't make the player bounce
+
+HyperTouch_DestroyEnemy:
+		btst	#2,status(a1)									; should the object remember that it's been destroyed (Remember Sprite State flag)?
+		beq.s	.dontremember							; if not, branch
+		move.b	ros_bit(a1),d0
+		movea.w	ros_addr(a1),a2
+		bclr	d0,(a2)										; mark object as destroyed
+
+.dontremember
+		bset	#7,status(a1)
+		moveq	#0,d0
+		move.w	(Chain_bonus_counter).w,d0				; get copy of chain bonus counter
+		addq.w	#2,(Chain_bonus_counter).w				; add 2 to chain bonus counter
+		cmpi.w	#6,d0									; has the counter already surpassed 5?
+		blo.s		.notreachedlimit							; if not, branch
+		moveq	#6,d0									; cap counter at 6
+
+.notreachedlimit
+		move.w	d0,objoff_3E(a1)
+		lea	Enemy_Points(pc),a2
+		move.w	(a2,d0.w),d0								; get appropriate number of points
+		cmpi.w	#16*2,(Chain_bonus_counter).w				; have 16 enemies been destroyed?
+		blo.s		.notreachedlimit2							; if not, branch
+		move.w	#1000,d0								; fix bonus to 10000 points
+		move.w	#10,objoff_3E(a1)
+
+.notreachedlimit2
+		move.l	#Obj_Explosion,address(a1)				; create enemy destruction explosion
+		bra.w	HUD_AddToScore
+; ---------------------------------------------------------------------------
+
+HyperTouch_Harmful:
+		moveq	#8,d0									; should the object be bounced away by a shield?
+		and.b	shield_reaction(a1),d0
+		bne.w	Touch_ChkHurt_Bounce_Projectile			; if so, branch
+		rts
+; ---------------------------------------------------------------------------
+
+HyperTouch_Special:
+		ori.b	#3,collision_property(a1)
+		cmpi.w	#PlayerModeID_Knuckles,(Player_mode).w	; are we in Knuckles Alone mode?
+		bne.s	.sonicortails								; if not, branch
+		move.w	x_pos(a1),(Player_2+x_pos).w	; ???
+		move.w	y_pos(a1),(Player_2+y_pos).w	; ???
+
+.sonicortails
+		move.b	#AniIDSonAni_Roll,(Player_2+anim).w		; put sidekick in his rolling animation
+		bset	#Status_InAir,(Player_2+status).w
 		rts

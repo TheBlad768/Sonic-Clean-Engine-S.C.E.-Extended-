@@ -48,6 +48,8 @@ ptr_snd60:	SMPS_SFX_METADATA	Sound60, $70, 0
 ptr_snd61:	SMPS_SFX_METADATA	Sound61, $70, 0
 ptr_snd62:	SMPS_SFX_METADATA	Sound62, $70, 0
 ptr_snd63:	SMPS_SFX_METADATA	Sound63, $70, 0
+ptr_snd64:	SMPS_SFX_METADATA	Sound64, $70, 0
+ptr_snd65:	SMPS_SFX_METADATA	Sound65, $70, 0
 
 ptr_sndend
 ; ---------------------------------------------------------------------------
@@ -125,4 +127,8 @@ Sound61:		include "Sound/SFX/Snd - GlideLand.asm"
 Sound62:	include "Sound/SFX/Snd - GroundSlide.asm"
 	even
 Sound63:	include "Sound/SFX/Snd - Laser.asm"
+	even
+Sound64:	include "Sound/SFX/Snd - Super Transform.asm"
+	even
+Sound65:	include "Sound/SFX/Snd - Thump.asm"
 	even
