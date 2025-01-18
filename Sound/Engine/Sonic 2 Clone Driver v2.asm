@@ -288,7 +288,7 @@ FMUpdateTrack:
 	btst	#1,SMPS_Track.PlaybackControl(a5)	; If resting, return
 	bne.s	.locret
 	bsr.w	DoModulation
-	bsr.w	FMPrepareNote
+	bsr.w	FMPrepareNote	; 'bsr' is necessary in case this function alters the stack pointer
 	bra.w	FMNoteOn
 ; ===========================================================================
 ; loc_71CE0:
@@ -297,7 +297,7 @@ FMUpdateTrack:
 	bne.s	.locret
 	bsr.w	NoteTimeoutUpdate
 	bsr.w	DoModulation
-	bra.w	FMUpdateFreq
+	bsr.w	FMUpdateFreq	; 'bsr' is necessary in case this function alters the stack pointer
 .locret:
 	rts
 ; End of function FMUpdateTrack
@@ -342,6 +342,11 @@ FMDoNext:
 ; ===========================================================================
 ; loc_71D1A:
 .gotduration:
+	tst.w	SMPS_Track.Freq(a5)
+	bne.s	.notrest
+	bset	#1,SMPS_Track.PlaybackControl(a5)	; Set 'track at rest' bit
+
+.notrest:
 	bsr.w	SetDuration
 	bra.w	FinishTrackUpdate
 ; End of function FMDoNext
@@ -992,6 +997,7 @@ PlaySoundID:	; For the love of god, don't rearrange the order of the groups, it 
 ; ===========================================================================
 
 Sound_ExIndex:
+ptr_flgF9:	dc.w	StopSpecSFX-Sound_ExIndex	; $F9	; Clownacy | Brand new.
 ptr_flgFA:	dc.w	StopSFX-Sound_ExIndex		; $FA	; Clownacy | Brand new. Was missing from the stock S1 driver because Sonic Team had stripped out various unused components of the driver
 ptr_flgFB:	dc.w	FadeOutMusic-Sound_ExIndex	; $FB	; Clownacy | Was $E0
 ptr_flgFC:	dc.w	PlaySegaSound-Sound_ExIndex	; $FC	; Clownacy | Was $E1
@@ -1452,8 +1458,15 @@ Sound_PlaySFX:
 	movea.l	(a0,d7.w),a3		; SFX data pointer
 	movea.l	a3,a1
 	move.w	(a1)+,d1		; Voice pointer
+    if SMPS_EnableUniversalVoiceBank
+	bne.s	.doesNotUseUniVoiceBank
+	move.l	#UniVoiceBank,d1
+	bra.s	.got_voice_pointer
+.doesNotUseUniVoiceBank:
+    endif
 	ext.l	d1
 	add.l	a3,d1			; Relative pointer
+.got_voice_pointer:
 	move.b	(a1)+,d5		; Dividing timing
 	; DANGER! Ugh, this bug.
 	; In the stock driver, sounds >= $E0 would cause a crash.
@@ -1499,8 +1512,7 @@ Sound_PlaySFX:
 	move.b	d0,(SMPS_psg_input).l
 	cmpi.b	#$C0,d4			; Is this PSG 3?
 	bne.s	.sfxoverridedone	; Branch if not
-	bchg	#5,d0			; Command to silence noise channel
-	move.b	d0,(SMPS_psg_input).l	; Silence PSG 4 (noise), too
+	move.b	#$FF,(SMPS_psg_input).l	; Silence PSG 4 (noise), too
 ; loc_7226E:
 .sfxoverridedone:
 	movea.w	SFX_SFXChannelRAM(pc,d3.w),a5
@@ -1608,8 +1620,15 @@ Sound_PlaySpecial:
 	movea.l	(a0,d7.w),a3
 	movea.l	a3,a1
 	move.w	(a1)+,d1	; Store voice pointer
+    if SMPS_EnableUniversalVoiceBank
+	bne.s	.doesNotUseUniVoiceBank
+	move.l	#UniVoiceBank,d1
+	bra.s	.got_voice_pointer
+.doesNotUseUniVoiceBank:
+    endif
 	ext.l	d1
 	add.l	a3,d1
+.got_voice_pointer:
 	move.b	(a1)+,d5	; Dividing timing
 	; DANGER! there is a missing 'moveq	#0,d7' here, without which Special SFXes whose
 	; index entry is above $3F will cause a crash. Ristar's driver didn't have this
@@ -1748,10 +1767,14 @@ StopSFX:
 	bsr.w	PSGNoteOff
     if SMPS_EnableSpecSFX
 	lea	SMPS_RAM.v_spcsfx_psg3_track(a6),a0
-	cmpi.b	#$E0,d3					; Is this a noise channel:
+	tst.b	SMPS_Track.PlaybackControl(a0)		; Is track playing?
+	bpl.s	.getchannelptr				; Branch if not
+	cmpi.b	#$E0,d3					; Is this a noise channel?
 	beq.s	.gotpsgpointer				; Branch if yes
 	cmpi.b	#$C0,d3					; Is this PSG 3?
 	beq.s	.gotpsgpointer				; Branch if yes
+
+.getchannelptr:
     endif
 	lsr.w	#4,d3
 	lea	SFX_BGMChannelRAM(pc),a0
@@ -1773,13 +1796,12 @@ StopSFX:
 
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-    if SMPS_EnableSpecSFX
 ; Snd_FadeOut2: Snd_FadeOutSFX2: FadeOutSpecSFX:
 StopSpecSFX:
+    if SMPS_EnableSpecSFX
 	lea	SMPS_RAM.v_spcsfx_fm4_track(a6),a5
-	tst.b	SMPS_Track.PlaybackControl(a5)			; Is track playing?
-	bpl.s	.fadedfm					; Branch if not
 	bclr	#7,SMPS_Track.PlaybackControl(a5)		; Stop track
+	beq.s	.fadedfm					; Branch if already not playing
 	btst	#2,SMPS_Track.PlaybackControl(a5)		; Is SFX overriding?
 	bne.s	.fadedfm					; Branch if not
 	bsr.w	SendFMNoteOff
@@ -1792,9 +1814,8 @@ StopSpecSFX:
 ; loc_724AE:
 .fadedfm:
 	lea	SMPS_RAM.v_spcsfx_psg3_track(a6),a5
-	tst.b	SMPS_Track.PlaybackControl(a5)			; Is track playing?
-	bpl.s	.fadedpsg					; Branch if not
 	bclr	#7,SMPS_Track.PlaybackControl(a5)		; Stop track
+	beq.s	.fadedpsg					; Branch if already not playing
 	btst	#2,SMPS_Track.PlaybackControl(a5)		; Is SFX overriding?
 	bne.s	.fadedpsg					; Return if not
 	bsr.w	SendPSGNoteOff
@@ -1808,9 +1829,9 @@ StopSpecSFX:
 	move.b	SMPS_Track.PSGNoise(a5),(SMPS_psg_input).l	; Set noise type
 ; locret_724E4:
 .fadedpsg
+    endif
 	rts
 ; End of function StopSpecSFX
-    endif
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Fade out music
@@ -2400,7 +2421,8 @@ PSGUpdateTrack:
 	bne.s	.locret
 	bsr.w	DoModulation
 	bsr.w	PSGDoNoteOn
-	bra.w	PSGDoVolFX
+	bsr.w	PSGDoVolFX	; 'bsr' is necessary in case this function alters the stack pointer
+	rts
 ; ===========================================================================
 ; loc_72866:
 .notegoing:
@@ -2409,7 +2431,7 @@ PSGUpdateTrack:
 	bsr.w	NoteTimeoutUpdate
 	bsr.w	PSGUpdateVolFX
 	bsr.w	DoModulation
-	bra.w	PSGUpdateFreq
+	bsr.w	PSGUpdateFreq	; 'bsr' is necessary in case this function alters the stack pointer
 .locret:
 	rts
 ; End of function PSGUpdateTrack
@@ -2454,6 +2476,11 @@ PSGDoNext:
 ; ===========================================================================
 ; loc_728A4:
 .gotduration:
+	cmpi.w	#-1,SMPS_Track.Freq(a5)
+	bne.s	.notrest
+	bset	#1,SMPS_Track.PlaybackControl(a5)	; Set 'track at rest' bit
+
+.notrest:
 	bsr.w	SetDuration
 	bra.w	FinishTrackUpdate
 ; End of function PSGDoNext
@@ -2643,7 +2670,7 @@ VolEnvHold:
 VolEnvOff:	; For compatibility with S3K
 	bset	#1,SMPS_Track.PlaybackControl(a5)	; Set 'track at rest' bit
 	; Do not return (I cannot find a single version of SMPS that includes this fix)
-	addq.w	#8,sp
+	addq.w	#4,sp
 ;	bra.s	PSGNoteOff
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
