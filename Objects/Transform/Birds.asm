@@ -49,6 +49,8 @@ Obj_SuperTailsBirds_Init:
 		move.l	#Obj_SuperTailsBirds_Main,address(a0)
 
 Obj_SuperTailsBirds_Main:
+
+		; check
 		tst.b	(Super_Tails_flag).w
 		bne.s	.tails_still_super
 
@@ -57,6 +59,8 @@ Obj_SuperTailsBirds_Main:
 		move.w	d0,(Player_2+x_pos).w
 		move.w	d0,(Player_2+y_pos).w
 		move.b	d0,(Player_2+anim).w
+
+		; check
 		tst.b	superTailsBirds_target_found(a0)
 		beq.s	.no_target
 		movea.w	superTailsBirds_target_address(a0),a1
@@ -72,7 +76,7 @@ Obj_SuperTailsBirds_Main:
 
 .move
 		bsr.w	Obj_SuperTailsBirds_Move
-		addi.b	#2,superTailsBirds_angle(a0)
+		addq.b	#2,superTailsBirds_angle(a0)
 
 		; update which way the sprite faces
 		tst.w	x_vel(a0)
