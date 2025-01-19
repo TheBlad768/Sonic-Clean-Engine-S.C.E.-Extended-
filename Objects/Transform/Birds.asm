@@ -270,7 +270,7 @@ Obj_SuperTailsBirds_Move:
 		and.w	(Screen_Y_wrap_value).w,d3
 		moveq	#32,d1
 		sub.w	y_pos(a0),d3
-		bcc.s	loc_1A3CA
+		bhs.s	loc_1A3CA
 		cmpi.w	#-$500,d3
 		ble.s		loc_1A3D0
 
