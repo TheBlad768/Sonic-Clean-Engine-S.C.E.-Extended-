@@ -31,9 +31,13 @@ ShakeScreen_Setup:
 		move.w	d1,(Screen_shaking_offset).w
 		rts
 
+; ---------------------------------------------------------------------------
+; Shaking screen (Hyper Knuckles)
+; ---------------------------------------------------------------------------
+
 ; =============== S U B R O U T I N E =======================================
 
-ShakeScreen_BG:
+ShakeScreen_Gliding_HitWall:
 		move.w	(Glide_screen_shake).w,d0
 		beq.s	.return
 		subq.w	#1,d0

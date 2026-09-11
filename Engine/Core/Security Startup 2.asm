@@ -57,7 +57,7 @@ Game_Program:
 		jsr	(Init_DMA_Queue).w
 		jsr	(Init_VDP).w
 		jsr	(SoundDriverLoad).w
-		bsr.s	Init_Controllers
+		bsr.w	Init_Controllers
 
 		; set Sonic Alone player is only for DEBUG builds
 		ifdebug	move.w	#1,(Player_option).w					; set Sonic Alone player

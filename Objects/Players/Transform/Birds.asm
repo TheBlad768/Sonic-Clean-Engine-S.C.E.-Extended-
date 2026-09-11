@@ -244,7 +244,7 @@ SuperTailsBirds_GetDestination:
 ; ---------------------------------------------------------------------------
 
 .destroy_enemy
-		jmp	(HyperTouch_DestroyEnemy).l
+		jmp	(HyperTouch_DestroyEnemy).w
 ; ---------------------------------------------------------------------------
 
 .special
