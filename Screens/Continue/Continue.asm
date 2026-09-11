@@ -93,7 +93,13 @@ ContinueScreen:
 
 		; load text
 		lea	Credits_TextCONTINUE(pc),a1
-		move.l	#$C347C347,d5							; VRAM shift (font pos in VRAM) ; large and small font
+
+		; VRAM shift (font pos in VRAM) ; large and small font
+		move.l	#words_to_long( \
+		make_art_tile($347,2,TRUE), \
+		make_art_tile($347,2,TRUE) \
+		),d5
+
 		bsr.w	Credits_LoadText
 
 		; check players
